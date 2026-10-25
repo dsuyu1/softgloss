@@ -62,6 +62,10 @@ try {
     if (action === 'hasFocus') return Boolean(root.activeElement);
     if (action === 'searchValue') return root.querySelector('input[type=search]').value;
     if (action === 'hidden') return root.querySelector('section').hidden;
+    if(action==='studyImport'){const input=root.querySelector('input[type=file]'),dt=new DataTransfer();dt.items.add(new File([value],'study.csv',{type:'text/csv'}));input.files=dt.files;input.dispatchEvent(new Event('change'));}
+    if(action==='studyLevel'){const select=root.querySelector('#sg-study-level');select.value=String(value);select.dispatchEvent(new Event('change'));}
+    if(action==='studyCounts')return [CSS.highlights.get('softgloss-study-word')?.size||0,CSS.highlights.get('softgloss-study-context')?.size||0];
+    if(action==='studyContext')return [...CSS.highlights.get('softgloss-study-context')||[]].map(r=>r.toString());
     if (action === 'grammarOpen') return [...root.querySelectorAll('.sg-grammar, .sg-grammar details')].map(d=>d.open);
     if (action === 'expandGrammar') root.querySelector('.sg-grammar summary')?.click();
     return root.querySelector('section').textContent;
@@ -166,6 +170,19 @@ try {
  await page.evaluate(()=>document.getElementById('long-reading').remove());
  await eventually(()=>panel('highlight'),2);
 
+ // Study list import, cumulative target levels and softer sentence context.
+ await page.evaluate(()=>{const p=document.createElement('p');p.id='study-inline';p.append('학교에서는 ',Object.assign(document.createElement('em'),{textContent:'읽어요'}),'.');document.body.append(p);});
+ await panel('studyImport','Korean,level\n책,1\n읽다,2');
+ await eventually(()=>worker.evaluate(async()=>Object.keys((await chrome.storage.local.get('studyLevels')).studyLevels||{}).length),2);
+ await panel('studyLevel',1);await eventually(()=>panel('studyCounts'),[2,2]);
+ assert.ok((await panel('studyContext')).some(t=>t.includes('책을 읽어요.')));
+ await panel('studyLevel',2);await eventually(()=>panel('studyCounts'),[4,3]);
+ assert.ok((await panel('studyContext')).some(t=>t==='학교에서는 읽어요.'));
+ await worker.evaluate(()=>store.apply({type:'setHighlights',enabled:false}));await eventually(()=>panel('studyCounts'),[0,0]);
+ await worker.evaluate(()=>store.apply({type:'setHighlights',enabled:true}));await eventually(()=>panel('studyCounts'),[4,3]);
+ await page.screenshot({path:'test-results/topik-study.png'});
+ await panel('studyLevel',0);await eventually(()=>panel('highlight'),2);
+ await panel('click','Remove study list');await page.evaluate(()=>document.getElementById('study-inline').remove());
  const library = await context.newPage(); await library.goto(`chrome-extension://${id}/library.html`);
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
  await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();

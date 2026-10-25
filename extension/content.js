@@ -5,11 +5,11 @@
  document.documentElement.append(host);
  const root = host.attachShadow({mode: 'closed'});
  const style = document.createElement('style');
- style.textContent = `:host{all:initial}*{box-sizing:border-box}section{position:fixed;z-index:2147483647;right:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;background:#fff;color:#232323;border:1px solid #e7e3e0;border-radius:12px;padding:16px;box-shadow:0 12px 48px #23232324;font:14px/1.55 system-ui}section[hidden]{display:none}header,.sg-actions{display:flex;align-items:center;gap:8px}header{justify-content:space-between;border-bottom:1px solid #eee9e6;padding-bottom:12px;margin-bottom:16px}header strong{font-size:18px;letter-spacing:-.5px}header small{font-size:11px}header button{margin:0;padding:5px 9px}summary{cursor:pointer;font-weight:600}details{margin:10px 0}h2{font-size:25px;line-height:1.3;letter-spacing:-.6px;margin:12px 0}h3{font-size:20px;line-height:1.4;margin:0}p{margin:8px 0;overflow-wrap:anywhere}button,input{font:inherit}button{cursor:pointer;border:1px solid #d8d1d1;border-radius:7px;background:#fff;color:#323232;padding:8px 11px;margin:4px 5px 4px 0}button:hover{background:#fcf7f4}button:disabled{cursor:default;opacity:.5}button[aria-pressed=true]{background:#f1f1f1;border-color:#59504c;box-shadow:inset 0 0 0 1px #59504c;font-weight:650}button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #a34227;outline-offset:3px}input[type=search]{width:100%;min-width:0;padding:10px 11px;border:1px solid #d8d1d1;border-radius:7px;background:#fff;color:#232323}form{display:grid;grid-template-columns:1fr auto;gap:8px}form label{grid-column:1/-1;font-size:12px;color:#645952}form button{margin:0;background:#b7482b;border-color:#b7482b;color:white;padding:8px 14px}form button:hover{background:#9b3c24}small{display:block;font-size:12px;color:#71645e}a{color:#914126;font-size:12px;overflow-wrap:anywhere}ol{padding-left:22px}li{margin:5px 0}.sg-card{border:1px solid #ebe6e3;border-radius:10px;padding:14px;margin:12px 0;background:#fff}.sg-card>p:first-of-type{font-size:16px}.sg-meta{font-size:12px;color:#71645e;margin:6px 0}.sg-chip{display:inline-block;border-radius:5px;padding:3px 7px;font-size:11px;font-weight:650;background:#f1f1f1;color:#514b47;margin:3px 5px 3px 0}.sg-noun{background:#eaf1fd;color:#24528a}.sg-predicate{background:#f2ecfc;color:#654099}.sg-grammar-chip{background:#fff1d9;color:#805600}.sg-construction{background:#e5f3f0;color:#245f55}.sg-phrase{background:#fcf7f4;border:1px solid #eeded4;border-radius:10px;padding:14px;margin:14px 0}.sg-phrase h3{font-size:16px}.sg-status{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.sg-status button{font-size:12px;margin:0;flex:1}.sg-settings{padding:10px 0;border-bottom:1px solid #eee9e6;margin:0 0 14px}.sg-settings summary{font-size:12px;color:#71645e}.sg-settings label{display:block;margin:10px 0}.sg-footer{border-top:1px solid #eee9e6;padding-top:10px}#notice{font-size:12px;color:#65544c}#notice:not(:empty){background:#fcf7f4;padding:8px;border-radius:7px}@media(max-width:400px){section{right:8px;top:8px;width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}}`;
+ style.textContent = `:host{all:initial}*{box-sizing:border-box}section{position:fixed;z-index:2147483647;right:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;background:#fff;color:#232323;border:1px solid #e7e3e0;border-radius:12px;padding:16px;box-shadow:0 12px 48px #23232324;font:14px/1.55 system-ui}section[hidden]{display:none}header,.sg-actions{display:flex;align-items:center;gap:8px}header{justify-content:space-between;border-bottom:1px solid #eee9e6;padding-bottom:12px;margin-bottom:16px}header strong{font-size:18px;letter-spacing:-.5px}header small{font-size:11px}header button{margin:0;padding:5px 9px}summary{cursor:pointer;font-weight:600}details{margin:10px 0}h2{font-size:25px;line-height:1.3;letter-spacing:-.6px;margin:12px 0}h3{font-size:20px;line-height:1.4;margin:0}p{margin:8px 0;overflow-wrap:anywhere}button,input,select{font:inherit}input[type=file]{max-width:100%}select{max-width:100%;padding:7px;border:1px solid #d8d1d1;border-radius:7px;background:#fff;color:#232323}button{cursor:pointer;border:1px solid #d8d1d1;border-radius:7px;background:#fff;color:#323232;padding:8px 11px;margin:4px 5px 4px 0}button:hover{background:#fcf7f4}button:disabled{cursor:default;opacity:.5}button[aria-pressed=true]{background:#f1f1f1;border-color:#59504c;box-shadow:inset 0 0 0 1px #59504c;font-weight:650}button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #a34227;outline-offset:3px}input[type=search]{width:100%;min-width:0;padding:10px 11px;border:1px solid #d8d1d1;border-radius:7px;background:#fff;color:#232323}form{display:grid;grid-template-columns:1fr auto;gap:8px}form label{grid-column:1/-1;font-size:12px;color:#645952}form button{margin:0;background:#b7482b;border-color:#b7482b;color:white;padding:8px 14px}form button:hover{background:#9b3c24}small{display:block;font-size:12px;color:#71645e}a{color:#914126;font-size:12px;overflow-wrap:anywhere}ol{padding-left:22px}li{margin:5px 0}.sg-card{border:1px solid #ebe6e3;border-radius:10px;padding:14px;margin:12px 0;background:#fff}.sg-card>p:first-of-type{font-size:16px}.sg-meta{font-size:12px;color:#71645e;margin:6px 0}.sg-chip{display:inline-block;border-radius:5px;padding:3px 7px;font-size:11px;font-weight:650;background:#f1f1f1;color:#514b47;margin:3px 5px 3px 0}.sg-noun{background:#eaf1fd;color:#24528a}.sg-predicate{background:#f2ecfc;color:#654099}.sg-grammar-chip{background:#fff1d9;color:#805600}.sg-construction{background:#e5f3f0;color:#245f55}.sg-phrase{background:#fcf7f4;border:1px solid #eeded4;border-radius:10px;padding:14px;margin:14px 0}.sg-phrase h3{font-size:16px}.sg-status{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.sg-status button{font-size:12px;margin:0;flex:1}.sg-settings{padding:10px 0;border-bottom:1px solid #eee9e6;margin:0 0 14px}.sg-settings summary{font-size:12px;color:#71645e}.sg-settings label{display:block;margin:10px 0}.sg-footer{border-top:1px solid #eee9e6;padding-top:10px}#notice{font-size:12px;color:#65544c}#notice:not(:empty){background:#fcf7f4;padding:8px;border-radius:7px}@media(max-width:400px){section{right:8px;top:8px;width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}}`;
  root.append(style);
  const panel = document.createElement('section');
  panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'SoftGloss Korean dictionary'); root.append(panel);
- let state = await chrome.storage.local.get({words: {}, preferences: {highlights: true}});
+ let state = await chrome.storage.local.get({words: {}, preferences: {highlights: true},studyLevels:{},studySource:''});
  let current = '', sentence = '', results = [], phraseResult = null, enabled = true, previousFocus = null, automatic = false;
  let hoverTimer, paintTimer, paintEpoch = 0;
  const skip = 'script,style,noscript,input,textarea,select,[contenteditable],[role=textbox]';
@@ -30,6 +30,16 @@
   const label=el('label','Highlight vocabulary ',settings),toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=state.preferences.highlights!==false;label.append(toggle);
   toggle.addEventListener('change',async()=>{if(!await write({type:'setHighlights',enabled:toggle.checked}))toggle.checked=state.preferences.highlights!==false;});
   el('small','On-page highlights: gray = unknown · amber = seen · green = known. Grammar colors below always have labels.',settings);
+  const studyLabel=el('label','TOPIK study target ',settings),select=el('select','',studyLabel);select.id='sg-study-level';
+  for(let level=0;level<=6;level++){const option=el('option',level?'Level '+level+' and below':'Off · vocabulary status',select);option.value=String(level);}select.value=String(state.preferences.studyLevel||0);
+  select.addEventListener('change',async()=>{if(!await write({type:'setStudyLevel',level:Number(select.value)}))select.value=String(state.preferences.studyLevel||0);});
+  el('small','Strong blue = target word; softer blue = sentence context. Levels follow your imported study list, not an official exam vocabulary classification.',settings);
+  const packInfo=el('small','',settings);packInfo.id='sg-study-info';
+  const listLabel=el('label','Import graded word list (CSV/TSV) ',settings),file=el('input','',listLabel);file.type='file';file.accept='.csv,.tsv,text/csv,text/tab-separated-values';
+  file.addEventListener('change',async()=>{const selected=file.files?.[0];if(!selected)return;if(selected.size>3000000){notice('Study list is too large.');return;}await write({type:'importStudyList',csv:await selected.text(),name:selected.name},'Study list imported.');file.value='';});
+  const guide=el('a','Download a graded study CSV (external site)',settings);guide.href='https://everykoreans.com/topik-vocabulary-list/';guide.target='_blank';guide.rel='noopener noreferrer';
+  el('small','Required columns: Korean,level. Levels 1–6. Import replaces only the study list; vocabulary and sentence cards stay intact.',settings);
+  button('Remove study list',()=>write({type:'clearStudyList'},'Study list removed.'),settings);
   button('Disable on this page',disable,settings);
   const form=el('form',''),searchLabel=el('label','Korean word, short phrase or English meaning',form);
   const input=document.createElement('input');input.type='search';input.maxLength=300;input.id='sg-search';input.placeholder='Try 보이지 않는다';searchLabel.htmlFor=input.id;input.value=current;form.append(input);
@@ -73,7 +83,9 @@
   const message=el('p','');message.id='notice';message.setAttribute('role','status');
   const footer=el('small',sentence?'Save sentence keeps this word with nearby text and the page address.':'Select page text to capture a sentence. Your vocabulary stays on this device.');footer.className='sg-footer';updateStatuses();
  }
+ function updateStudyControls(){const select=root.getElementById('sg-study-level');if(select)select.value=String(state.preferences.studyLevel||0);const info=root.getElementById('sg-study-info');if(info)info.textContent=Object.keys(state.studyLevels).length+' graded words'+(state.studySource?' · '+state.studySource:' · import a list to begin');}
  function updateStatuses() {
+  updateStudyControls();
   for (const node of root.querySelectorAll('[data-lemma]')) {
    const status = state.words[node.dataset.lemma] || 'unknown';
    if (node.tagName === 'BUTTON') node.setAttribute('aria-pressed', String(status === node.dataset.status));
@@ -115,7 +127,7 @@
   const value = selected(); if (value) display(value.word, value.context);
  });
  document.addEventListener('keydown', e => {if (enabled && e.key === 'Escape' && !panel.hidden) close();});
- function clearHighlights() {for (const key of ['unknown', 'seen', 'known']) globalThis.CSS?.highlights?.delete('softgloss-' + key);}
+ function clearHighlights() {for (const key of ['unknown', 'seen', 'known','study-context','study-word']) globalThis.CSS?.highlights?.delete('softgloss-' + key);}
  function schedulePaint() {
   if (!enabled) return;
   clearTimeout(paintTimer); paintEpoch++;
@@ -124,7 +136,15 @@
  function paint() {
   const epoch = ++paintEpoch; clearHighlights();
   if (!enabled || state.preferences.highlights === false || !globalThis.CSS?.highlights || !globalThis.Highlight || !document.body) return;
-  const sets = {unknown: new Highlight(), seen: new Highlight(), known: new Highlight()};
+  const sets = {unknown: new Highlight(), seen: new Highlight(), known: new Highlight(),'study-context':new Highlight(),'study-word':new Highlight()};
+  sets['study-context'].priority=-1;sets['study-word'].priority=1;
+  const blocks=new WeakMap();
+  function contextRange(node,index){
+   const block=node.parentElement?.closest('p,li,blockquote,td,h1,h2,h3,h4')||node.parentElement;if(!block)return null;
+   if(!blocks.has(block)){const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT),pieces=[];let text='',n;while((n=walker.nextNode())){if(n.parentElement?.closest(skip))continue;if(pieces.length>=200||text.length+n.length>10000){blocks.set(block,null);return null;}pieces.push({node:n,start:text.length,end:text.length+n.length});text+=n.textContent;}blocks.set(block,{pieces,text,seen:new Set()});}
+   const data=blocks.get(block);if(!data)return null;const piece=data.pieces.find(p=>p.node===node);if(!piece)return null;const offset=piece.start+index;
+   const match=[...data.text.matchAll(/[^.!?。！？\n]+[.!?。！？]?/gu)].find(m=>m.index<=offset&&offset<m.index+m[0].length);if(!match||data.seen.has(match.index))return null;data.seen.add(match.index);const start=match.index,end=start+match[0].length,a=data.pieces.find(p=>p.end>start),b=data.pieces.find(p=>p.end>=end);if(!a||!b)return null;const r=new Range();r.setStart(a.node,start-a.start);r.setEnd(b.node,end-b.start);return r;
+  }
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let nodes = 0, characters = 0;
   function chunk() {
@@ -136,9 +156,10 @@
     if (n.parentElement?.closest(skip)) continue;
     const text = n.textContent.slice(0, Math.min(10000, 500000 - characters)); characters += text.length;
     for (const t of SG.tokens(text)) {
-     const a = SG.lookup(t.word); if (!a.length || new Set(a.map(r => r.lemma)).size !== 1) continue;
+     const match=SG.highlightMatch(t.word,state.words,state.studyLevels,state.preferences.studyLevel||0);
+     if(state.preferences.studyLevel ? !match.study : !match.supported)continue;
      const range = new Range(); range.setStart(n, t.index); range.setEnd(n, t.index + t.word.length);
-     sets[state.words[a[0].lemma] || 'unknown'].add(range);
+     if(state.preferences.studyLevel){sets['study-word'].add(range);const context=contextRange(n,t.index);if(context)sets['study-context'].add(context);}else sets[match.status].add(range);
     }
    }
    for (const [key, value] of Object.entries(sets)) CSS.highlights.set('softgloss-' + key, value);
@@ -147,7 +168,7 @@
   chunk();
  }
  const colorStyle = document.createElement('style');
- colorStyle.textContent = '::highlight(softgloss-unknown){color:#232323;background-color:#eeedf0}::highlight(softgloss-seen){color:#232323;background-color:#eee8b8}::highlight(softgloss-known){color:#232323;background-color:#d8eadb}';
+ colorStyle.textContent = '::highlight(softgloss-study-context){color:#232323;background-color:#edf4fb}::highlight(softgloss-study-word){color:#153b65;background-color:#a9d3ff;text-decoration:underline}::highlight(softgloss-unknown){color:#232323;background-color:#eeedf0}::highlight(softgloss-seen){color:#232323;background-color:#eee8b8}::highlight(softgloss-known){color:#232323;background-color:#d8eadb}';
  (document.head || document.documentElement).append(colorStyle);
  const observer = new MutationObserver(schedulePaint);
  function observe() {if (document.body) observer.observe(document.body, {childList: true, subtree: true, characterData: true});}
@@ -159,7 +180,9 @@
    state.preferences = changes.preferences.newValue || {highlights: true};
    const toggle = root.querySelector('input[type=checkbox]'); if (toggle) toggle.checked = state.preferences.highlights !== false;
   }
-  if (changes.words || changes.preferences) schedulePaint();
+  if(changes.studyLevels)state.studyLevels=changes.studyLevels.newValue||{};if(changes.studySource)state.studySource=changes.studySource.newValue||'';
+  if(changes.preferences||changes.studyLevels||changes.studySource)updateStudyControls();
+  if (changes.words || changes.preferences || changes.studyLevels) schedulePaint();
  });
  globalThis.__softgloss = {
   show() {automatic = false; enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},

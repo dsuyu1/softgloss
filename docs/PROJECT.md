@@ -76,7 +76,8 @@ Cloudflare later: static documentation/download hosting first if useful, then op
 The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multiple senses and source hanja spellings. Its accuracy and learner usefulness have not passed beta gates. No monolingual dictionary, production parser, frequency ranks, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
 
 ## Next concrete work
-1. Collect and independently review at least 100 real reading tokens; report unknowns and incorrect analyses separately.
+1. Expand graded-list sourcing for the new TOPIK mode with audited redistribution rights; retain local import in the meantime.
+2. Collect and independently review at least 100 real reading tokens; report unknowns and incorrect analyses separately.
 2. Complete manual Chrome permission/hover/accessibility/zoom and actual Anki import checks.
 3. Add reviewed grammar explanations, and profile cold startup, memory and long-page responsiveness.
 4. Pilot with Damian and 3–5 learners; log friction.
@@ -156,3 +157,11 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Label grammar/part-of-speech colors, merge duplicate analyses per source entry and collapse secondary meanings/settings.
 - [x] Verify phrase selection, context saving, automatic activation and existing regressions in Chromium CI; inspect desktop/narrow-panel/popup screenshots (Actions 40213872396).
 - [ ] Independently review Korean-language accuracy and usability with learners; expand genuine headword coverage beyond these pilot misses.
+
+## 0.9.0 — explicit scope addition: TOPIK study mode
+- [x] User-requested cumulative level 1–6 selector, offline graded-list import/removal, strong word and softer sentence highlights.
+- [x] Resolve dictionary forms for level matching; retain list labels without claiming official exam classifications. No third-party graded list is bundled.
+- [x] Highlight ambiguous supported results neutrally, prefer exact dictionary entries, fix 응답자의 and 편하려고 screenshot cases.
+- [x] Preserve preference updates through the worker queue; keep imports atomic and bounded.
+- [ ] Audit a redistributable graded dataset for a bundled default.
+- [ ] Complete independent Korean review, learner-hardware/zoom/accessibility and Anki checks before reader/subtitle expansion.

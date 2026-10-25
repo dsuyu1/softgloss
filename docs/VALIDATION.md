@@ -68,3 +68,8 @@ In that Chromium 141 / Linux x64 / Node 22.23.3 run, cold injection was 449 ms, 
 
 ## 0.8.1 screenshot coverage
 38 Node tests and static/integrity checks pass locally. New probes cover the third-round screenshots, every token of the selected six-word question, stacked particles and invalid ending/base combinations. Earlier screenshot probes remain passing. See PILOT-COVERAGE.md for scope and limitations. Chromium CI adds targeted reading-panel checks; independent Korean review remains open.
+
+## 0.9.0 study mode
+Adds Node checks for CSV/TSV parsing, malformed/empty/oversized-level inputs, cumulative thresholds, inflected matches, exact-match preference, ambiguous highlights and atomic preference/list mutations. Chromium tests exercise file-input import, target selection, word/context ranges, switching off and list removal alongside existing long-page/persistence checks. Sentence context uses paragraph/list/heading/table blocks bounded to 200 text nodes and 10,000 characters; unusually large blocks may have word highlights without sentence context. Context segmentation is punctuation/newline based, not a linguistic sentence parser.
+
+No graded dataset is redistributed or estimated. Settings link to https://everykoreans.com/topik-vocabulary-list/ for optional user-directed downloads; its publisher describes curriculum-based grades and personal/classroom sharing terms. Import is local and makes no runtime request. Source CSV is kept separately from learning backups.
