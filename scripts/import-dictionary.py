@@ -34,9 +34,18 @@ def convert(record):
 
 def build(source, output, lock_path, snapshot=None):
     lock = json.loads(pathlib.Path(lock_path).read_text())
-    raw = pathlib.Path(source).read_bytes()
+    source_path = pathlib.Path(source)
+    if str(source).endswith('.parts.json'):
+        parts = json.loads(source_path.read_text())['chunks']
+        chunks = []
+        for part in parts:
+            chunk = (source_path.parent / part['path']).read_bytes()
+            if len(chunk) != part['bytes'] or digest(chunk) != part['sha256']: raise ValueError('Snapshot chunk checksum mismatch.')
+            chunks.append(chunk)
+        raw = b''.join(chunks)
+    else: raw = source_path.read_bytes()
     if digest(raw) not in {lock['sha256'], lock.get('snapshotSha256')}: raise ValueError('Source checksum differs from data/source-lock.json; review and pin an update first.')
-    if str(source).endswith('.gz'): raw = gzip.decompress(raw)
+    if str(source).endswith(('.gz','.parts.json')): raw = gzip.decompress(raw)
     entries = {}
     for line in raw.splitlines():
         record = convert(json.loads(line))

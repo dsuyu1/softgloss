@@ -12,7 +12,7 @@ jobs:
           node-version: '22'
       - name: Rebuild dictionary from the pinned offline snapshot
         run: |
-          python3 scripts/import-dictionary.py data/source-snapshot.jsonl.gz
+          python3 scripts/import-dictionary.py data/source-snapshot.parts.json
           git diff --exit-code -- extension/dictionary
       - run: npm test
       - run: npm run check

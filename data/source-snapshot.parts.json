@@ -1,0 +1,29 @@
+{
+  "chunks": [
+    {
+      "path": "source-snapshot.part-00",
+      "sha256": "2dc903ca525468c6ee0637f5b7041061dcf9f603b62ee712878e707bcd8cd62f",
+      "bytes": 450000
+    },
+    {
+      "path": "source-snapshot.part-01",
+      "sha256": "05ee775b83ad155ca73569e0a35372105ec3b5469c0c00da1bb3fe40bd06dbbf",
+      "bytes": 450000
+    },
+    {
+      "path": "source-snapshot.part-02",
+      "sha256": "1869dd81ab9671357806436e576b9775ee765f1d2d2a929e075e9d4a016b09bf",
+      "bytes": 450000
+    },
+    {
+      "path": "source-snapshot.part-03",
+      "sha256": "e4ca66ffa879659313ee82858e505ea9a337a43209f06c40557730f87bae9e5d",
+      "bytes": 450000
+    },
+    {
+      "path": "source-snapshot.part-04",
+      "sha256": "27554c1aa51781b389dbdd29e42283797a5fc7dd8bbd31fe63541cbbbd64403f",
+      "bytes": 18893
+    }
+  ]
+}

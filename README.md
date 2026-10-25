@@ -29,4 +29,4 @@ The browser harness uses a temporary extension copy with localhost-only test per
 ## Dictionary coverage
 29,777 imported Korean headwords, 40,510 senses and 72,869 listed conjugated spellings from English Wiktionary via Kaikki. The popup preserves alternative meanings and source labels, with explicitly supplied hanja spellings. Listed conjugations include irregulars; unsupported forms still return an empty result. See [data and licensing](docs/DATA.md) and [morphology limits](docs/MORPHOLOGY.md).
 
-The adapted dictionary is CC BY-SA 4.0; credit and license are included in the extension and retained in dictionary-derived saved cards/exports. Rebuild offline using `python3 scripts/import-dictionary.py data/source-snapshot.jsonl.gz`. A checksum mismatch fails instead of silently importing a changed source.
+The adapted dictionary is CC BY-SA 4.0; credit and license are included in the extension and retained in dictionary-derived saved cards/exports. Rebuild offline using `python3 scripts/import-dictionary.py data/source-snapshot.parts.json`. A checksum mismatch fails instead of silently importing a changed source.

@@ -10,5 +10,5 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
   "modifications": "Select modern Hangul headwords and supported parts of speech; keep glosses, sense IDs and labels, hanja form labels, and a subset of indicative conjugation table rows. Exclude examples, quotations, audio, images, etymology and cross-reference-only senses. Sort, deduplicate and compact into JavaScript data shards.",
   "snapshotSha256": "110777f423b3e99e8ccf1279ded4e2da7ebbc1b1baea45c75463764ecad2ce4b",
-  "snapshotPath": "data/source-snapshot.jsonl.gz"
+  "snapshotPath": "data/source-snapshot.parts.json"
 }

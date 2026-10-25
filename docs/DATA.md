@@ -24,12 +24,12 @@ Only listed indicative past/non-past forms with supported style/politeness label
 Run from the repository root:
 
 ```sh
-python3 scripts/import-dictionary.py data/source-snapshot.jsonl.gz
+python3 scripts/import-dictionary.py data/source-snapshot.parts.json
 npm test
 npm run check
 ```
 
-The 1.8 MB compressed source snapshot retains only the selected fields and is licensed as adapted dictionary data under CC BY-SA 4.0. Its pinned compressed-file hash is checked before reading. The importer deterministically regenerates 34 packaged JavaScript shards and a manifest containing hashes and counts. CI rebuilds and rejects a diff. Nothing is downloaded at extension runtime.
+The 1.8 MB compressed source snapshot retains only the selected fields and is licensed as adapted dictionary data under CC BY-SA 4.0. It is split into small binary chunks for reliable transfer; each chunk and the combined compressed-file hash are checked before reading. The importer deterministically regenerates 34 packaged JavaScript shards and a manifest containing hashes and counts. CI rebuilds and rejects a diff. Nothing is downloaded at extension runtime.
 
 To audit the original input, download the URL in `source-lock.json` and verify its SHA-256 before rebuilding. That endpoint changes over time: the checked-in snapshot ensures offline reproduction even after the original endpoint changes. To update, review the new snapshot and rights first, deliberately update the source lock, rebuild, compare changes and run all checks. Never silently accept a checksum mismatch.
 
