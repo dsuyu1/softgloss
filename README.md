@@ -3,7 +3,7 @@ Free, offline Korean reading companion. **Offline dictionary alpha — broader c
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.13.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.14.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin Bungeoppang from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
 5. Hover a Korean word or select **one Korean word**. Multiword sentence selection, images and video subtitles are not supported lookup surfaces yet.
@@ -71,3 +71,6 @@ Click **Add to reviews** on a word result to save that specific dictionary entry
 Review cards deduplicate by dictionary entry, so homonyms can be studied separately. Suspend/resume or remove cards in Manage review deck. JSON v2 backups preserve review schedules and up to 1,000 recent ratings per card; v1 backups still restore and replace the deck with an empty one. Anki TSV exports include review cards and sentence cards with their source credits. TSV carries content, not schedules, and requires mapping the four fields to your Anki note type; it is not live synchronization.
 
 The Naver Café pilot also adds source-gated conversational endings such as 놀랐네요, 했는데 and 같은데요, comparison/alternative particles, and seven original clothing/color/price glosses with bilingual examples. The screenshot-derived review fixture has 61 tokens, of which 44 currently return candidates and 17 remain unknown. These counts are coverage, not accuracy; all 61 still require independent review. See evaluation/naver-cafe-cases.json.
+
+### Pronunciation (0.14.0)
+**Listen** on a dictionary card or library word plays the dictionary form. 9,709 of the 9,719 bundled curriculum lemmas have packaged clips (24 MB), machine-generated offline with the open-weight [Supertonic 3](https://huggingface.co/Supertone/supertonic-3) model (OpenRAIL-M). No model runs in the browser and nothing is sent anywhere. Other words use an offline Korean voice installed on your device, if one exists; cloud voices are skipped. An automatic speech-recognition screen flags uncertain clips, but native-speaker review is still pending. See [pronunciation audio](docs/AUDIO.md).

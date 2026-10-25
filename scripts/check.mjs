@@ -35,3 +35,7 @@ execFileSync(process.execPath,['--check',scheduler.file]);
 if(!fs.existsSync('extension/licenses/ts-fsrs-MIT.txt'))throw Error('Missing scheduler license');
 const schedulerSource=fs.readFileSync(scheduler.file,'utf8');if(/\beval\s*\(|new Function|\bfetch\s*\(|XMLHttpRequest|WebSocket/.test(schedulerSource))throw Error('Unexpected scheduler runtime code');
 console.log('Pinned offline FSRS scheduler integrity and license checks passed.');
+
+if(!m.permissions.includes('tts'))throw Error('Missing tts permission');
+const audio=JSON.parse(fs.readFileSync('extension/audio/manifest.json'));for(const file of audio.files){const p='extension/audio/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Audio checksum mismatch: '+p);execFileSync(process.execPath,['--check',p]);}
+console.log('Pronunciation audio integrity and syntax checks passed.');

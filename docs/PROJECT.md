@@ -198,3 +198,12 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Prepare 61 screenshot-derived review probes: 44 supported candidates, 17 unknown, zero independently reviewed. This does not satisfy the 100-token accuracy gate.
 - [ ] Verify actual Naver Café article with the learner; independently review new Korean analyses/examples and remaining unknowns.
 - [ ] Complete manual accessibility/zoom, learner hardware profiling and real Anki import; parameter optimization, deck collections and live Anki sync remain future scope.
+
+## 0.14.0 — explicit scope addition: pronunciation audio
+User-requested on 2026-10-25. Free and offline for the public; paid per-request TTS such as ElevenLabs was ruled out on cost and privacy. See docs/AUDIO.md.
+- [x] Compare open-weight Korean TTS licenses and fit; select Supertonic 3 (OpenRAIL-M) for offline pre-generation, not in-browser inference.
+- [x] Add a resumable generator pinned to the model revision, voice, seed, steps and codec. Record per-clip ASR screen results; exclude gross failures and list flagged clips.
+- [x] Package curriculum clips as hashed shards loaded on demand; Listen in the panel and library; disclose machine-generated speech.
+- [x] Fall back to installed non-remote `chrome.tts` voices only; no network code, cloud voices or web-accessible resources.
+- [x] Add integrity checks, shard/codec tests and a Chromium playback assertion.
+- [ ] Native-speaker review of flagged clips and a random sample; real-device fallback-voice checks on Windows, macOS and ChromeOS.

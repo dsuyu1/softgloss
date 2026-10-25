@@ -23,7 +23,7 @@ const url = `http://127.0.0.1:${server.address().port}/`;
 const errors = [], external = [];
 let context;
 async function launch() {
- context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]});
+ context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`, '--autoplay-policy=no-user-gesture-required']});
  context.on('page', page => page.on('pageerror', e => errors.push(e.message)));
  context.on('request', req => {if (/^https?:/.test(req.url()) && !req.url().startsWith(url) && !req.url().startsWith(url.replace('127.0.0.1','localhost'))) external.push(req.url());});
  let worker = context.serviceWorkers()[0];
@@ -66,6 +66,7 @@ try {
     if (action === 'hasFocus') return Boolean(root.activeElement);
     if (action === 'searchValue') return root.querySelector('input[type=search]').value;
     if (action === 'hidden') return root.querySelector('section').hidden;
+    if (action === 'notice') return root.getElementById('notice')?.textContent;
     if(action==='studyImport'){const input=root.querySelector('input[type=file]'),dt=new DataTransfer();dt.items.add(new File([value],'study.csv',{type:'text/csv'}));input.files=dt.files;input.dispatchEvent(new Event('change'));}
     if(action==='studyLevel'){const select=root.querySelector('#sg-study-level');select.value=String(value);select.dispatchEvent(new Event('change'));}
     if(action==='studyCounts')return [CSS.highlights.get('softgloss-study-word')?.size||0,CSS.highlights.get('softgloss-study-context')?.size||0];
@@ -89,7 +90,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.13.0/);
+ assert.match(await panel('text'),/v0.14.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -108,6 +109,9 @@ try {
  await page.setViewportSize({width:360,height:740});
  await page.screenshot({path:'test-results/panel-phrase-mobile.png'});
  await page.setViewportSize({width:1280,height:720});
+ // Packaged pronunciation is injected on demand and decoded locally.
+ assert.match(await panel('search', '학교'), /학교/);
+ await panel('click', 'Listen'); await eventually(() => panel('notice'), 'Machine-generated voice · Supertonic 3');
  assert.match(await panel('search', 'BOOK'), /책/);
  await panel('click', 'known'); await eventually(() => panel('status'), 'true');
  await eventually(() => panel('highlight'), 1);
@@ -207,6 +211,7 @@ try {
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
  await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();
  await eventually(() => library.locator('#stats').textContent(), '1 known · 1 seen · 0 saved sentences');
+ await library.getByRole('button', {name: 'Listen to 학교'}).first().click(); await eventually(() => library.locator('#message').textContent(), 'Machine-generated voice · Supertonic 3');
  // Real extension messaging from two library tabs tests the worker's single-writer path.
  const second = await context.newPage(); await second.goto(`chrome-extension://${id}/library.html`);
  const card = await library.evaluate(url => {const r = SG.lookup('책')[0]; return {lemma:r.lemma, meaning:r.meaning, sentence:'책을 읽어요.', url, entryId:r.id, source:r.source, license:r.license};}, url);

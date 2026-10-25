@@ -6,7 +6,7 @@ async function loadFrame(tabId, frameId, quiet=false) {
  const [probe]=await chrome.scripting.executeScript({target,func:()=>({version:globalThis.__softgloss?.version,loaded:!!globalThis.SG_DATA?.loaded})});
  if(probe.result.version&&probe.result.version!==chrome.runtime.getManifest().version)throw Error('Reload the webpage to load Bungeoppang '+chrome.runtime.getManifest().version+'.');
  if(!probe.result.loaded)await chrome.scripting.executeScript({target,files:SG_DICTIONARY_FILES});
- await chrome.scripting.executeScript({target,files:['core.js','api.js','content.js']});
+ await chrome.scripting.executeScript({target,files:['core.js','api.js','speech.js','content.js']});
  if(quiet)await chrome.scripting.executeScript({target,func:()=>globalThis.__softgloss?.hide()});
 }
 const frameLoads=new Map();
@@ -67,6 +67,10 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if(typeof message.word!=='string'||!SG.selectionWords(message.word).length||typeof message.context!=='string'||message.context.length>2000)return;
   chrome.scripting.executeScript({target:{tabId:sender.tab.id},func:(word,context,url)=>globalThis.__softgloss?.fromFrame(word,context,url),args:[message.word,message.context,(sender.url||'').split(/[?#]/)[0]]}).catch(()=>{});return;
  }
+ if(message?.type==='loadAudio' && sender.tab?.id && /^audio\/audio-\d{2}\.js$/.test(message.file)) {
+  chrome.scripting.executeScript({target:{tabId:sender.tab.id,frameIds:[sender.frameId]},files:[message.file]}).then(()=>respond({ok:true}),e=>respond({ok:false,error:e.message}));return true;
+ }
+ if(message?.type==='speak') {speak(message.text).then(respond,e=>respond({ok:false,error:e.message}));return true;}
  if (message?.type === 'openLibrary') {chrome.runtime.openOptionsPage(); return;}
  if (message?.type === 'pageDisabled') {
   if(sender.tab?.id){chrome.action.setBadgeText({tabId:sender.tab.id,text:''});if(sender.frameId===0)chrome.scripting.executeScript({target:{tabId:sender.tab.id,allFrames:true},func:()=>{if(window!==top)globalThis.__softgloss?.disable();}}).catch(()=>{});}
@@ -77,6 +81,15 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
  store.apply(message).then(respond, e => respond({ok: false, error: e.message}));
  return true;
 });
+
+// Fallback for words without a packaged clip. Remote (cloud) voices are skipped so lookup text never leaves the device.
+async function speak(text) {
+ if(typeof text!=='string'||!/^[가-힣]{1,80}$/u.test(text))return {ok:false,error:'Only a single Korean word can be read aloud.'};
+ const voice=(await chrome.tts.getVoices()).find(v=>v.lang?.toLowerCase().startsWith('ko')&&!v.remote);
+ if(!voice)return {ok:false,error:'No recording for this word, and no offline Korean voice is installed on this device.'};
+ await chrome.tts.speak(text,{voiceName:voice.voiceName,lang:voice.lang,rate:0.9});
+ return {ok:true,voice:voice.voiceName};
+}
 
 const autoScriptId='softgloss-auto';
 let autoQueue=Promise.resolve();
