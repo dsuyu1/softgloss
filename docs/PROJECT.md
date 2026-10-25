@@ -17,8 +17,8 @@ Check a box only when its stated deliverable is implemented and supporting evide
 - [x] Verify authenticated GitHub identity and Cloudflare account access.
 - [x] Create dependency-free Manifest V3 source scaffold, core tests and CI definition.
 - [x] Dedicated repository created and initialized: https://github.com/dsuyu1/softgloss
-- [ ] Import this source through the foundation pull request.
-- [ ] Run CI remotely after repository setup.
+- [x] Import source through [foundation PR #5](https://github.com/dsuyu1/softgloss/pull/5).
+- [x] Remote Node tests, static checks and alpha packaging passed: [Actions run](https://github.com/dsuyu1/softgloss/actions/runs/40162442136).
 
 ## M1a — starter alpha (current increment)
 - [x] Toolbar enables lookup on current page with activeTab, scripting and storage permissions; no permanent host access.
