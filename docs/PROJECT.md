@@ -54,10 +54,10 @@ Check a box only when its stated deliverable is implemented and supporting evide
 
 ## M1 release gates
 - [ ] All M1a manual tests and M1b tasks above resolved or explicitly moved out with rationale.
-- [ ] No AI runtime, no API keys, no telemetry, no lookup service dependency.
+- [x] No AI runtime, no API keys, no telemetry, no lookup service dependency. Static checks and Chromium network observations pass.
 - [ ] Full dictionary license/attribution, privacy notice, install/help and data deletion instructions reviewed.
 - [ ] Supported ordinary web pages work without breaking links, selection or editing.
-- [ ] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
+- [x] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
 - [ ] All required checks pass, review complete, versioned release ZIP produced.
 
 ## Later milestones — not promised in the current release
@@ -76,11 +76,11 @@ Cloudflare later: static documentation/download hosting first if useful, then op
 The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multiple senses and source hanja spellings. Its accuracy and learner usefulness have not passed beta gates. No monolingual dictionary, production parser, frequency ranks, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
 
 ## Next concrete work
-1. Finish the dictionary increment and verify the full-pack browser suite.
-2. Run manual Chrome smoke tests and fix failures.
-3. Independently review at least 100 real reading tokens and candidate analyses.
-4. Expand morphology against a reviewed Korean fixture set.
-5. Reassess beta scope with evidence from the pilot.
+1. Collect and independently review at least 100 real reading tokens; report unknowns and incorrect analyses separately.
+2. Complete manual Chrome permission/hover/accessibility/zoom and actual Anki import checks.
+3. Add reviewed grammar explanations, and profile cold startup, memory and long-page responsiveness.
+4. Pilot with Damian and 3–5 learners; log friction.
+5. Reassess beta scope before adding reader/subtitle features.
 
 ## GitHub work tracking
 - [Chrome verification #1](https://github.com/dsuyu1/softgloss/issues/1)
@@ -108,4 +108,4 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Package credits/license and preserve dictionary attribution in cards, backups and Anki exports.
 - [x] Keep vocabulary/backups compatible with existing lemma-based data.
 - [x] Add integrity, irregular-form, ambiguity and attribution regression coverage.
-- [ ] Verify full-pack browser CI and merge the increment.
+- [x] Verify full-pack browser CI: [Actions run 40165006893](https://github.com/dsuyu1/softgloss/actions/runs/40165006893). Merge tracked in PR #7.
