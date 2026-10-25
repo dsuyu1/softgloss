@@ -1,7 +1,7 @@
 # SoftGloss project scope and delivery checklist
 
 Owner: Damian Villarreal. Scope baseline: October 24, 2026.
-Working name: SoftGloss. Status: foundation alpha, not a public release.
+Working name: SoftGloss. Status: offline dictionary alpha, not a public release.
 
 ## Product commitment
 A free, useful Korean immersion companion without AI. Target learners know roughly 500+ words and want to read real content with less lookup friction. Long-term destination: dictionary, morphology, grammar, subtitles, sentence mining, vocabulary tracking, reader, recommendations and mobile. Build our own implementation; do not copy a competitor's code or content.
@@ -37,12 +37,13 @@ Check a box only when its stated deliverable is implemented and supporting evide
 - [ ] Verify no outgoing requests in browser network logs.
 
 ## M1b — useful reading beta (next implementation milestone)
-- [ ] Audit candidate dictionary licenses using upstream policy; record version, source, attribution, redistribution and commercial-use obligations before bundling.
-- [ ] Build reproducible offline dictionary import with stable IDs and bilingual senses.
+- [x] Audit candidate dictionary licenses using upstream policy; record version, source, attribution, redistribution and commercial-use obligations before bundling. See docs/DATA.md and the pinned source lock.
+- [x] Build reproducible offline dictionary import with stable source IDs and Korean headwords / English senses; preserve multiple entries. Offline snapshot and CI rebuild gate added in 0.4.0.
 - [ ] Evaluate morphological analyzers against explicit forms/rules; measure browser footprint, ambiguity and lookup coverage before choosing.
-- [ ] Support irregular conjugations beyond starter forms; preserve multiple senses/analyses.
+- [x] Support irregular conjugations beyond starter forms; preserve multiple senses/analyses. Uses upstream listed forms and source-entry links; independent accuracy review remains open.
 - [ ] Add reviewed grammar entries and source attribution.
-- [ ] Show supported hanja, idioms and frequency data only after source approval; never fabricate missing fields.
+- [x] Display source-labeled hanja spellings after the dictionary source review; retain attribution.
+- [ ] Add licensed idiom and frequency coverage; never fabricate missing fields.
 - [x] Add manual dictionary search and keyboard lookup so hover is not required. Implemented in 0.3.0; browser evidence tracked separately.
 - [x] Add disable/enable controls, highlighting preferences and dynamic-page support. Implemented in 0.3.0; browser evidence tracked separately.
 - [x] Serialize vocabulary/card writes to avoid multi-tab lost updates. Implemented in 0.3.0; browser evidence tracked separately.
@@ -53,10 +54,10 @@ Check a box only when its stated deliverable is implemented and supporting evide
 
 ## M1 release gates
 - [ ] All M1a manual tests and M1b tasks above resolved or explicitly moved out with rationale.
-- [ ] No AI runtime, no API keys, no telemetry, no lookup service dependency.
+- [x] No AI runtime, no API keys, no telemetry, no lookup service dependency. Static checks and Chromium network observations pass.
 - [ ] Full dictionary license/attribution, privacy notice, install/help and data deletion instructions reviewed.
 - [ ] Supported ordinary web pages work without breaking links, selection or editing.
-- [ ] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
+- [x] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
 - [ ] All required checks pass, review complete, versioned release ZIP produced.
 
 ## Later milestones — not promised in the current release
@@ -72,14 +73,14 @@ Current: isolated extension content script → local dictionary/rules; writes �
 Cloudflare later: static documentation/download hosting first if useful, then optional sync. Do not provision accounts/database/object storage for functionality already handled locally. No deployment, DNS, billing changes or paid resources in this increment. Track hosting/storage/egress costs before offering sync without limits.
 
 ## Decisions and limits
-The seed pack is deliberately small; it does not meet the useful-beta coverage gate. No monolingual dictionary, production parser, frequency ranks, hanja, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
+The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multiple senses and source hanja spellings. Its accuracy and learner usefulness have not passed beta gates. No monolingual dictionary, production parser, frequency ranks, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
 
 ## Next concrete work
-1. Complete the reading-UX PR and its automated browser smoke tests.
-2. Run manual Chrome smoke tests and fix failures.
-3. Complete dictionary/data license audit and select a reproducible data pipeline.
-4. Expand morphology against a reviewed Korean fixture set.
-5. Reassess beta scope with evidence from the pilot.
+1. Collect and independently review at least 100 real reading tokens; report unknowns and incorrect analyses separately.
+2. Complete manual Chrome permission/hover/accessibility/zoom and actual Anki import checks.
+3. Add reviewed grammar explanations, and profile cold startup, memory and long-page responsiveness.
+4. Pilot with Damian and 3–5 learners; log friction.
+5. Reassess beta scope before adding reader/subtitle features.
 
 ## GitHub work tracking
 - [Chrome verification #1](https://github.com/dsuyu1/softgloss/issues/1)
@@ -96,4 +97,15 @@ The seed pack is deliberately small; it does not meet the useful-beta coverage g
 - [x] Correct DOM offsets after decomposed Unicode characters; reuse dictionary indexes.
 - [x] Regression tests for concurrent writes, failure recovery, restore ordering and search.
 - [x] Add CI browser smoke suite with restart and backup round-trip checks.
-- [ ] Confirm browser suite passes; manual hover, actual shortcut routing, zoom, Anki import and assistive-technology checks remain open.
+- [x] Confirm 0.3.0 browser suite passes: PR #6 / Actions run 40163385599. Manual hover, actual shortcut routing, zoom, Anki import and assistive-technology checks remain open.
+
+## 0.4.0 offline dictionary increment
+- [x] Audit Wiktionary/Kaikki, NIKL and Kengdic upstream terms; select CC BY-SA 4.0 dictionary fields.
+- [x] Pin original input and compressed selected-source snapshot; reproduce output without network access.
+- [x] Bundle 33,784 source entries / 29,777 headwords / 40,510 senses / 72,869 conjugated spellings.
+- [x] Preserve source IDs, multiple meanings, usage labels and source-specific form links.
+- [x] Show hanja spellings only when explicitly labeled in the source.
+- [x] Package credits/license and preserve dictionary attribution in cards, backups and Anki exports.
+- [x] Keep vocabulary/backups compatible with existing lemma-based data.
+- [x] Add integrity, irregular-form, ambiguity and attribution regression coverage.
+- [x] Verify full-pack browser CI: [Actions run 40165006893](https://github.com/dsuyu1/softgloss/actions/runs/40165006893). Merge tracked in PR #7.

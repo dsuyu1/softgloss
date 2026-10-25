@@ -1,5 +1,5 @@
 # SoftGloss
-Free, offline Korean reading companion. **Reading-UX alpha — small starter pack, not a full dictionary or a Kimchi Reader replacement yet.** No AI, server, login, API key or build dependencies.
+Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No AI, server, login, API key or runtime dependencies.
 
 ## Try it
 1. Extract the project ZIP.
@@ -25,3 +25,8 @@ Node 22+: `npm test` and `npm run check`. No npm install needed. See [project sc
 CI installs test-only Playwright 1.56.1 and Chromium, then runs `node browser-tests/smoke.mjs`. These dependencies are not packaged in the extension. For local browser tests: `npm install --no-save --package-lock=false playwright@1.56.1`, `npx playwright install chromium`, then run the script. Manual hover, real keyboard shortcut delivery, 200% zoom and Anki import still need human verification.
 
 The browser harness uses a temporary extension copy with localhost-only test permission; the packaged extension retains activeTab-only access. Real toolbar permission grants still need manual verification. Run `node scripts/benchmark.mjs` for starter-pack lookup timing (not a browser performance benchmark).
+
+## Dictionary coverage
+29,777 imported Korean headwords, 40,510 senses and 72,869 listed conjugated spellings from English Wiktionary via Kaikki. The popup preserves alternative meanings and source labels, with explicitly supplied hanja spellings. Listed conjugations include irregulars; unsupported forms still return an empty result. See [data and licensing](docs/DATA.md) and [morphology limits](docs/MORPHOLOGY.md).
+
+The adapted dictionary is CC BY-SA 4.0; credit and license are included in the extension and retained in dictionary-derived saved cards/exports. Rebuild offline using `python3 scripts/import-dictionary.py data/source-snapshot.parts.json`. A checksum mismatch fails instead of silently importing a changed source.

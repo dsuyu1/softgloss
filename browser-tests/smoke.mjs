@@ -62,6 +62,10 @@ try {
  }
  await eventually(() => panel('focus'), 'sg-search');
  assert.match(await panel('search', '먹었어요'), /먹다/);
+ assert.match(await panel('search', '걸었어요'), /걷다/);
+ assert.match(await panel('search', '배'), /pear/);
+ assert.match(await panel('search', '배'), /boat/);
+ assert.match(await panel('search', '병원'), /Wiktionary contributors/);
  assert.match(await panel('search', 'BOOK'), /책/);
  await panel('click', 'known'); await eventually(() => panel('status'), 'true');
  await eventually(() => panel('highlight'), 1);
@@ -73,14 +77,22 @@ try {
  assert.equal(await page.locator('#softgloss-root').count(), 1);
  const library = await context.newPage(); await library.goto(`chrome-extension://${id}/library.html`);
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
- await library.getByRole('button', {name: 'Mark seen', exact: true}).click();
+ await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();
  await eventually(() => library.locator('#stats').textContent(), '1 known · 1 seen · 0 saved sentences');
  // Real extension messaging from two library tabs tests the worker's single-writer path.
  const second = await context.newPage(); await second.goto(`chrome-extension://${id}/library.html`);
- const card = {lemma: '책', meaning: 'book', sentence: '책을 읽어요.', url};
+ const card = await library.evaluate(url => {const r = SG.lookup('책')[0]; return {lemma:r.lemma, meaning:r.meaning, sentence:'책을 읽어요.', url, entryId:r.id, source:r.source, license:r.license};}, url);
  await Promise.all([library, second].map(p => p.evaluate(card => SGWrite({type: 'saveCard', card}), card)));
  await library.reload(); await eventually(() => library.locator('#cards article').count(), 1);
  const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: []}));
+ assert.equal(backup.cards[0].source, card.source); assert.equal(backup.cards[0].license, 'CC-BY-SA-4.0');
+ const performanceEvidence = await library.evaluate(() => {
+  const inputs = ['병원', '학교에서', '걸었어요', '배', '먹었어요'];
+  const times=[]; for (let i=0;i<100;i++) {const start=performance.now(); for (let j=0;j<100;j++) SG.lookup(inputs[j%inputs.length]); times.push((performance.now()-start)/100);}
+  times.sort((a,b)=>a-b); return {userAgent:navigator.userAgent, entries:SG_DATA.entries.length, batches:times.length, lookupsPerBatch:100, p95BatchMeanMilliseconds:times[95], maximumMilliseconds:times.at(-1)};
+ });
+ assert.ok(performanceEvidence.p95BatchMeanMilliseconds < 100);
+ console.log('Warm browser lookup timing:', JSON.stringify(performanceEvidence));
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();

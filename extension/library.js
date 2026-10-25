@@ -18,7 +18,7 @@ async function render() {
  if (!state.cards.length) $('cards').textContent = 'No saved sentences yet. Enable SoftGloss on a Korean page to start.';
  for (const c of state.cards) {
   const article = document.createElement('article');
-  for (const text of [c.lemma + ' · ' + c.meaning, c.sentence, c.url]) {
+  for (const text of [c.lemma + ' · ' + c.meaning, c.sentence, c.url, ...(c.source ? ['English Wiktionary contributors · CC BY-SA 4.0 · ' + c.source] : [])]) {
    const p = document.createElement('p'); p.textContent = text; article.append(p);
   }
   const b = document.createElement('button'); b.textContent = 'Delete sentence';
@@ -54,7 +54,12 @@ $('search-form').onsubmit = event => {
  for (const r of results) {
   const article = document.createElement('article');
   const title = document.createElement('h3'); title.textContent = r.lemma; title.lang = 'ko'; article.append(title);
-  const p = document.createElement('p'); p.textContent = [r.meaning, ...r.parts].join(' · '); article.append(p);
+  const p = document.createElement('p'); p.textContent = r.parts.join(' · '); article.append(p);
+  const list = document.createElement('ol');
+  for (const sense of r.senses || [{glosses: [r.meaning], tags: []}]) {const li = document.createElement('li'); li.textContent = (sense.tags.length ? '[' + sense.tags.join(', ') + '] ' : '') + sense.glosses.join('; '); list.append(li);}
+  article.append(list);
+  if (r.hanja?.length) {const h = document.createElement('p'); h.textContent = 'Hanja spelling: ' + r.hanja.join(' · '); article.append(h);}
+  if (r.source) {const a = document.createElement('a'); a.textContent = 'Wiktionary contributors · CC BY-SA 4.0'; a.href = r.source; a.target = '_blank'; a.rel = 'noopener noreferrer'; article.append(a);}
   for (const status of ['unknown', 'seen', 'known']) {
    const b = document.createElement('button'); b.textContent = 'Mark ' + status;
    b.onclick = () => write({type: 'setWord', lemma: r.lemma, status}, r.lemma + ' marked ' + status + '.'); article.append(b);

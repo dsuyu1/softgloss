@@ -1,9 +1,11 @@
-importScripts('core.js', 'mutations.js');
+importScripts('core.js', 'mutations.js', 'dictionary-files.js');
 const store = SGStore.createStore(chrome.storage.local);
 async function enable(tab, keyboard = false) {
  if (!tab?.id) return;
  try {
-  await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['data.js', 'core.js', 'api.js', 'content.js']});
+  const [loaded] = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: () => Boolean(globalThis.SG_DATA?.loaded)});
+  if (!loaded.result) await chrome.scripting.executeScript({target: {tabId: tab.id}, files: SG_DICTIONARY_FILES});
+  await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['core.js', 'api.js', 'content.js']});
   if (keyboard) await chrome.scripting.executeScript({target: {tabId: tab.id}, func: () => globalThis.__softgloss?.openSelection()});
   await chrome.action.setBadgeText({tabId: tab.id, text: 'ON'});
   await chrome.action.setTitle({tabId: tab.id, title: 'Open SoftGloss on this page'});

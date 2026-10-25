@@ -31,3 +31,14 @@ Browser findings must be recorded here before checking the corresponding PROJECT
 
 ### Starter lookup timing (not the browser release gate)
 `node scripts/benchmark.mjs`: Node v24.22.1, Linux x64, AMD EPYC 9V74; 52 entries, 10,000 warm samples. Observed p95 0.000601 ms and maximum 0.196 ms. This small-pack Node microbenchmark does not establish browser responsiveness, long-page latency, or production-pack performance; that checklist item remains open.
+
+## 0.4.0 dictionary increment
+- Twenty Node tests pass, including pinned shard hashes, unique entry IDs, source/sense integrity, imported vocabulary/hanja, multiple meanings for 배, 20 familiar irregular/contraction forms, homonym-specific form links and attribution round trips. These fixtures are regression checks, not independent linguistic validation.
+- Importing the original input and rebuilding from the committed compressed field snapshot produce byte-identical shards and manifest. CI repeats the offline rebuild and rejects generated-file drift.
+- Full-pack Node warm lookup: 33,785 runtime entries, 10,000 samples, p95 0.0175 ms (Node v24.22.1 / Linux x64 / AMD EPYC 9V74). Not a browser/long-page result.
+- Full-pack browser smoke tests passed in Actions run 40164714739: expanded vocabulary, ambiguous senses, listed irregulars, attribution persistence, restart, dynamic highlighting and no outgoing HTTP requests. Chromium 141 / Linux x64; initial timing used individual calls and hit browser timer resolution, so no precise p95 is claimed from that run.
+- The rebuild gate caught a truncated binary snapshot during GitHub transfer. The snapshot is now split into small chunks with per-chunk and combined checksums. All other published file blobs matched the local commit; no checksum was relaxed. The corrected published Git tree matches the local tree exactly.
+- Manual Chrome permission flow, pointer hover, assistive technology, 200% zoom, actual Anki import, 100 independently reviewed tokens and learner pilots remain open.
+
+### Full-pack CI result
+[Actions run 40165006893](https://github.com/dsuyu1/softgloss/actions/runs/40165006893) passed both jobs: deterministic offline rebuild, 20 Node tests, syntax/integrity/safety checks, ZIP packaging and full-pack Chromium smoke tests. The browser suite exercises search, alternate senses, listed irregulars, source attribution, dynamic highlighting, disabling/re-enabling, multi-tab saves, backup round trips, narrow library layout, restart persistence and absence of outgoing HTTP requests. This is still distinct from manual activeTab/hover/assistive-technology/Anki checks and independent Korean-language validation.

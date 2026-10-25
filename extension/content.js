@@ -37,11 +37,19 @@
   const submit = el('button', 'Search', form); submit.type = 'submit';
   form.addEventListener('submit', e => {e.preventDefault(); display(input.value, '', true); root.getElementById('sg-search').focus();});
   el('h2', current || 'A little help reading Korean.');
-  el('small', 'Starter dictionary · limited coverage · no AI');
+  el('small', 'Offline dictionary · Wiktionary + original fallback entries');
   if (!current) el('p', 'Hover or select a Korean word. Press Alt+Shift+K to look up a selection or focus search. Change the shortcut at chrome://extensions/shortcuts.');
-  else if (!results.length) el('p', 'No supported entry yet. Try a dictionary form or an English meaning.');
+  else if (!results.length) el('p', 'No supported entry yet. Try a dictionary form or an English meaning. Multiword idioms and unlisted endings may be unsupported.');
   for (const r of results) {
-   el('hr', ''); el('h2', r.lemma).lang = 'ko'; el('p', r.meaning); el('small', r.pos + ' · ' + r.kind);
+   el('hr', ''); el('h2', r.lemma).lang = 'ko';
+   if (r.senses) {
+    const senses = el('ol', '');
+    for (const sense of r.senses) el('li', (sense.tags.length ? '[' + sense.tags.join(', ') + '] ' : '') + sense.glosses.join('; '), senses);
+   } else el('p', r.meaning);
+   el('small', r.pos + ' · ' + r.kind);
+   if (r.hanja?.length) el('small', 'Hanja spelling: ' + r.hanja.join(' · '));
+   if (r.source) {const link = el('a', 'Wiktionary contributors · CC BY-SA 4.0'); link.href = r.source; link.target = '_blank'; link.rel = 'noopener noreferrer';}
+   if (results.length > 1) el('small', 'Several dictionary entries or analyses may fit; context decides.');
    r.parts.forEach(p => el('p', p));
    const statusLine = el('small', ''); statusLine.dataset.lemma = r.lemma;
    for (const status of ['unknown', 'seen', 'known']) {
@@ -50,7 +58,7 @@
     b.setAttribute('aria-label', `Mark ${r.lemma} ${status}`);
    }
    const save = button('Save sentence', () => write({type: 'saveCard', card: {
-    lemma: r.lemma, meaning: r.meaning, sentence: sentence.slice(0, 2000), url: location.origin + location.pathname
+    lemma: r.lemma, meaning: r.meaning, ...(r.source ? {entryId: r.id, source: r.source, license: r.license} : {}), sentence: sentence.slice(0, 2000), url: location.origin + location.pathname
    }}, 'Saved to your library.'));
    save.disabled = !sentence.trim();
   }
@@ -117,7 +125,7 @@
     if (n.parentElement?.closest(skip)) continue;
     const text = n.textContent.slice(0, Math.min(10000, 500000 - characters)); characters += text.length;
     for (const t of SG.tokens(text)) {
-     const a = SG.lookup(t.word); if (a.length !== 1) continue;
+     const a = SG.lookup(t.word); if (!a.length || new Set(a.map(r => r.lemma)).size !== 1) continue;
      const range = new Range(); range.setStart(n, t.index); range.setEnd(n, t.index + t.word.length);
      sets[state.words[a[0].lemma] || 'unknown'].add(range);
     }
