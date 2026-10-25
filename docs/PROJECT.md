@@ -227,3 +227,12 @@ Next executable work within the reading-beta scope: make the FSRS review flow pr
 - [x] Test schedule/history recovery, stale cross-tab undo, double undo and failed-write retry locally.
 - [x] Combined keyboard/audio/undo/idle-refresh and narrow/reflow layouts pass Chromium CI (Actions 40244266506); inspect desktop and narrow screenshots.
 - [ ] Complete screen-reader/real-zoom checks and learner pilots, then collect independent language/audio judgments.
+
+
+## 0.17.0 — screenshot-guided library and review layout
+- [x] Adapt the two provided PNG reference sheets to the native HTML/CSS/JavaScript stack with Malnaru's existing coral/neutral palette. Figma MCP was rate-limited; the user supplied PNGs as alternative visual references.
+- [x] Collection overview using real due/new/total, sentence and vocabulary counts, plus known-word progress; no invented decks or mastery values.
+- [x] Addressable Library/Review/Dictionary/Vocabulary/Sentences/Settings navigation with one visible view, current-page state and browser history support.
+- [x] Large centered review prompt, revealed meaning/context and the existing four FSRS ratings, keyboard/audio/undo behavior.
+- [ ] Verify navigation, narrow/reflow layouts and all existing study/export/persistence behavior in Chromium; inspect screenshots against the uploaded references.
+No new runtime dependencies, external assets, copied Decki branding or AI features. The reading overlay and TOPIK palette remain unchanged. Existing language/accessibility/manual beta gates stay open.

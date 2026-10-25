@@ -1,37 +1,56 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Malnaru Read · Your library</title><link rel="stylesheet" href="library.css">
-<main>
- <small>MALNARU · READ · OFFLINE</small>
- <h1>Your Korean, one sentence at a time.</h1>
- <p>An offline Korean–English dictionary. Your vocabulary and saved sentences stay in this browser.</p>
- <p id="stats"></p>
- <p id="message" role="status"></p>
- <section id="review-session" aria-labelledby="review-heading">
- <h2 id="review-heading">Review your words</h2>
- <p>Save a word with “Add to reviews” while reading. Recall its meaning, reveal the answer, then rate your recall. Reviews use FSRS with a 90% target retention and default parameters.</p>
- <p id="review-stats" role="status"></p><p id="review-help">Focus this review area to use Space to reveal, 1–4 to rate, P to listen after revealing, and U to undo the last rating. Shortcuts stay inactive while typing.</p><button id="start-review">Start review</button><div id="review" role="region" aria-label="Review card" aria-describedby="review-help" tabindex="-1" aria-live="polite"></div>
- <button id="undo-review" hidden>Undo last rating</button><button id="refresh-reviews">Refresh review queue</button>
- </section>
- <details><summary>Manage review deck</summary><label for="review-filter">Filter review words</label><input id="review-filter" type="search" maxlength="80"><div id="review-deck"></div></details>
- <h2>Dictionary search</h2>
- <form id="search-form"><label for="search">Korean word or English meaning</label><input id="search" type="search" maxlength="80" required><button type="submit">Search</button></form>
- <div id="search-results" aria-live="polite"></div>
- <h2>Vocabulary</h2>
- <label for="word-filter">Filter Korean words</label><input id="word-filter" type="search" maxlength="80">
- <label for="status-filter">Status</label><select id="status-filter"><option value="">All statuses</option><option>unknown</option><option>seen</option><option>known</option></select>
- <p id="word-count" role="status"></p><div id="words"></div>
- <h2>Saved sentences</h2><div id="cards"></div>
- <p><a href="THIRD_PARTY_NOTICES.html">Dictionary credits and licenses</a></p><h2>Your data</h2>
- <button id="backup">Export backup</button><button id="anki">Export Anki TSV</button>
- <label>Restore backup <input id="restore" type="file" accept="application/json"></label>
- <p>Backups contain vocabulary, saved sentences and review schedules. Restoring replaces them; highlight preferences stay unchanged.</p>
- <button id="clear">Delete all learning data</button>
- <h2>Using Malnaru Read</h2>
- <p>Enable on a regular webpage using the toolbar. Hover or select a Korean word, or press Alt+Shift+K to focus dictionary search. You can change the shortcut at chrome://extensions/shortcuts.</p>
- <p>Close hides the panel; Disable on this page stops lookups and highlighting until you enable again. Highlight vocabulary is a preference shared across tabs. Word status is always available as text here and in lookup results.</p>
- <p>Dynamic pages refresh automatically. Highlighting is bounded to the first 10,000 text nodes and 500,000 scanned characters (10,000 per node). Internal browser pages, extension/store pages, PDFs, and canvas text are unsupported. Embedded articles work where Chrome grants access to their website. Other-origin frames require optional website access.</p>
-</main>
+<title>Malnaru Read · Library</title><link rel="stylesheet" href="library.css">
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="app-header"><div class="header-inner"><a class="brand" href="#view-library" aria-label="Malnaru Read library"><span class="brand-mark" aria-hidden="true">M</span><span>Malnaru <strong>Read</strong></span></a><span class="offline-badge">On this device · Offline</span></div></header>
+<nav class="app-nav" aria-label="Library navigation"><a href="#view-library" data-view="library">Library</a><a href="#view-review" data-view="review">Review</a><a href="#view-dictionary" data-view="dictionary">Dictionary</a><a href="#view-vocabulary" data-view="vocabulary">Vocabulary</a><a href="#view-sentences" data-view="sentences">Sentences</a><a href="#view-settings" data-view="settings">Settings</a></nav>
+<main id="main-content" class="app-main" tabindex="-1">
+<p id="message" class="status-message" role="status"></p>
+<section id="view-library" data-panel="library" aria-labelledby="library-heading">
+ <div class="page-heading"><div><span class="eyebrow">YOUR LEARNING SPACE</span><h1 id="library-heading" tabindex="-1">Your library</h1><p>Words worth keeping. Context worth remembering.</p></div><a class="button primary" href="#view-review">Open review <span aria-hidden="true">→</span></a></div>
+ <p id="stats" class="sr-only"></p>
+ <div class="summary-strip" aria-label="Review overview"><div><span>Ready to review</span><strong id="overview-due">0</strong></div><div><span>New cards</span><strong id="overview-new">0</strong></div><div><span>Total review cards</span><strong id="overview-total">0</strong></div></div>
+ <div class="section-heading"><h2>Your collections</h2><a href="#view-dictionary">Find a word <span aria-hidden="true">→</span></a></div>
+ <div class="collection-grid">
+  <a class="collection" href="#view-review"><span class="collection-top"><span class="tag">PERSONAL DECK</span><span aria-hidden="true">↗</span></span><h3>Saved words</h3><p>Build a habit from the words you meet.</p><div class="collection-footer"><strong id="collection-reviews">0 cards</strong><span id="collection-due">0 ready</span></div></a>
+  <a class="collection" href="#view-sentences"><span class="collection-top"><span class="tag">READING CONTEXT</span><span aria-hidden="true">↗</span></span><h3>Sentence collection</h3><p>Return to the passages you saved.</p><div class="collection-footer"><strong id="collection-sentences">0 sentences</strong><span>View collection</span></div></a>
+  <a class="collection" href="#view-vocabulary"><span class="collection-top"><span class="tag">YOUR VOCABULARY</span><span aria-hidden="true">↗</span></span><h3>Words you know</h3><p>Keep track of unknown, seen and known words.</p><div class="collection-footer"><strong id="collection-known">0 known</strong><span id="collection-tracked">0 tracked</span></div><progress id="known-progress" max="1" value="0" aria-label="Known words among tracked vocabulary"></progress></a>
+ </div>
+ <p class="quiet-note">Add words and sentences from the reading panel. Your collections stay on this device.</p>
+</section>
+<section id="view-review" data-panel="review" hidden aria-labelledby="review-heading">
+ <div id="review-session">
+ <div class="review-heading"><a class="back-link" href="#view-library">← Back to library</a><div><span class="eyebrow">PERSONAL DECK</span><h1 id="review-heading" tabindex="-1">Saved words</h1></div><button id="refresh-reviews" class="text-button">Refresh queue</button></div>
+ <p id="review-stats" class="sr-only" role="status"></p><div id="review-summary" class="review-summary" aria-hidden="true"></div>
+ <div class="review-toolbar"><span class="muted">Recall the meaning before revealing.</span><button id="start-review" class="text-button">Start review</button></div>
+ <div id="review" role="region" aria-label="Review card" aria-describedby="review-help" tabindex="-1" aria-live="polite"></div>
+ <div class="review-bottom"><button id="undo-review" class="text-button" hidden>Undo last rating</button><p id="review-help">Space reveal · 1–4 rate · P listen · U undo<br>Shortcuts work only in the review area and stay inactive while typing.</p></div>
+ <details class="review-guide"><summary>How reviews work</summary><p>FSRS schedules each card from your ratings, using a 90% target retention and default parameters. Again means forgotten; Hard means recalled with effort; Good means recalled; Easy means effortless. Suspending a card pauses it. Undo reverses the latest rating across your tabs.</p></details>
+ </div>
+ <details class="deck-manager"><summary>Manage review deck</summary><label for="review-filter">Filter review words</label><input id="review-filter" type="search" maxlength="80"><div id="review-deck"></div></details>
+</section>
+<section id="view-dictionary" data-panel="dictionary" hidden aria-labelledby="dictionary-heading">
+ <div class="page-heading"><div><span class="eyebrow">LOOK IT UP</span><h1 id="dictionary-heading" tabindex="-1">Dictionary</h1><p>Find a Korean word, phrase or English meaning.</p></div></div>
+ <form id="search-form" class="search-form"><label for="search">Korean word or English meaning</label><div class="search-row"><input id="search" type="search" maxlength="80" placeholder="Try 학교 or school" required><button class="primary" type="submit">Search</button></div></form>
+ <div id="search-results" class="entry-list" aria-live="polite"></div>
+</section>
+<section id="view-vocabulary" data-panel="vocabulary" hidden aria-labelledby="vocabulary-heading">
+ <div class="page-heading"><div><span class="eyebrow">YOUR PROGRESS</span><h1 id="vocabulary-heading" tabindex="-1">Vocabulary</h1><p>Every familiar word makes the next page easier.</p></div></div>
+ <div class="filter-row"><div><label for="word-filter">Filter Korean words</label><input id="word-filter" type="search" maxlength="80" placeholder="Find a saved word"></div><div><label for="status-filter">Status</label><select id="status-filter"><option value="">All statuses</option><option>unknown</option><option>seen</option><option>known</option></select></div></div>
+ <p id="word-count" class="muted" role="status"></p><div id="words" class="word-list"></div>
+</section>
+<section id="view-sentences" data-panel="sentences" hidden aria-labelledby="sentences-heading">
+ <div class="page-heading"><div><span class="eyebrow">SAVED WHILE READING</span><h1 id="sentences-heading" tabindex="-1">Sentence collection</h1><p>Keep the words and the context together.</p></div></div><div id="cards" class="entry-list"></div>
+</section>
+<section id="view-settings" data-panel="settings" hidden aria-labelledby="settings-heading">
+ <div class="page-heading"><div><span class="eyebrow">MAKE IT YOURS</span><h1 id="settings-heading" tabindex="-1">Settings &amp; data</h1><p>Your learning stays local. Keep a backup when you need one.</p></div></div>
+ <section class="settings-section"><h2>Export &amp; restore</h2><p>JSON backups include vocabulary, sentences and review schedules. Anki TSV exports card content.</p><div class="button-row"><button id="backup">Export backup</button><button id="anki">Export Anki TSV</button></div><label class="file-label">Restore backup <input id="restore" type="file" accept="application/json"></label><p class="muted">Restoring replaces learning data. Highlight preferences stay unchanged. The temporary undo snapshot is excluded from backups.</p></section>
+ <section class="settings-section"><h2>Using Malnaru Read</h2><p>Enable a regular webpage using the toolbar. Hover Korean text, select up to eight Korean words, or press Alt+Shift+K for lookup. Shortcut settings are at chrome://extensions/shortcuts.</p><p>Disable on this page stops lookup and highlighting until enabled again. Embedded articles need Chrome website access to their origin. Browser/store pages, PDFs and image lettering are unsupported. Dynamic scans are bounded to 10,000 text nodes and 500,000 characters.</p><a href="THIRD_PARTY_NOTICES.html">Dictionary, grammar and audio credits</a></section>
+ <section class="settings-section danger-zone"><h2>Delete learning data</h2><p>Remove vocabulary, sentence cards, review schedules and the undo snapshot from this browser.</p><button id="clear" class="danger">Delete all learning data</button></section>
+</section>
+</main><footer class="app-footer"><span>말나루 · A little further, one word at a time.</span><span id="library-version"></span></footer>
 <script src="learning-examples.js"></script><script src="data.js"></script><script src="dictionary/dictionary-00.js"></script><script src="dictionary/dictionary-01.js"></script><script src="dictionary/dictionary-02.js"></script><script src="dictionary/dictionary-03.js"></script><script src="dictionary/dictionary-04.js"></script><script src="dictionary/dictionary-05.js"></script><script src="dictionary/dictionary-06.js"></script><script src="dictionary/dictionary-07.js"></script><script src="dictionary/dictionary-08.js"></script><script src="dictionary/dictionary-09.js"></script><script src="dictionary/dictionary-10.js"></script><script src="dictionary/dictionary-11.js"></script><script src="dictionary/dictionary-12.js"></script><script src="dictionary/dictionary-13.js"></script><script src="dictionary/dictionary-14.js"></script><script src="dictionary/dictionary-15.js"></script><script src="dictionary/dictionary-16.js"></script><script src="dictionary/dictionary-17.js"></script><script src="dictionary/dictionary-18.js"></script><script src="dictionary/dictionary-19.js"></script><script src="dictionary/dictionary-20.js"></script><script src="dictionary/dictionary-21.js"></script><script src="dictionary/dictionary-22.js"></script><script src="dictionary/dictionary-23.js"></script><script src="dictionary/dictionary-24.js"></script><script src="dictionary/dictionary-25.js"></script><script src="dictionary/dictionary-26.js"></script><script src="dictionary/dictionary-27.js"></script><script src="dictionary/dictionary-28.js"></script><script src="dictionary/dictionary-29.js"></script><script src="dictionary/dictionary-30.js"></script><script src="dictionary/dictionary-31.js"></script><script src="dictionary/dictionary-32.js"></script><script src="dictionary/dictionary-33.js"></script><script src="dictionary-loader.js"></script><script src="grammar.js"></script><script src="morphology/morphology-00.js"></script><script src="morphology/morphology-01.js"></script><script src="morphology/morphology-02.js"></script><script src="morphology/morphology-03.js"></script><script src="morphology/morphology-04.js"></script><script src="study/vocabulary-00.js"></script><script src="study/vocabulary-01.js"></script><script src="study/vocabulary-02.js"></script><script src="study/vocabulary-03.js"></script><script src="study/vocabulary-04.js"></script><script src="study/grammar.js"></script><script src="examples/examples-00.js"></script><script src="examples/examples-01.js"></script><script src="examples/examples-02.js"></script><script src="examples/examples-03.js"></script><script src="examples/examples-04.js"></script><script src="examples/examples-05.js"></script><script src="examples/examples-06.js"></script><script src="examples/examples-07.js"></script><script src="examples/examples-08.js"></script><script src="examples/examples-09.js"></script><script src="examples/examples-10.js"></script><script src="vendor/ts-fsrs-5.4.2.js"></script><script src="srs.js"></script><script src="core.js"></script><script src="api.js"></script><script src="speech.js"></script><script src="library.js"></script>
-</html>
+
+</body></html>

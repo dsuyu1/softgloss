@@ -93,7 +93,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.16.0/);
+ assert.match(await panel('text'),/v0.17.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -224,7 +224,9 @@ try {
  assert.match(await panel('search','단체관람안내'),/not a whole-label translation/);
  assert.match(await panel('search','기아타이거즈의'),/KIA Tigers/);
  await panel('studyLevel',0);await page.evaluate(()=>document.getElementById('coverage-gaps').remove());
+ async function libraryView(page,view){await page.locator('a[data-view="'+view+'"]').click();await eventually(()=>page.locator('[data-panel="'+view+'"]').isVisible(),true);}
  const library = await context.newPage(); await library.goto(`chrome-extension://${id}/library.html`);
+ await libraryView(library,'dictionary');
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
  await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();
  await eventually(() => library.locator('#stats').textContent(), '1 known · 1 seen · 0 saved sentences');
@@ -234,9 +236,11 @@ try {
  const card = await library.evaluate(url => {const r = SG.lookup('책')[0]; return {lemma:r.lemma, meaning:r.meaning, sentence:'책을 읽어요.', url, entryId:r.id, source:r.source, license:r.license};}, url);
  await Promise.all([library, second].map(p => p.evaluate(card => SGWrite({type: 'saveCard', card}), card)));
  await library.reload(); await eventually(() => library.locator('#cards article').count(), 1);
+ await libraryView(library,'dictionary');
  await library.locator('#search').fill('학교');await library.locator('#search-form button').click();
  await library.bringToFront();
  // In-app FSRS: select an entry, reveal, answer, export and round-trip its schedule.
+ await libraryView(library,'dictionary');
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'1 due · 1 new · 1 cards');
  assert.equal(await library.locator('#review').getByRole('button',{name:/^Good/}).count(),0,'rating requires answer reveal');
@@ -244,6 +248,7 @@ try {
  await library.locator('#search').fill('');await library.locator('#search').pressSequentially('1234 pu');
  assert.equal(await library.locator('#review-show-answer').count(),1);
  assert.equal(await library.evaluate(async()=>Object.values((await chrome.storage.local.get('reviewCards')).reviewCards)[0].schedule.reps),0);
+ await libraryView(library,'review');
  await library.locator('#start-review').click();assert.equal(await library.evaluate(()=>document.activeElement.id),'review-show-answer');
  await library.keyboard.press('1');assert.equal(await library.locator('#review-show-answer').count(),1);
  await library.keyboard.press('Space');await library.locator('#review-rate-4').waitFor();
@@ -262,17 +267,18 @@ try {
  await library.keyboard.press('Space');await library.keyboard.press('4');
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
  // Idle queues wake themselves when a scheduled card becomes due, without taking focus.
- await library.locator('#search').focus();
+ await libraryView(library,'dictionary');await library.locator('#search').focus();
  await library.evaluate(async()=>{const {reviewCards}=await chrome.storage.local.get('reviewCards');for(const c of Object.values(reviewCards))c.schedule.due=new Date(Date.now()+750).toISOString();await chrome.storage.local.set({reviewCards});});
  await eventually(()=>library.locator('#review-show-answer').count(),1);
  assert.equal(await library.evaluate(()=>document.activeElement.id),'search');
- await library.locator('#start-review').click();await library.keyboard.press('Space');await library.keyboard.press('4');
+ await libraryView(library,'review');await library.locator('#start-review').click();await library.keyboard.press('Space');await library.keyboard.press('4');
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
+ await libraryView(library,'dictionary');
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
  const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{}}));
  assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,2);
- const backupDownload=library.waitForEvent('download');await library.locator('#backup').click();const exported=JSON.parse(await readFile(await (await backupDownload).path(),'utf8'));
+ await libraryView(library,'settings');const backupDownload=library.waitForEvent('download');await library.locator('#backup').click();const exported=JSON.parse(await readFile(await (await backupDownload).path(),'utf8'));
  assert.equal(exported.version,2);assert.equal(Object.hasOwn(exported,'reviewUndo'),false);assert.deepEqual(exported.reviewCards,backup.reviewCards);
  // Frame fixture: child highlights and selection use the top panel, preserving link behavior.
  const framePage=await context.newPage();await framePage.goto(url+'frames');
@@ -342,6 +348,7 @@ try {
  assert.ok(activations.every(r=>r.ok));assert.equal(await inactivePage.locator('#softgloss-root').count(),1);
  await popup.setViewportSize({width:350,height:700});await popup.screenshot({path:'test-results/popup.png',fullPage:true});
  await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
+ await libraryView(library,'settings');
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'malnaru-read-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
@@ -354,6 +361,14 @@ try {
  await library.locator('#restore').setInputFiles({name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"version":2}')});
  await eventually(() => library.locator('#message').textContent(), 'Restore failed: Unsupported backup.');
  assert.equal(await library.locator('#cards article').count(), 1);
+ await libraryView(library,'library');
+ assert.equal(await library.locator('[data-panel]:visible').count(),1);
+ assert.equal(await library.locator('a[data-view][aria-current=page]').getAttribute('data-view'),'library');
+ assert.equal(await library.locator('#overview-total').textContent(),'1');assert.equal(await library.locator('#collection-sentences').textContent(),'1 sentence');
+ await library.screenshot({path:'test-results/library-overview-desktop.png',fullPage:true});
+ await libraryView(library,'vocabulary');await library.goBack();await eventually(()=>library.locator('[data-panel=library]').isVisible(),true);
+ await libraryView(library,'review');await library.reload();await eventually(()=>library.locator('[data-panel=review]').isVisible(),true);
+ await libraryView(library,'library');
  await library.setViewportSize({width: 360, height: 740});
  assert.equal(await library.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
  await mkdir('test-results', {recursive: true}); await library.screenshot({path: 'test-results/library-mobile.png', fullPage: true});
