@@ -251,6 +251,7 @@ try {
  await libraryView(library,'review');
  await library.locator('#start-review').click();assert.equal(await library.evaluate(()=>document.activeElement.id),'review-show-answer');
  await library.keyboard.press('1');assert.equal(await library.locator('#review-show-answer').count(),1);
+ await library.screenshot({path:'test-results/review-front-desktop.png',fullPage:true});
  await library.keyboard.press('Space');await library.locator('#review-rate-4').waitFor();
  assert.equal(await library.evaluate(()=>document.activeElement.id),'review');
  await library.keyboard.press('p');await eventually(()=>library.locator('#message').textContent(),'Machine-generated voice · Supertonic 3');
@@ -287,7 +288,7 @@ try {
   const original=Element.prototype.attachShadow;Element.prototype.attachShadow=function(options){const root=original.call(this,options);if(this.id==='softgloss-root')globalThis.__frameTestRoot=root;return root;};
  }}),frameTab);
  await worker.evaluate(tabId=>enable({id:tabId}),frameTab);
- async function frameState(){return worker.evaluate(async tabId=>(await chrome.scripting.executeScript({target:{tabId,allFrames:true},func:()=>({child:window!==top,enabled:globalThis.__softgloss?.isEnabled(),hidden:globalThis.__frameTestRoot?.querySelector('section')?.hidden,word:globalThis.__frameTestRoot?.querySelector('input[type=search]')?.value,highlights:CSS.highlights.get('softgloss-known')?.size||0})})).map(r=>r.result),frameTab);}
+ async function frameState(){return worker.evaluate(async tabId=>(await chrome.scripting.executeScript({target:{tabId,allFrames:true},func:()=>({child:window!==top,enabled:globalThis.__softgloss?.isEnabled(),hidden:globalThis.__frameTestRoot?.querySelector('section')?.hidden,word:globalThis.__frameTestRoot?.querySelector('input[type=search]')?.value,highlights:CSS.highlights.get('softgloss-known')?.size||0})})).map(r=>r.result).filter(Boolean),frameTab);}
  await eventually(async()=>(await frameState()).some(r=>r.child&&r.enabled&&r.hidden&&r.highlights>0),true);
  const articleFrame=framePage.frames().find(f=>f.url()===url+'article');
  await articleFrame.locator('a').click();assert.match(articleFrame.url(),/#next$/);
@@ -371,6 +372,8 @@ try {
  await libraryView(library,'library');
  await library.setViewportSize({width: 360, height: 740});
  assert.equal(await library.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+ for(const view of ['dictionary','vocabulary','sentences','settings','review']){await libraryView(library,view);assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,view+' mobile reflow');await library.screenshot({path:'test-results/library-'+view+'-mobile.png',fullPage:true});}
+ await libraryView(library,'library');
  await mkdir('test-results', {recursive: true}); await library.screenshot({path: 'test-results/library-mobile.png', fullPage: true});
  assert.deepEqual(errors, []); assert.deepEqual(external, []);
  await context.close();

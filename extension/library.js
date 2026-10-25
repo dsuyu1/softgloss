@@ -15,7 +15,7 @@ function renderOverview(){
  const words=Object.values(state.words),known=words.filter(v=>v==='known').length;
  $('overview-due').textContent=String(due);$('overview-new').textContent=String(fresh);$('overview-total').textContent=String(cards.length);
  $('collection-reviews').textContent=cards.length+(cards.length===1?' card':' cards');$('collection-due').textContent=due+' ready';$('collection-sentences').textContent=state.cards.length+(state.cards.length===1?' sentence':' sentences');$('collection-known').textContent=known+' known';$('collection-tracked').textContent=words.length+' tracked';
- $('known-progress').max=Math.max(1,words.length);$('known-progress').value=known;
+ $('known-progress').max=Math.max(1,words.length);$('known-progress').value=known;$('known-progress').setAttribute('aria-valuetext',known+' known of '+words.length+' tracked words');
  const summary=$('review-summary');summary.replaceChildren();for(const [label,count] of [['Ready',due],['New',fresh],['Total',cards.length]]){const item=document.createElement('span');item.textContent=label+' ';const value=document.createElement('strong');value.textContent=String(count);item.append(value);summary.append(item);}
 }
 function download(name, text, type) {
