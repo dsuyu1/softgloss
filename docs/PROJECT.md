@@ -124,4 +124,5 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Yield highlight scans between nodes after an elapsed-time budget.
 - [x] Add pointer, blank-space, selection and editable-input browser regressions.
 - [x] Add reproducible CI performance artifact for startup, renderer heap and a 2,000-paragraph dynamic page.
-- [ ] Record passing CI reference measurements; real-device profiling remains open.
+- [x] Record passing CI reference measurements: Actions 40207430126; details in docs/PERFORMANCE.md.
+- [ ] Profile on learner hardware and assess memory across multiple enabled tabs.
