@@ -158,6 +158,34 @@ try {
  });
  assert.ok(performanceEvidence.p95BatchMeanMilliseconds < 100);
  console.log('Warm browser lookup timing:', JSON.stringify(performanceEvidence));
+ // Automatic registration uses only the temporary test copy's localhost grant.
+ await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:true});await syncAuto();});
+ const automaticPage=await context.newPage();await automaticPage.goto(url+'automatic');
+ assert.equal(await automaticPage.locator('#softgloss-root').count(),0,'auto mode must stay lazy before Korean interaction');
+ const autoTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'automatic');
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softglossBootstrap)});return r.result;},autoTab),true);
+ await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>{const original=Element.prototype.attachShadow;Element.prototype.attachShadow=function(options){const root=original.call(this,options);if(this.id==='softgloss-root')globalThis.__autoTestRoot=root;return root;};}}),autoTab);
+ await automaticPage.evaluate(()=>{
+  const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
+ });
+ await automaticPage.locator('#softgloss-root').waitFor({state:'attached'});
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),true);
+ const autoResult=await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>({hidden:globalThis.__autoTestRoot.querySelector('section').hidden,word:globalThis.__autoTestRoot.querySelector('input[type=search]').value})});return r.result;},autoTab);
+ assert.deepEqual(autoResult,{hidden:false,word:'책을'});
+ await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
+ assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),false);
+ const inactivePage=await context.newPage();await inactivePage.goto(url+'inactive');
+ await inactivePage.evaluate(()=>{const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);getSelection().addRange(r);document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
+ await inactivePage.waitForTimeout(350);assert.equal(await inactivePage.locator('#softgloss-root').count(),0);
+ const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html`);
+ assert.equal(await popup.locator('#enable').textContent(),'Enable on this page');
+ assert.match(await popup.locator('main').textContent(),/No local server/);
+ const inactiveTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'inactive');
+ const activations=await popup.evaluate(tabId=>Promise.all([chrome.runtime.sendMessage({type:'enableCurrent',tabId}),chrome.runtime.sendMessage({type:'enableCurrent',tabId})]),inactiveTab);
+ assert.ok(activations.every(r=>r.ok));assert.equal(await inactivePage.locator('#softgloss-root').count(),1);
+ await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();

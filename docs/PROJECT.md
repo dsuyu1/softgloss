@@ -21,7 +21,7 @@ Check a box only when its stated deliverable is implemented and supporting evide
 - [x] Remote Node tests, static checks and alpha packaging passed: [Actions run](https://github.com/dsuyu1/softgloss/actions/runs/40162442136).
 
 ## M1a — starter alpha (current increment)
-- [x] Toolbar enables lookup on current page with activeTab, scripting and storage permissions; no permanent host access.
+- [x] Manual mode enables lookup on the current page with activeTab, scripting and storage permissions. Version 0.6.0 adds user-requested optional automatic website access.
 - [x] Implement dictionary-backed word lookup, explicitly listed conjugations and limited particle candidates.
 - [x] Render unknown-word fallback without invented translation.
 - [x] Implement Unknown / Seen / Known state keyed by lemma and local page colors.
@@ -126,3 +126,12 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Add reproducible CI performance artifact for startup, renderer heap and a 2,000-paragraph dynamic page.
 - [x] Record passing CI reference measurements: Actions 40207430126; details in docs/PERFORMANCE.md.
 - [ ] Profile on learner hardware and assess memory across multiple enabled tabs.
+
+## 0.6.0 website activation fix
+- [x] Explain toolbar activation and remove the impression that a demo server is required.
+- [x] Add a toolbar panel with Enable on this page, version, errors and library access.
+- [x] Add optional automatic HTTP/HTTPS lookup with a user-initiated Chrome permission request.
+- [x] Register a lightweight listener; load the dictionary only on Korean hover/selection.
+- [x] Handle opt-out and permission revocation; retain manual mode.
+- [x] Verify new-page automatic activation, visible Korean result, opt-out and concurrent manual activation in Chromium CI: Actions 40209433993.
+- [ ] Verify Chrome's interactive website-access permission dialog and actual toolbar activeTab grant manually.

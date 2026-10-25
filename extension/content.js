@@ -10,7 +10,7 @@
  const panel = document.createElement('section');
  panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'SoftGloss Korean dictionary'); root.append(panel);
  let state = await chrome.storage.local.get({words: {}, preferences: {highlights: true}});
- let current = '', sentence = '', results = [], enabled = true, previousFocus = null;
+ let current = '', sentence = '', results = [], enabled = true, previousFocus = null, automatic = false;
  let hoverTimer, paintTimer, paintEpoch = 0;
  const skip = 'script,style,noscript,input,textarea,select,[contenteditable],[role=textbox]';
  function el(tag, text, parent = panel) {const e = document.createElement(tag); e.textContent = text; parent.append(e); return e;}
@@ -21,12 +21,12 @@
   catch (error) {notice(error.message); return false;}
  }
  function close() {panel.hidden = true; const focused = root.activeElement; focused?.blur(); if (focused) previousFocus?.focus?.();}
+ function disable() {enabled=false;clearTimeout(hoverTimer);clearTimeout(paintTimer);paintEpoch++;observer.disconnect();clearHighlights();close();chrome.runtime.sendMessage({type:'pageDisabled'});}
  function render() {
   panel.replaceChildren(); el('small', 'SOFTGLOSS · OFFLINE ALPHA');
   button('Close', close); button('My library', () => chrome.runtime.sendMessage({type: 'openLibrary'}));
   button('Disable on this page', () => {
-   enabled = false; clearTimeout(hoverTimer); clearTimeout(paintTimer); paintEpoch++;
-   observer.disconnect(); clearHighlights(); close(); chrome.runtime.sendMessage({type: 'pageDisabled'});
+   disable();
   });
   const label = el('label', 'Highlight vocabulary ');
   const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.checked = state.preferences.highlights !== false; label.append(toggle);
@@ -154,6 +154,7 @@
  function observe() {if (document.body) observer.observe(document.body, {childList: true, subtree: true, characterData: true});}
  chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
+  if (changes.autoLookup && changes.autoLookup.newValue === false && automatic) disable();
   if (changes.words) {state.words = changes.words.newValue || {}; updateStatuses();}
   if (changes.preferences) {
    state.preferences = changes.preferences.newValue || {highlights: true};
@@ -162,8 +163,15 @@
   if (changes.words || changes.preferences) schedulePaint();
  });
  globalThis.__softgloss = {
-  show() {enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
-  openSelection() {
+  show() {automatic = false; enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
+  async autoLookup(word,context) {
+   const {autoLookup}=await chrome.storage.local.get({autoLookup:false});
+   if(!autoLookup){disable();return;}
+   automatic=true;display(word,context);
+  },
+  isAutomatic() {return automatic && enabled;},
+  stopAuto() {if(automatic)disable();},
+  openSelection() {automatic=false;
    previousFocus = document.activeElement; enabled = true; observe();
    const value = selected();
    if (value) display(value.word, value.context); else {panel.hidden = false; render();}
