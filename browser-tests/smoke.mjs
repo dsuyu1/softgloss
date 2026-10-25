@@ -85,12 +85,15 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
+ assert.match(await panel('text'),/v0.12.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
  await panel('expandGrammar');
  assert.deepEqual(await panel('grammarOpen'), [true,false]);
  for(const [word,definition] of [['지도부','leadership'],['전원주택은','countryside'],['하단에는','bottom section'],['성공하려면','intending'],['할까','wondering']])assert.ok((await panel('search',word)).includes(definition),word);
+ const exampleWord=await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>SG_DATA.entries.find(e=>SG.examplesFor(e).length)?.lemma});return r.result;},tabId);
+ assert.match(await panel('search',exampleWord),/Dictionary sentence example/);
  assert.match(await panel('search','기업들의'),/기업/);
  assert.match(await panel('search','끌어모으려는'),/끌어모으다/);
  assert.match(await panel('search','무슨성역이냐'),/성역/);

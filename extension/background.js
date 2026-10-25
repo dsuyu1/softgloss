@@ -3,6 +3,8 @@ const store = SGStore.createStore(chrome.storage.local);
 async function enablePage(tab) {
  if (!tab?.id) return {ok:false,error:'Open an ordinary website first.'};
  try {
+  const [existing]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:()=>globalThis.__softgloss ? globalThis.__softgloss.version||'older build' : null});
+  if(existing.result&&existing.result!==chrome.runtime.getManifest().version)return {ok:false,error:'This page is running '+existing.result+'. Reload the webpage to load Bungeoppang '+chrome.runtime.getManifest().version+'.'};
   const [loaded] = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: () => Boolean(globalThis.SG_DATA?.loaded)});
   if (!loaded.result) await chrome.scripting.executeScript({target: {tabId: tab.id}, files: SG_DICTIONARY_FILES});
   await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['core.js', 'api.js', 'content.js']});

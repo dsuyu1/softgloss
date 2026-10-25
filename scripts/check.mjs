@@ -26,3 +26,5 @@ console.log('Extended morphology integrity and syntax checks passed.');
 
 const study=JSON.parse(fs.readFileSync('extension/study/manifest.json'));for(const file of study.files){const p='extension/study/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Curriculum checksum mismatch');execFileSync(process.execPath,['--check',p]);}
 console.log('Official curriculum integrity and syntax checks passed.');
+
+const examples=JSON.parse(fs.readFileSync('extension/examples/manifest.json'));for(const f of examples.files){const p='extension/examples/'+f.path;if(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')!==f.sha256)throw Error('Example checksum mismatch');execFileSync(process.execPath,['--check',p]);}

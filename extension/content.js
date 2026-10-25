@@ -25,7 +25,7 @@
  function disable() {enabled=false;clearTimeout(hoverTimer);clearTimeout(paintTimer);paintEpoch++;observer.disconnect();clearHighlights();close();chrome.runtime.sendMessage({type:'pageDisabled'});}
  function render() {
   panel.replaceChildren();
-  const header=el('header','');const brand=el('div','',header);el('strong','Bungeoppang',brand);el('small','붕어빵 · KOREAN · OFFLINE',brand);
+  const header=el('header','');const brand=el('div','',header);el('strong','Bungeoppang',brand);el('small','붕어빵 · v'+chrome.runtime.getManifest().version+' · OFFLINE',brand);
   const actions=el('div','',header);button('My library',()=>chrome.runtime.sendMessage({type:'openLibrary'}),actions);button('Close',close,actions);
   const settings=el('details','');settings.className='sg-settings';el('summary','Reading settings',settings);
   const label=el('label','Highlight vocabulary ',settings),toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=state.preferences.highlights!==false;label.append(toggle);
@@ -35,6 +35,7 @@
   for(let level=0;level<=6;level++){const option=el('option',level?'Level '+level+' and below':'Off · vocabulary status',select);option.value=String(level);}select.value=String(state.preferences.studyLevel||0);
   select.addEventListener('change',async()=>{if(!await write({type:'setStudyLevel',level:Number(select.value)}))select.value=String(state.preferences.studyLevel||0);});
   el('small','Vocabulary shades by grade: 1 blue, 2 teal, 3 green, 4 gold, 5 peach, 6 purple. Softer blue = sentence context. Includes official NIKL curriculum grades; custom imports add to them. These are study grades, not an exhaustive TOPIK exam syllabus. Underlining marks possible grammar; the background keeps the vocabulary grade color.',settings);
+  const legend=el('div','',settings);['#c1ddfa','#bce8e5','#d3e8b4','#f6e4a3','#f6d1b9','#e0cef4'].forEach((color,i)=>{const chip=el('span','Level '+(i+1),legend);chip.className='sg-chip';chip.style.backgroundColor=color;chip.style.color='#232323';});
   const packInfo=el('small','',settings);packInfo.id='sg-study-info';
   const listLabel=el('label','Import graded word list (CSV/TSV) ',settings),file=el('input','',listLabel);file.type='file';file.accept='.csv,.tsv,text/csv,text/tab-separated-values';
   file.addEventListener('change',async()=>{const selected=file.files?.[0];if(!selected)return;if(selected.size>3000000){notice('Study list is too large.');return;}await write({type:'importStudyList',csv:await selected.text(),name:selected.name},'Study list imported.');file.value='';});
@@ -68,6 +69,8 @@
    const chip=el('span',type==='predicate'?'Predicate · '+r.pos:r.pos,card);chip.className='sg-chip'+(type?' sg-'+type:'');
    el('h3',r.lemma,card).lang='ko';if(phraseResult)el('small','From: '+[...new Set(r.surfaces)].join(' · '),card);
    el('p',r.meaning,card);
+   const sourcedExamples=SG.examplesFor(r);for(const example of sourcedExamples){const details=el('details','',card);el('summary','Dictionary sentence example',details);el('small','Sense: '+example.senseGloss,details);el('p',example.korean,details).lang='ko';el('p',example.english,details);const credit=el('a','Wiktionary contributors · CC BY-SA 4.0',details);credit.href=example.source;credit.target='_blank';credit.rel='noopener noreferrer';}
+   if(!sourcedExamples.length&&!globalThis.SG_LEARNING_EXAMPLES?.[r.lemma])el('small','No bundled bilingual sentence example for this entry yet.',card);
    const example=globalThis.SG_LEARNING_EXAMPLES?.[r.lemma];if(example&&example[2]===r.id){const details=el('details','',card);el('summary','Learning example',details);el('p',example[0],details).lang='ko';el('p',example[1],details);el('small','Original learning example · may illustrate one meaning only',details);}
    const grade=globalThis.SG_STUDY_DEFAULTS?.[r.lemma];if(grade)el('small','NIKL curriculum grade '+grade,card);
    if(r.senses?.length>1){const details=el('details','',card);el('summary','All '+r.senses.length+' meanings',details);const senses=el('ol','',details);for(const sense of r.senses)el('li',(sense.tags.length?'['+sense.tags.join(', ')+'] ':'')+sense.glosses.join('; '),senses);}
@@ -195,6 +198,7 @@
   if (changes.words || changes.preferences || changes.studyLevels) schedulePaint();
  });
  globalThis.__softgloss = {
+  version:chrome.runtime.getManifest().version,
   show() {automatic = false; enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
   async autoLookup(word,context) {
    const {autoLookup}=await chrome.storage.local.get({autoLookup:false});

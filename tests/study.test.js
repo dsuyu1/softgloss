@@ -45,3 +45,8 @@ test('original examples attach to specific dictionary entries, including the cal
  for(const [word,example] of Object.entries(SG_LEARNING_EXAMPLES))assert.ok(SG.lookup(word).some(r=>r.id===example[2]),word);
  assert.ok(SG.lookup('부르다').some(r=>r.id===SG_LEARNING_EXAMPLES['부르다'][2]&&r.pos==='verb'));
 });
+
+test('dictionary examples retain sense links, bilingual text and attribution',()=>{
+ const entries=SG_DATA.entries.filter(r=>SG.examplesFor(r).length);assert.ok(entries.length>2800);
+ for(const r of entries)for(const e of SG.examplesFor(r)){assert.ok(e.korean&&e.english);assert.ok(r.senses.some(s=>s.id===e.senseId));assert.equal(e.license,'CC-BY-SA-4.0');assert.match(e.source,/^https:\/\/en.wiktionary.org\/wiki\//);}
+});

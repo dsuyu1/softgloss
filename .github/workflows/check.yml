@@ -15,7 +15,8 @@ jobs:
           python3 scripts/import-dictionary.py data/source-snapshot.parts.json
           python3 scripts/import-morphology.py data/morphology-source.json.gz
           python3 scripts/import-curriculum.py
-          git diff --exit-code -- extension/dictionary extension/morphology extension/study data/morphology-manifest.json
+          python3 scripts/import-examples.py
+          git diff --exit-code -- extension/dictionary extension/morphology extension/study extension/examples data/morphology-manifest.json
       - run: npm test
       - run: npm run check
       - name: Package unpacked alpha
