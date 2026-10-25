@@ -147,7 +147,7 @@
   chunk();
  }
  const colorStyle = document.createElement('style');
- colorStyle.textContent = '::highlight(softgloss-unknown){background-color:#eeedf0}::highlight(softgloss-seen){background-color:#eee8b8}::highlight(softgloss-known){background-color:#d8eadb}';
+ colorStyle.textContent = '::highlight(softgloss-unknown){color:#232323;background-color:#eeedf0}::highlight(softgloss-seen){color:#232323;background-color:#eee8b8}::highlight(softgloss-known){color:#232323;background-color:#d8eadb}';
  (document.head || document.documentElement).append(colorStyle);
  const observer = new MutationObserver(schedulePaint);
  function observe() {if (document.body) observer.observe(document.body, {childList: true, subtree: true, characterData: true});}

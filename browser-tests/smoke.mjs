@@ -97,6 +97,10 @@ try {
  assert.match(await panel('search', 'BOOK'), /책/);
  await panel('click', 'known'); await eventually(() => panel('status'), 'true');
  await eventually(() => panel('highlight'), 1);
+ await page.evaluate(()=>{document.body.style.background='#121212';document.body.style.color='#fff';});
+ assert.equal(await page.evaluate(()=>getComputedStyle(document.body,'::highlight(softgloss-known)').color),'rgb(35, 35, 35)','vocabulary highlights must stay readable on dark pages');
+ await panel('search','책을');await page.screenshot({path:'test-results/panel-dark-page.png'});
+ await page.evaluate(()=>{document.body.style.background='';document.body.style.color='';});
  await page.evaluate(() => {const p = document.createElement('p'); p.textContent = '책'; document.body.append(p);});
  await eventually(() => panel('highlight'), 2);
  await panel('click', 'Disable on this page'); await eventually(() => panel('highlight'), 0);
