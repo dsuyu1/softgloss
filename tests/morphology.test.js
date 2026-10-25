@@ -32,5 +32,5 @@ test('compound and derived predicate fallbacks expose components without inventi
  assert.ok(compound.every(r=>r.kind==='possible compound component' && r.source));
  const derived=SG.lookup('반영된');assert.ok(derived.some(r=>r.lemma==='반영'));assert.ok(derived.some(r=>r.lemma==='되다'));
  assert.ok(derived.every(r=>r.kind==='possible derived predicate component'));
- assert.deepEqual(SG.lookup('청원인은'),[]); // Genuine headword gap retained for the next data pass.
+ assert.ok(SG.lookup('청원인은').some(r=>r.lemma==='청원인'));
 });

@@ -71,6 +71,20 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   for(const entry of lemmas.get(stem)||[])if(['noun','pronoun'].includes(entry.pos))add(entry,[`-${suffix}: informal question with the copula (be)`],'possible copula analysis');
  }
  if(word.endsWith('들'))for(const entry of lemmas.get(word.slice(0,-1))||[])if(['noun','pronoun'].includes(entry.pos))add(entry,['-들: plural marker'],'possible plural analysis');
+ if(options.composed!==false && word.endsWith('까')) {
+  for(const r of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(r.formTags?.includes('determiner')&&r.formTags.includes('future'))add(r,['-(으)ㄹ까: question, wondering or suggestion; context decides'],'possible question ending',{ending:'ㄹ까'});
+ }
+ if(options.composed!==false && word.endsWith('려면')) {
+  for(const r of lookup(word.slice(0,-1)+'고',data,{composed:false}))if(r.formTags?.includes('motive-form'))add(r,[...r.parts,'-(으)려면: if intending to; in order to (condition)'],'possible intention condition',{ending:'려면'});
+ }
+ if(options.composed!==false && word.endsWith('다면')) {
+  for(const entry of lemmas.get(word.slice(0,-2)+'다')||[])if(entry.pos==='adjective')add(entry,['-다면: hypothetical condition (if that is so / if it is ...)'],'possible hypothetical condition');
+ }
+ if(options.stacked!==false)for(const outer of ['는','도','만'])if(word.endsWith(outer)) {
+  const stem=word.slice(0,-outer.length);
+  if(!/(?:에서|에게|부터|까지|으로|에|로)$/.test(stem))continue;
+  for(const r of lookup(stem,data,{stacked:false,composed:false,compounds:false}))if(r.particle&&['noun','pronoun'].includes(r.pos))add(r,[...r.parts,`-${outer}: ${outer==='는'?'topic / contrast':outer==='도'?'also':'only'}`],'possible stacked particle analysis',{particle:r.particle});
+ }
  const form = data.forms?.[word];
  if (form && !forms.has(word)) for (const entry of lemmas.get(form[0]) || []) add(entry, form.slice(1), 'listed form');
  for (const [suffix,note] of particles) {
@@ -91,7 +105,7 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   for(const {entry,tags,bases,noun,verb} of sourceForms(word,data,true)) {
    const parts=[noun,verb];
    for(const base of bases)add(base,[`Possible derived predicate: ${parts.join(' + ')}`, 'Noun component; not a whole-word translation'],'possible derived predicate component',{compoundParts:parts});
-   add(entry,[`Possible derived predicate: ${parts.join(' + ')}`, 'Source-listed verb form: '+tags.filter(t=>!['formal','informal','polite'].includes(t)).join(' · ')],'possible derived predicate component',{compoundParts:parts});
+   add(entry,[`Possible derived predicate: ${parts.join(' + ')}`, 'Source-listed verb form: '+tags.filter(t=>!['formal','informal','polite'].includes(t)).join(' · ')],'possible derived predicate component',{compoundParts:parts,formTags:tags});
   }
  }
  if(!out.length && options.compounds!==false && word.length>=3 && word.length<=16) {
