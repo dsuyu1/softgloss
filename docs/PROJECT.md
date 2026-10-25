@@ -194,6 +194,7 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Add entry-specific review saving, due queue, answer reveal, four ratings/intervals, suspend/resume/removal and serialized stale-answer protection.
 - [x] Include reviews in Anki content export, JSON v2 schedule/history backup, restore and delete-all; retain v1 compatibility.
 - [x] Add seven original clothing/color/price entries and bilingual examples, bounded conversational endings and comparison/alternative particles from the screenshot.
+- [x] Chromium CI verifies frame link/selection/highlights, delayed and denied-origin frames, review UI, backup/restore and restart persistence; desktop/narrow screenshots inspected (Actions 40237573990).
 - [x] Prepare 61 screenshot-derived review probes: 44 supported candidates, 17 unknown, zero independently reviewed. This does not satisfy the 100-token accuracy gate.
 - [ ] Verify actual Naver Café article with the learner; independently review new Korean analyses/examples and remaining unknowns.
 - [ ] Complete manual accessibility/zoom, learner hardware profiling and real Anki import; parameter optimization, deck collections and live Anki sync remain future scope.
