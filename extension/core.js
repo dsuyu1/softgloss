@@ -214,10 +214,47 @@ function parseStudyCSV(input) {
 function highlightMatch(surface,words={},levels={},target=0) {
  const all=lookup(surface),exact=all.filter(r=>r.kind==='dictionary'),analyses=exact.length?exact:all;
  const lemmas=[...new Set(analyses.map(r=>r.lemma))];
- const study=target>0 && (levels[surface]<=target || lemmas.some(l=>levels[l]<=target));
+ const grade=l=>Math.min(levels[l]||7,globalThis.SG_STUDY_DEFAULTS?.[l]||7);
+ const study=target>0 && (grade(surface)<=target || lemmas.some(l=>grade(l)<=target));
  const statuses=lemmas.map(l=>words[l]||'unknown');
  return {supported:!!analyses.length,status:statuses.length&&statuses.every(s=>s===statuses[0])?statuses[0]:'unknown',study:!!study,ambiguous:lemmas.length>1};
 }
+let studyCatalog,studyPatterns;const studyGrammarCache=new Map();
+const grammarNFD=value=>value.normalize('NFD').replace(/[ㄴㄹㅁㅂ]/g,c=>({'ㄴ':'ᆫ','ㄹ':'ᆯ','ㅁ':'ᆷ','ㅂ':'ᆸ'}[c]));
+function studyGrammarMatches(text,target) {
+ if(!Number.isInteger(target)||target<1||target>6)return [];
+ if(studyCatalog!==globalThis.SG_STUDY_GRAMMAR){studyGrammarCache.clear();studyCatalog=globalThis.SG_STUDY_GRAMMAR;studyPatterns=[];
+  for(const record of studyCatalog||[])for(const raw of [record.form,...record.related.split(',')]){
+   const clean=raw.replace(/<[^>]*>/g,'').replace(/[0-9]/g,'').replace(/\([^)]*\)/g,'').replace(/^[\s\-\u00ad]+|[\s\-]+$/g,'');
+   if(!/^[가-힣ㄴㄹㅁㅂ]+(?: [가-힣ㄴㄹㅁㅂ]+)*$/.test(clean))continue;
+   studyPatterns.push({record,variant:clean,words:clean.split(' '),suffix:/^[\s]*[-\u00ad]/.test(raw)});
+  }
+ }
+ const key=target+'|'+text;if(studyGrammarCache.has(key))return studyGrammarCache.get(key);
+ const parts=tokens(text),cache=new Map(),out=new Map();
+ const analyses=w=>{if(!cache.has(w))cache.set(w,lookup(w));return cache.get(w);};
+ for(let i=0;i<parts.length;i++){
+  const part=parts[i],a=analyses(part.word),predicate=a.some(r=>['verb','adjective'].includes(r.pos)&&(r.formTags?.length||r.ending));
+  for(const pattern of studyPatterns){const {record,words,suffix}=pattern;if(record.level>target||i+words.length>parts.length)continue;
+   let first=false;
+   if(record.category==='조사')first=a.some(r=>r.particle===words[0]);
+   else if(suffix){const eligible=record.category==='전성어미'?a.some(r=>r.formTags?.includes('determiner')||r.formTags?.includes('noun-from-verb')):predicate;first=eligible&&(record.category==='선어말어미'?grammarNFD(part.word).includes(grammarNFD(words[0])):grammarNFD(part.word).endsWith(grammarNFD(words[0])));}
+   else first=part.word===words[0]||a.some(r=>r.particle===words[0]);
+   if(!first)continue;
+   // Single endings require supported morphology, not a coincidental noun suffix.
+   if(words.length===1 && record.category!=='조사' && !predicate)continue;
+   let matches=true;
+   for(let j=1;j<words.length;j++){
+    const previous=parts[i+j-1],current=parts[i+j];if(!/^\s+$/u.test(String(text).slice(previous.index+previous.word.length,current.index))){matches=false;break;}
+    if(current.word===words[j])continue;
+    if(j!==words.length-1){matches=false;break;}
+    const expected=new Set(analyses(words[j]).map(r=>r.lemma));if(!analyses(current.word).some(r=>expected.has(r.lemma))){matches=false;break;}
+   }
+   if(matches){const end=parts[i+words.length-1];const match={start:part.index,end:end.index+end.word.length,id:record.id,level:record.level,form:pattern.variant};out.set(match.start+'|'+match.end+'|'+record.id,match);}
+  }
+ }
+ const matches=[...out.values()];if(String(text).length<=10000){if(studyGrammarCache.size>=256)studyGrammarCache.delete(studyGrammarCache.keys().next().value);studyGrammarCache.set(key,matches);}return matches;
+}
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,grammarFor};
 })();

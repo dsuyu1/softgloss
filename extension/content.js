@@ -33,13 +33,13 @@
   const studyLabel=el('label','TOPIK study target ',settings),select=el('select','',studyLabel);select.id='sg-study-level';
   for(let level=0;level<=6;level++){const option=el('option',level?'Level '+level+' and below':'Off · vocabulary status',select);option.value=String(level);}select.value=String(state.preferences.studyLevel||0);
   select.addEventListener('change',async()=>{if(!await write({type:'setStudyLevel',level:Number(select.value)}))select.value=String(state.preferences.studyLevel||0);});
-  el('small','Strong blue = target word; softer blue = sentence context. Levels follow your imported study list, not an official exam vocabulary classification.',settings);
+  el('small','Strong blue = target word; softer blue = sentence context. Includes official NIKL curriculum grades; custom imports add to them. These are study grades, not an exhaustive TOPIK exam syllabus. Blue marks vocabulary; amber marks possible grammar.',settings);
   const packInfo=el('small','',settings);packInfo.id='sg-study-info';
   const listLabel=el('label','Import graded word list (CSV/TSV) ',settings),file=el('input','',listLabel);file.type='file';file.accept='.csv,.tsv,text/csv,text/tab-separated-values';
   file.addEventListener('change',async()=>{const selected=file.files?.[0];if(!selected)return;if(selected.size>3000000){notice('Study list is too large.');return;}await write({type:'importStudyList',csv:await selected.text(),name:selected.name},'Study list imported.');file.value='';});
-  const guide=el('a','Download a graded study CSV (external site)',settings);guide.href='https://everykoreans.com/topik-vocabulary-list/';guide.target='_blank';guide.rel='noopener noreferrer';
-  el('small','Required columns: Korean,level. Levels 1–6. Import replaces only the study list; vocabulary and sentence cards stay intact.',settings);
-  button('Remove study list',()=>write({type:'clearStudyList'},'Study list removed.'),settings);
+  const guide=el('a','NIKL curriculum source · KOGL Type 1',settings);guide.href='https://www.korean.go.kr/front/reportData/reportDataView.do?mn_id=45&report_seq=932';guide.target='_blank';guide.rel='noopener noreferrer';
+  el('small','Required columns: Korean,level. Levels 1–6. Imports add to the bundled curriculum and earlier custom imports. Lower grades win on duplicates. Vocabulary and sentence cards stay intact.',settings);
+  button('Remove custom lists',()=>write({type:'clearStudyList'},'Custom lists removed; bundled curriculum stays available.'),settings);
   button('Disable on this page',disable,settings);
   const form=el('form',''),searchLabel=el('label','Korean word, short phrase or English meaning',form);
   const input=document.createElement('input');input.type='search';input.maxLength=300;input.id='sg-search';input.placeholder='Try 보이지 않는다';searchLabel.htmlFor=input.id;input.value=current;form.append(input);
@@ -56,6 +56,7 @@
   }
   const other=phraseResult?.components.filter(c=>c.alternatives?.length)||[];
   if(other.length){const details=el('details','');el('summary','Other word meanings',details);for(const c of other){el('p',c.surface,details);for(const r of new Map(c.alternatives.map(r=>[r.id||r.lemma,r])).values())el('p',r.lemma+' · '+r.pos+' · '+r.meaning,details);button('Look up '+c.surface,()=>display(c.surface,'',true),details);}}
+  const grammarMatches=SG.studyGrammarMatches(current,state.preferences.studyLevel||0);if(grammarMatches.length){const details=el('details','');el('summary','Possible curriculum grammar · '+grammarMatches.length,details);for(const m of grammarMatches)el('p',m.form+' · grade '+m.level,details);const source=el('a','NIKL curriculum · KOGL Type 1',details);source.href='https://www.korean.go.kr/front/reportData/reportDataView.do?mn_id=45&report_seq=932';source.target='_blank';source.rel='noopener noreferrer';}
   // Keep homonyms separate, but merge analyses of the same source entry.
   const groups=new Map();for(const r of results){const key=r.id||r.lemma;if(!groups.has(key))groups.set(key,{...r,parts:[],analyses:[],surfaces:[]});const g=groups.get(key);g.parts.push(...r.parts);g.analyses.push(r);g.surfaces.push(r.surface);}
   for(const r of groups.values()) {
@@ -64,6 +65,7 @@
    const chip=el('span',type==='predicate'?'Predicate · '+r.pos:r.pos,card);chip.className='sg-chip'+(type?' sg-'+type:'');
    el('h3',r.lemma,card).lang='ko';if(phraseResult)el('small','From: '+[...new Set(r.surfaces)].join(' · '),card);
    el('p',r.meaning,card);
+   const grade=globalThis.SG_STUDY_DEFAULTS?.[r.lemma];if(grade)el('small','NIKL curriculum grade '+grade,card);
    if(r.senses?.length>1){const details=el('details','',card);el('summary','All '+r.senses.length+' meanings',details);const senses=el('ol','',details);for(const sense of r.senses)el('li',(sense.tags.length?'['+sense.tags.join(', ')+'] ':'')+sense.glosses.join('; '),senses);}
    for(const part of new Set(r.parts)){const line=el('p',part,card);line.className='sg-meta';}
    if(r.parts.length){const chip=el('span','Grammar · possible analysis',card);chip.className='sg-chip sg-grammar-chip';}
@@ -83,7 +85,7 @@
   const message=el('p','');message.id='notice';message.setAttribute('role','status');
   const footer=el('small',sentence?'Save sentence keeps this word with nearby text and the page address.':'Select page text to capture a sentence. Your vocabulary stays on this device.');footer.className='sg-footer';updateStatuses();
  }
- function updateStudyControls(){const select=root.getElementById('sg-study-level');if(select)select.value=String(state.preferences.studyLevel||0);const info=root.getElementById('sg-study-info');if(info)info.textContent=Object.keys(state.studyLevels).length+' graded words'+(state.studySource?' · '+state.studySource:' · import a list to begin');}
+ function updateStudyControls(){const select=root.getElementById('sg-study-level');if(select)select.value=String(state.preferences.studyLevel||0);const info=root.getElementById('sg-study-info');if(info)info.textContent=Object.keys(globalThis.SG_STUDY_DEFAULTS||{}).length+' bundled words · '+(globalThis.SG_STUDY_GRAMMAR||[]).length+' grammar entries · '+Object.keys(state.studyLevels).length+' custom words';}
  function updateStatuses() {
   updateStudyControls();
   for (const node of root.querySelectorAll('[data-lemma]')) {
@@ -127,7 +129,7 @@
   const value = selected(); if (value) display(value.word, value.context);
  });
  document.addEventListener('keydown', e => {if (enabled && e.key === 'Escape' && !panel.hidden) close();});
- function clearHighlights() {for (const key of ['unknown', 'seen', 'known','study-context','study-word']) globalThis.CSS?.highlights?.delete('softgloss-' + key);}
+ function clearHighlights() {for (const key of ['unknown', 'seen', 'known','study-context','study-word','study-grammar']) globalThis.CSS?.highlights?.delete('softgloss-' + key);}
  function schedulePaint() {
   if (!enabled) return;
   clearTimeout(paintTimer); paintEpoch++;
@@ -136,8 +138,8 @@
  function paint() {
   const epoch = ++paintEpoch; clearHighlights();
   if (!enabled || state.preferences.highlights === false || !globalThis.CSS?.highlights || !globalThis.Highlight || !document.body) return;
-  const sets = {unknown: new Highlight(), seen: new Highlight(), known: new Highlight(),'study-context':new Highlight(),'study-word':new Highlight()};
-  sets['study-context'].priority=-1;sets['study-word'].priority=1;
+  const sets = {unknown: new Highlight(), seen: new Highlight(), known: new Highlight(),'study-context':new Highlight(),'study-word':new Highlight(),'study-grammar':new Highlight()};
+  sets['study-context'].priority=-1;sets['study-word'].priority=1;sets['study-grammar'].priority=2;
   const blocks=new WeakMap();
   function contextRange(node,index){
    const block=node.parentElement?.closest('p,li,blockquote,td,h1,h2,h3,h4')||node.parentElement;if(!block)return null;
@@ -155,6 +157,7 @@
     nodes++;
     if (n.parentElement?.closest(skip)) continue;
     const text = n.textContent.slice(0, Math.min(10000, 500000 - characters)); characters += text.length;
+    if(state.preferences.studyLevel)for(const match of SG.studyGrammarMatches(text,state.preferences.studyLevel)){const range=new Range();range.setStart(n,match.start);range.setEnd(n,match.end);sets['study-grammar'].add(range);const context=contextRange(n,match.start);if(context)sets['study-context'].add(context);}
     for (const t of SG.tokens(text)) {
      const match=SG.highlightMatch(t.word,state.words,state.studyLevels,state.preferences.studyLevel||0);
      if(state.preferences.studyLevel ? !match.study : !match.supported)continue;
@@ -168,7 +171,7 @@
   chunk();
  }
  const colorStyle = document.createElement('style');
- colorStyle.textContent = '::highlight(softgloss-study-context){color:#232323;background-color:#edf4fb}::highlight(softgloss-study-word){color:#153b65;background-color:#a9d3ff;text-decoration:underline}::highlight(softgloss-unknown){color:#232323;background-color:#eeedf0}::highlight(softgloss-seen){color:#232323;background-color:#eee8b8}::highlight(softgloss-known){color:#232323;background-color:#d8eadb}';
+ colorStyle.textContent = '::highlight(softgloss-study-grammar){color:#664200;background-color:#ffe1ab;text-decoration:underline}::highlight(softgloss-study-context){color:#232323;background-color:#edf4fb}::highlight(softgloss-study-word){color:#153b65;background-color:#a9d3ff;text-decoration:underline}::highlight(softgloss-unknown){color:#232323;background-color:#eeedf0}::highlight(softgloss-seen){color:#232323;background-color:#eee8b8}::highlight(softgloss-known){color:#232323;background-color:#d8eadb}';
  (document.head || document.documentElement).append(colorStyle);
  const observer = new MutationObserver(schedulePaint);
  function observe() {if (document.body) observer.observe(document.body, {childList: true, subtree: true, characterData: true});}

@@ -163,5 +163,13 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Resolve dictionary forms for level matching; retain list labels without claiming official exam classifications. No third-party graded list is bundled.
 - [x] Highlight ambiguous supported results neutrally, prefer exact dictionary entries, fix 응답자의 and 편하려고 screenshot cases.
 - [x] Preserve preference updates through the worker queue; keep imports atomic and bounded.
-- [ ] Audit a redistributable graded dataset for a bundled default.
+- [x] Audit and bundle official NIKL curriculum grades under KOGL Type 1 (0.10.0); distinguish them from an exam syllabus.
 - [ ] Complete independent Korean review, learner-hardware/zoom/accessibility and Anki checks before reader/subtitle expansion.
+
+## 0.10.0 official defaults and grammar scanning
+- [x] Import official NIKL vocabulary/grammar appendix with source hashes, attribution, deterministic offline rebuild and shard integrity checks.
+- [x] Bundle 9,719 normalized vocabulary lemmas and 336 source grammar records.
+- [x] Match supported grammar particles/endings/expressions in scanning; expose source grades and possible matches in lookup.
+- [x] Make custom lists additive; removing custom lists retains defaults.
+- [ ] Independently review grammar detection and 100+ real tokens; complete manual accessibility/zoom and Anki checks.
+Next implementation: improve supported grammar/inflection coverage against the imported catalog and add review evidence. Reader/subtitle work remains after the beta gates.

@@ -34,7 +34,8 @@
       if(!Number.isInteger(message.level)||message.level<0||message.level>6)throw Error('Invalid study level.');
       await storage.set({preferences:{...state.preferences,studyLevel:message.level}});break;
      case 'importStudyList': {
-      const studyLevels=SG.parseStudyCSV(message.csv);
+      const imported=SG.parseStudyCSV(message.csv);
+      const {studyLevels:existing={}}=await storage.get({studyLevels:{}});const studyLevels={...existing};for(const [word,level] of Object.entries(imported))studyLevels[word]=Math.min(studyLevels[word]||7,level);
       await storage.set({studyLevels,studySource:String(message.name||'Imported list').slice(0,120)});break;
      }
      case 'clearStudyList': await storage.set({studyLevels:{},studySource:''});break;

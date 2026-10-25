@@ -3,7 +3,7 @@ Free, offline Korean reading companion. **Offline dictionary alpha — broader c
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on SoftGloss, and check that it shows version **0.9.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on SoftGloss, and check that it shows version **0.10.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin SoftGloss from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
 5. Hover a Korean word or select **one Korean word**. Multiword sentence selection, images and video subtitles are not supported lookup surfaces yet.
@@ -35,15 +35,17 @@ The adapted dictionary is CC BY-SA 4.0; credit and license are included in the e
 ## Grammar hints and language review
 Particle results can show expandable notes for topic/contrast, subject and object markers. These simplified notes have source links; independent Korean review is pending. See [accuracy-review workflow](docs/ACCURACY_REVIEW.md) for collecting and grading real reading samples offline.
 
-## Expanded endings (0.9.0)
+## Expanded endings (0.10.0)
 The pilot-driven update adds 188,285 source-listed spellings beyond the initial table pack, including noun-modifying forms, connectives, questions and nominalizations. Try `중단하는`, `드러내기`, `있는`, `다루면서` and `있는지`. `인기글` can show a possible `인기 + 글` breakdown; `반영된` can show `반영 + 되다`. Component definitions are not whole-word translations. Genuine headword gaps and context ambiguity remain; see [morphology limits](docs/MORPHOLOGY.md).
 
-### Phrase breakdowns (0.9.0)
+### Phrase breakdowns (0.10.0)
 Select up to 8 Korean words, or type a short Korean phrase in the reading panel. Supported negation, ability/possibility and intention patterns get a construction hint above their dictionary components. Other phrases show individual entries and missing words, without claiming a whole-phrase translation. Each **Save sentence** button saves its word with the selected phrase or surrounding text.
 
 The refreshed panel uses labeled colors: blue nouns, purple predicates, amber grammar and teal constructions. Page highlights track vocabulary separately: gray unknown, amber seen and green known. Reading settings holds the highlight toggle and page-disable control.
 
-### TOPIK study mode (0.9.0)
-Open **Reading settings**, import a graded CSV/TSV with columns `Korean,level`, then select Level 1–6. Words at that level and below receive strong blue highlights; their sentence context is softer blue, including sentences split across inline elements. Inflected forms use dictionary lemmas. Ungraded words stay unmarked in study mode. Turn the target off to return to vocabulary-status highlights. The highlight checkbox controls both modes.
+### TOPIK preparation / official curriculum study mode (0.10.0)
+Open **Reading settings** and choose a grade: the bundled official NIKL curriculum provides 9,719 normalized vocabulary lemmas and a catalog of 336 graded grammar entries. No import is required. Vocabulary is blue; possible supported grammar is amber; sentence context is softer blue. Select a grade to include it and all lower grades. Grammar recognition uses supported morphology and expression patterns, not every possible inflection of every catalog entry. Grades are NIKL curriculum grades, not an asserted exhaustive TOPIK exam syllabus.
 
-No exam levels are guessed or bundled. Import your own graded list, or use the external study-list download linked in settings (follow its terms). Labels are the imported list’s study levels, not an official TOPIK vocabulary classification. Lists stay on the device and can be removed separately; learning backups currently cover vocabulary/cards, so keep your source CSV for reinstalling.
+Custom CSV/TSV lists (`Korean,level`, 1–6) add to the defaults and previous imports. Lower grades win on duplicate words. **Remove custom lists** leaves bundled data available. All scanning works offline. Keep custom CSVs: vocabulary/card backups still do not include them.
+
+Default material: National Institute of Korean Language, 2017 International Standard Curriculum for Korean Language Education, grade appendix revised 2020-11-17. [Official source](https://www.korean.go.kr/front/reportData/reportDataView.do?mn_id=45&report_seq=932), KOGL Type 1; full attribution and transformation notes in packaged credits and `docs/CURRICULUM.md`.
