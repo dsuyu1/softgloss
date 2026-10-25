@@ -31,3 +31,10 @@ Browser findings must be recorded here before checking the corresponding PROJECT
 
 ### Starter lookup timing (not the browser release gate)
 `node scripts/benchmark.mjs`: Node v24.22.1, Linux x64, AMD EPYC 9V74; 52 entries, 10,000 warm samples. Observed p95 0.000601 ms and maximum 0.196 ms. This small-pack Node microbenchmark does not establish browser responsiveness, long-page latency, or production-pack performance; that checklist item remains open.
+
+## 0.4.0 dictionary increment
+- Twenty Node tests pass, including pinned shard hashes, unique entry IDs, source/sense integrity, imported vocabulary/hanja, multiple meanings for 배, 20 familiar irregular/contraction forms, homonym-specific form links and attribution round trips. These fixtures are regression checks, not independent linguistic validation.
+- Importing the original input and rebuilding from the committed compressed field snapshot produce byte-identical shards and manifest. CI repeats the offline rebuild and rejects generated-file drift.
+- Full-pack Node warm lookup: 33,785 runtime entries, 10,000 samples, p95 0.0175 ms (Node v24.22.1 / Linux x64 / AMD EPYC 9V74). Not a browser/long-page result.
+- Full-pack browser smoke tests now cover expanded vocabulary, ambiguous senses, listed irregulars, attribution persistence and warm browser timing. CI execution pending.
+- Manual Chrome permission flow, pointer hover, assistive technology, 200% zoom, actual Anki import, 100 independently reviewed tokens and learner pilots remain open.

@@ -1,0 +1,14 @@
+{
+  "source": "English Wiktionary contributors, extracted by Tatu Ylonen and Wiktextract contributors at Kaikki.org",
+  "url": "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl",
+  "sourcePage": "https://kaikki.org/dictionary/Korean/index.html",
+  "dumpDate": "2026-10-01",
+  "extractionDate": "2026-10-21",
+  "retrievedDate": "2026-10-24",
+  "sha256": "3cd601d27f59c56b6d58b96896076335d5a2c6d219a272d94f39f5e8ad217e99",
+  "license": "CC-BY-SA-4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "modifications": "Select modern Hangul headwords and supported parts of speech; keep glosses, sense IDs and labels, hanja form labels, and a subset of indicative conjugation table rows. Exclude examples, quotations, audio, images, etymology and cross-reference-only senses. Sort, deduplicate and compact into JavaScript data shards.",
+  "snapshotSha256": "110777f423b3e99e8ccf1279ded4e2da7ebbc1b1baea45c75463764ecad2ce4b",
+  "snapshotPath": "data/source-snapshot.jsonl.gz"
+}

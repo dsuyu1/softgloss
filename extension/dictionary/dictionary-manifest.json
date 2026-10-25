@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "sourceSha256": "3cd601d27f59c56b6d58b96896076335d5a2c6d219a272d94f39f5e8ad217e99",
+  "entries": 33784,
+  "lemmas": 29777,
+  "senses": 40510,
+  "formLinks": 78857,
+  "formSurfaces": 72869,
+  "files": [
+    {
+      "path": "dictionary-00.js",
+      "sha256": "d9c6d045b18dfc2b0b46100ef32f095043852646cbc0179dda3e53664a6da450",
+      "bytes": 353017
+    },
+    {
+      "path": "dictionary-01.js",
+      "sha256": "843640aa7f100885a6f0bd298a45ed48d959a516293aa2a48af397b32d4eb80a",
+      "bytes": 359543
+    },
+    {
+      "path": "dictionary-02.js",
+      "sha256": "317c4d0eca7263e5a6748cdfa8559b6ec81895356fdf7d4078d3164a19cfd4e2",
+      "bytes": 272868
+    },
+    {
+      "path": "dictionary-03.js",
+      "sha256": "b25f2ca14fa41b01a366323b1e4d3a7574df058b8d23c7f14204fa583f3a38aa",
+      "bytes": 287057
+    },
+    {
+      "path": "dictionary-04.js",
+      "sha256": "cfb462fe9fbf7f9b99de103c57d8478374ab55ee19e23b496577675688d77434",
+      "bytes": 373182
+    },
+    {
+      "path": "dictionary-05.js",
+      "sha256": "c46d08886df42fad48827c129a839650610b487282631d9dbbd41fa36e242a03",
+      "bytes": 328730
+    },
+    {
+      "path": "dictionary-06.js",
+      "sha256": "edaad963a08af5756ccce6865e285fa32079ba87a67436600193e8ee23b455d3",
+      "bytes": 331526
+    },
+    {
+      "path": "dictionary-07.js",
+      "sha256": "5831010acbe640f77802df3e75c46d24b4410004ff6e167fbdcfad6e42dd71e4",
+      "bytes": 317537
+    },
+    {
+      "path": "dictionary-08.js",
+      "sha256": "9f2bf0866e48c03a47318a970b16025ba85395c189adc73604d72446c37936aa",
+      "bytes": 329225
+    },
+    {
+      "path": "dictionary-09.js",
+      "sha256": "ec78b786a424a129e88a461c33f90105cca763a538fb5c8a1ebfca7c987a99a6",
+      "bytes": 308680
+    },
+    {
+      "path": "dictionary-10.js",
+      "sha256": "0f174e7f04baf8acd9772806bc34e68053b5f785a90dc6cdfb8ca36820ce45d7",
+      "bytes": 288544
+    },
+    {
+      "path": "dictionary-11.js",
+      "sha256": "0051529ad8f294176ebe12b32efb7217a1d104831dee956e25dda3c56f213e41",
+      "bytes": 310241
+    },
+    {
+      "path": "dictionary-12.js",
+      "sha256": "af826b650fcc5c2dc339f8a742137b1876dbcf83157a579a85a307019e370c62",
+      "bytes": 264647
+    },
+    {
+      "path": "dictionary-13.js",
+      "sha256": "6027d9d9d5b11ef94fa64c5d90a31a0137f84bbc600182094bc0feee03782cf2",
+      "bytes": 308874
+    },
+    {
+      "path": "dictionary-14.js",
+      "sha256": "270aa668ae32334393a6351939058211c54200ba497b6859906d2eadc0b216bc",
+      "bytes": 289915
+    },
+    {
+      "path": "dictionary-15.js",
+      "sha256": "acc02fc8843dca374c048ba2278e72ed220d3ef7569beab974e5270cda4e866f",
+      "bytes": 266619
+    },
+    {
+      "path": "dictionary-16.js",
+      "sha256": "ee33bfe4eb8afa128f16a0b54121a941900055478baba6002494c8f01630a65a",
+      "bytes": 259347
+    },
+    {
+      "path": "dictionary-17.js",
+      "sha256": "3101a5f97c957d2b5387f0bfefb224becde7c4309ade68c64561e6a6ac2f93f9",
+      "bytes": 258941
+    },
+    {
+      "path": "dictionary-18.js",
+      "sha256": "fc8fdb4e53c2b7af20adc4e1e4270d7e38567559302b6697114c2a80e58e5d34",
+      "bytes": 300430
+    },
+    {
+      "path": "dictionary-19.js",
+      "sha256": "1251d648abd97c11c000fc1b90c9bd2c429a00fe901310bca51099371742061f",
+      "bytes": 283730
+    },
+    {
+      "path": "dictionary-20.js",
+      "sha256": "667b26d276bf42aafe30a3edf592858d5180e1ae007b000485710663e0e0e18b",
+      "bytes": 265999
+    },
+    {
+      "path": "dictionary-21.js",
+      "sha256": "6b85df0ef4be61c2248acaf81c633f0a8525c7dd1fa4d7597385288ebf2569aa",
+      "bytes": 271167
+    },
+    {
+      "path": "dictionary-22.js",
+      "sha256": "37a122d8e02f560d3b424e9a10420d0a19ab6c96af42a0755b10f762d2ff249e",
+      "bytes": 248833
+    },
+    {
+      "path": "dictionary-23.js",
+      "sha256": "82933d190141ec0a7d3951afb0078b5c8d5ad6d8955ed74352cc87e269c0865a",
+      "bytes": 267512
+    },
+    {
+      "path": "dictionary-24.js",
+      "sha256": "e9a7fb1d9141cc502b16516776ccddc55b15064a7bd6a8db220b63ed050dd871",
+      "bytes": 291647
+    },
+    {
+      "path": "dictionary-25.js",
+      "sha256": "ad3e14d42de7d43fa42b6d92224eae558a86c62200b4d408630b2439df77fa39",
+      "bytes": 252156
+    },
+    {
+      "path": "dictionary-26.js",
+      "sha256": "dcecca693ffba0354224dbefda0d235327dae2466da8edfea0e0f4ebaabc2e47",
+      "bytes": 293151
+    },
+    {
+      "path": "dictionary-27.js",
+      "sha256": "11aa9b5fd0ffd68f24c24a3a1ddffbbe7baf72d0ac2e01e7c10cda3e52c77ebb",
+      "bytes": 330443
+    },
+    {
+      "path": "dictionary-28.js",
+      "sha256": "94a58c8e55589dcad3fdb150d06f3d99bf772aec135c0e31495e87d7a6b76d38",
+      "bytes": 295387
+    },
+    {
+      "path": "dictionary-29.js",
+      "sha256": "74ca1cb5cf3cb18a9f3dc3a51ea698ae327e80affdeaafee74567b9fb0c88ab0",
+      "bytes": 218094
+    },
+    {
+      "path": "dictionary-30.js",
+      "sha256": "ce80ea46165f541ea77a61d282b5caf0c8a409bc574fb7ce4bcc2a29ade1896d",
+      "bytes": 256617
+    },
+    {
+      "path": "dictionary-31.js",
+      "sha256": "90e989b10288353b1843132c244cd17c320a0673551f5a7d192fc7ff5939fb9c",
+      "bytes": 225208
+    },
+    {
+      "path": "dictionary-32.js",
+      "sha256": "6d899e55268987ef4ffb78c6bd1bbef9370d27db78bed92c03b713e4be791961",
+      "bytes": 248837
+    },
+    {
+      "path": "dictionary-33.js",
+      "sha256": "d5b74ed4f934c956a618382d7f88cf36be64d17610366cd40f232523531a38ba",
+      "bytes": 233982
+    }
+  ]
+}
