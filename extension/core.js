@@ -200,6 +200,24 @@ function validateBackup(value) {
  return card;});
  return {version:1,words,cards};
 }
+// User-supplied study levels are list labels, not official exam classifications.
+function parseStudyCSV(input) {
+ const text=String(input).replace(/^\uFEFF/,'');if(text.length>3000000)throw Error('Study list is too large.');
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<=text.length;i++){const c=text[i];if(quoted){if(c===undefined)throw Error('Unclosed CSV quote.');if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}else if(c==='"'){if(field)throw Error('Invalid CSV quote.');quoted=true;}else if(c===','||c==='\t'){row.push(field);field='';}else if(c==='\n'||c===undefined){row.push(field.replace(/\r$/,''));if(row.some(x=>x.trim()))rows.push(row);row=[];field='';if(rows.length>30001)throw Error('Too many study words.');}else field+=c;}
+ if(!rows.length)throw Error('Empty study list.');
+ const header=rows[0].map(x=>x.trim().toLowerCase()),wordCol=header.findIndex(x=>['word','korean','lemma','단어','어휘'].includes(x)),levelCol=header.findIndex(x=>['level','grade','topik','등급','급수'].includes(x));
+ if(wordCol<0||levelCol<0)throw Error('Use CSV headers Korean,level (levels 1–6).');
+ const levels={};for(const r of rows.slice(1)){const word=(r[wordCol]||'').trim().normalize('NFC'),value=(r[levelCol]||'').trim();if(!/^[가-힣]{1,80}$/.test(word)||!/^[1-6]$/.test(value))throw Error('Each row needs a Korean dictionary word and level 1–6.');const level=Number(value);levels[word]=Math.min(levels[word]||7,level);}
+ if(!Object.keys(levels).length)throw Error('Empty study list.');return levels;
+}
+function highlightMatch(surface,words={},levels={},target=0) {
+ const all=lookup(surface),exact=all.filter(r=>r.kind==='dictionary'),analyses=exact.length?exact:all;
+ const lemmas=[...new Set(analyses.map(r=>r.lemma))];
+ const study=target>0 && (levels[surface]<=target || lemmas.some(l=>levels[l]<=target));
+ const statuses=lemmas.map(l=>words[l]||'unknown');
+ return {supported:!!analyses.length,status:statuses.length&&statuses.every(s=>s===statuses[0])?statuses[0]:'unknown',study:!!study,ambiguous:lemmas.length>1};
+}
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,grammarFor};
 })();

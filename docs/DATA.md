@@ -14,7 +14,7 @@ Redistribution, adaptation and commercial use are permitted under those terms. K
 No examples, quotations, audio, images or other media are imported. These can have separate rights. The source is the downloadable postprocessed Korean extract, whose upstream endpoint is marked deprecated; future upstream migrations require a new review. Its origin is not represented as a raw English-Wiktionary dump.
 
 ## Coverage and exact changes
-The imported pack has **33,784 source entries, 29,777 distinct Hangul headwords, 40,510 senses and 72,869 distinct conjugated spellings** (78,857 entry/form links). In 0.8.1 there are ten original fallback entries, for 33,794 runtime entries. These are coverage counts, not verified accuracy or word-frequency rankings.
+The imported pack has **33,784 source entries, 29,777 distinct Hangul headwords, 40,510 senses and 72,869 distinct conjugated spellings** (78,857 entry/form links). In 0.9.0 there are eleven original fallback entries, for 33,795 runtime entries. These are coverage counts, not verified accuracy or word-frequency rankings.
 
 The importer selects modern Hangul spellings and ten supported parts of speech, retains English glosses, source sense IDs and usage labels, and excludes empty/cross-reference-only senses. It retains explicitly labeled hanja spellings, not inferred hanja origins. Multiple source entries and senses stay separate. A form links to its specific source entry, so regular and irregular homonyms do not borrow each other's conjugations.
 

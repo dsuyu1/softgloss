@@ -46,7 +46,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (sender.tab?.id) chrome.action.setBadgeText({tabId: sender.tab.id, text: ''});
   return;
  }
- const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'clearLearning'];
+ const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList'];
  if (!operations.includes(message?.type)) return;
  store.apply(message).then(respond, e => respond({ok: false, error: e.message}));
  return true;
