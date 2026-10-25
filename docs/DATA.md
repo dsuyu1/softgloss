@@ -52,3 +52,7 @@ Added short original glosses for 명품 (luxury goods / outstanding product), �
 
 ## 0.10.0 official default curriculum
 NIKL vocabulary and grammar grade data is now bundled separately under KOGL Type 1. This supersedes the earlier “No NIKL data” candidate decision for curriculum fields only; no Basic Dictionary API/media/definitions are imported. See CURRICULUM.md, data/curriculum-lock.json, reproducible importer and packaged credits. The source is the official 2017 study appendix revised 2020-11-17, not a third-party TOPIK list.
+
+
+### Fourth pilot original additions
+The 0.14.0 fallback glosses for 층간소음, 기아타이거즈, 두산베어스, 삼성라이온즈 and 엘지트윈스 and their bilingual examples are original short learning text, not extracted dictionary prose. Baseball club identities are checked against the [official KBO club directory](https://www.koreabaseball.com/Kbo/League/TeamInfo.aspx); no club descriptions, logos or media are copied. These entries have no assigned curriculum/TOPIK grade. Korean-language example review remains pending.

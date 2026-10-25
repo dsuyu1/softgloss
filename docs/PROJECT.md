@@ -1,7 +1,7 @@
 # SoftGloss project scope and delivery checklist
 
 Owner: Damian Villarreal. Scope baseline: October 24, 2026.
-Product name: Bungeoppang (formerly SoftGloss). Status: offline dictionary alpha, not a public release.
+Product name: Malnaru Read (말나루), in the Malnaru suite; formerly Bungeoppang / SoftGloss. Status: offline dictionary alpha, not a public release.
 
 ## Product commitment
 A free, useful Korean immersion companion without AI. Target learners know roughly 500+ words and want to read real content with less lookup friction. Long-term destination: dictionary, morphology, grammar, subtitles, sentence mining, vocabulary tracking, reader, recommendations and mobile. Build our own implementation; do not copy a competitor's code or content.
@@ -199,10 +199,20 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [ ] Verify actual Naver Café article with the learner; independently review new Korean analyses/examples and remaining unknowns.
 - [ ] Complete manual accessibility/zoom, learner hardware profiling and real Anki import; parameter optimization, deck collections and live Anki sync remain future scope.
 
-## 0.14.0 — explicit scope addition: pronunciation audio
+
+## 0.14.0 — Malnaru suite branding and fourth pilot coverage
+- [x] User selected Malnaru / 말나루; rename this extension Malnaru Read across panel, toolbar, library, manifest, credits and current help. Preserve data/IDs.
+- [x] Default neutral marks for ungraded dictionary matches during study mode, explicit no-grade lookup labels and a strict-list toggle; do not invent curriculum grades or include higher-grade words.
+- [x] Source-gated polite -지요 questions, nominal copula backgrounds, proper-name particles and unique joined labels with three/four nouns.
+- [x] Paint joined nouns at their individual grades; do not grade a whole compound from its easiest component.
+- [x] Original 층간소음 and four team-name entries with original bilingual examples. Names checked against the official KBO club directory.
+- [x] Chromium screenshot/range and existing frame/FSRS regressions pass; desktop/narrow/toolbar screenshots inspected (Actions 40239976738).
+- [ ] Independently review the new analyses/examples. Image lettering/OCR, arbitrary unknown names and general spacing repair remain outside the supported parser.
+
+## 0.15.0 — explicit scope addition: pronunciation audio
 User-requested on 2026-10-25. Free and offline for the public; paid per-request TTS such as ElevenLabs was ruled out on cost and privacy. See docs/AUDIO.md.
 - [x] Compare open-weight Korean TTS licenses and fit; select Supertonic 3 (OpenRAIL-M) for offline pre-generation, not in-browser inference.
-- [x] Add a resumable generator pinned to the model revision, voice, seed, steps and codec. Record per-clip ASR screen results; exclude gross failures and list flagged clips.
+- [x] Add a resumable generator pinned through SDK 1.3.1 to the model revision, voice, seed, steps and codec; reject SDK/revision overrides. Record per-clip ASR screen results; exclude gross failures and list flagged clips.
 - [x] Package curriculum clips as hashed shards loaded on demand; Listen in the panel and library; disclose machine-generated speech.
 - [x] Fall back to installed non-remote `chrome.tts` voices only; no network code, cloud voices or web-accessible resources.
 - [x] Add integrity checks, shard/codec tests and a Chromium playback assertion.

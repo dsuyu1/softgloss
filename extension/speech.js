@@ -1,6 +1,7 @@
 // Pronunciation: packaged machine-generated clips (Supertonic 3, OpenRAIL-M) for curriculum lemmas.
 // Clips are base64 Ogg Opus in hashed shards; decoding through Web Audio avoids page media CSP. No network.
 (() => {
+ if(globalThis.SGSpeech)return;
  const SHARDS = 64, loaded = new Set();
  let context, playing;
  // FNV-1a over UTF-16 code units; scripts/generate-audio.py uses the same layout.

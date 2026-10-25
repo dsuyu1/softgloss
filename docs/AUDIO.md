@@ -1,4 +1,4 @@
-# Pronunciation audio (0.14.0)
+# Pronunciation audio (0.15.0)
 
 Dictionary cards and the library have a **Listen** button. Bundled NIKL curriculum lemmas play a packaged, machine-generated clip. Other words use an offline Korean voice installed on the device, when one exists. No model runs in the browser and nothing is downloaded or uploaded at runtime.
 
@@ -9,7 +9,7 @@ Reviewed October 25, 2026 for a free, public, offline extension:
 |---|---|---|---|
 | [Supertonic 3](https://huggingface.co/Supertone/supertonic-3) (Supertone) | Yes, 1 of 31 languages | Weights BigScience OpenRAIL-M; sample code MIT; commercial use allowed with use restrictions | **Selected** for offline pre-generation. ~99M parameters, CPU-only, plain Hangul input (no phonemizer). Its ~400 MB of ONNX weights are too large to ship or run in a lookup panel. |
 | ElevenLabs | Yes | Paid API, per-character billing, network calls | Rejected: per-learner cost and outgoing lookup text. |
-| Chrome `chrome.tts` / OS voices | Depends on device | Platform voices | Kept as the fallback. Cloud ("remote") voices are skipped so text stays on the device. |
+| Chrome `chrome.tts` / OS voices | Depends on device | Platform voices | Kept as the fallback. Only voices explicitly marked non-remote are eligible; cloud and unspecified voices are skipped so text stays on the device. |
 | [MMS-TTS Korean](https://huggingface.co/Xenova/mms-tts-kor) | Yes | CC BY-NC 4.0 | Rejected: non-commercial. |
 | [Piper KSS Korean](https://huggingface.co/neurlang/piper-onnx-kss-korean) | Yes | CC BY-NC-SA 4.0, needs a separate phonemizer | Rejected: non-commercial. |
 | Kokoro-82M | No official Korean voice | Apache 2.0 | Rejected: no Korean. |
@@ -26,7 +26,7 @@ Nobody on the project has listened to every clip yet. To catch gross failures (s
 Whisper writes what it hears, so correct pronunciations can still score as errors (for example 가뜩이나 → 가뜨기나, 가계 → 가게). Single-syllable words are the least reliable. A low score is a screen, not proof of correct pronunciation. Native-speaker review of the flagged list, and a sample of the rest, remains open.
 
 ## Terms and disclosure
-Supertone claims no rights in generated output. The clips are not the model, and no weights are redistributed. The OpenRAIL-M use restrictions still apply to how Bungeoppang uses the output. The relevant one requires machine-generated content to be disclosed, so the panel and library label playback "Machine-generated voice · Supertonic 3". The packaged credits page repeats this. Do not use these clips to imitate a real person.
+Supertone claims no rights in generated output. The clips are not the model, and no weights are redistributed. The OpenRAIL-M use restrictions still apply to how Malnaru Read uses the output. The relevant one requires machine-generated content to be disclosed, so the panel and library label playback "Machine-generated voice · Supertonic 3". The packaged credits page repeats this. Do not use these clips to imitate a real person.
 
 ## Regenerating
 Maintainers only; this needs network access once to fetch the model and the Whisper weights, plus ffmpeg:
@@ -40,6 +40,8 @@ npm test && npm run check
 An interrupted run resumes from `--work`. `--pack-only` rebuilds the shards from finished clips. ONNX Runtime and Opus output can vary by CPU and ffmpeg build, so CI verifies the committed hashes and does not regenerate the audio. On a 16-thread Windows desktop, a full run took about 80 minutes.
 
 ## Limits
-- Only curriculum lemmas (dictionary forms) have packaged clips. Conjugated forms and the other dictionary headwords use the device voice, or show a message when none is installed. Windows needs the Korean speech pack; macOS and ChromeOS usually include a Korean voice.
+- Only curriculum lemmas (dictionary forms) have packaged clips. Listen reads the dictionary lemma even when a conjugated surface was looked up. Other lemmas use the device voice, or show a message when none is installed. Windows needs the Korean speech pack; macOS and ChromeOS usually include a Korean voice.
 - Homographs share one clip. Vowel length and context-dependent sound changes are not modeled.
 - One preset voice. Adding a male voice would double the audio size (currently 24 MB for 9,709 clips, 92 minutes of audio).
+
+Integration review verified that SDK 1.3.1 pins supertonic-3 to the manifest revision by default. The generator now rejects a different SDK/model-revision override. The full upstream model license is packaged with credits; clips are visibly labeled synthetic before playback.

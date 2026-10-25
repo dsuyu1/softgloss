@@ -15,7 +15,7 @@ async function render() {
  Object.values(state.words).forEach(s => counts[s]++);
  $('stats').textContent = `${counts.known} known · ${counts.seen} seen · ${state.cards.length} saved sentences`;
  $('cards').replaceChildren();
- if (!state.cards.length) $('cards').textContent = 'No saved sentences yet. Enable Bungeoppang on a Korean page to start.';
+ if (!state.cards.length) $('cards').textContent = 'No saved sentences yet. Enable Malnaru Read on a Korean page to start.';
  for (const c of state.cards) {
   const article = document.createElement('article');
   for (const text of [c.lemma + ' · ' + c.meaning, c.sentence, c.url, ...(c.source ? ['English Wiktionary contributors · CC BY-SA 4.0 · ' + c.source] : [])]) {
@@ -32,7 +32,7 @@ function loadAudio(file) {
  return new Promise((resolve, reject) => {const s = document.createElement('script'); s.src = file; s.onload = resolve; s.onerror = () => reject(Error('Audio data is missing.')); document.head.append(s);});
 }
 function listenButton(lemma) {
- const b = document.createElement('button'); b.textContent = 'Listen'; b.setAttribute('aria-label', 'Listen to ' + lemma);
+ const b = document.createElement('button'); b.textContent = 'Listen · synthetic'; b.setAttribute('aria-label', 'Listen to ' + lemma);
  b.onclick = () => SGSpeech.listen(lemma, loadAudio).then(text => {$('message').textContent = text;}, e => {$('message').textContent = e.message;});
  return b;
 }
@@ -83,8 +83,8 @@ $('search-form').onsubmit = event => {
   $('search-results').append(article);
  }
 };
-$('backup').onclick = async () => {await render(); download('softgloss-backup.json', JSON.stringify({version: 2, ...state}, null, 2), 'application/json');};
-$('anki').onclick = async () => {await render(); download('softgloss-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
+$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version: 2, ...state}, null, 2), 'application/json');};
+$('anki').onclick = async () => {await render(); download('malnaru-read-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
 $('clear').onclick = () => {
  if (confirm('Delete all vocabulary, saved sentences and review schedules from this browser? Export a backup first. This cannot be undone.')) write({type: 'clearLearning'}, 'Learning data deleted.');
 };

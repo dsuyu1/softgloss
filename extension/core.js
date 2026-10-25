@@ -52,6 +52,13 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   const labels=tags.filter(t=>!['formal','informal','polite'].includes(t)).map(t=>({'determiner':'noun-modifying form','noun-from-verb':'nominalized form','conditional':'conditional connective','conjunctive':'linking connective','contrastive':'contrast/background connective','causative':'connective (context needed)','interrogative':'question-form table entry','motive-form':'purpose/intention connective'}[t]||t));
   add(entry,['Source-listed form: '+labels.join(' · ')],'listed extended conjugation',{formTags:tags});
  }
+ // Final polite 요 can follow supported -지 analyses, including honorific -시는지.
+ if(options.composed!==false&&options.polite!==false&&word.endsWith('지요')){
+  for(const r of lookup(word.slice(0,-1),data,{...options,polite:false}))if(r.kind==='possible connective analysis'||r.ending==='지')add(r,[...r.parts,'-요: polite sentence-final marker'],'possible polite ending',{formTags:r.formTags});
+ }
+ for(const ending of ['인데요','인데','인지요','인지'])if(word.endsWith(ending)){
+  for(const entry of lemmas.get(word.slice(0,-ending.length))||[])if(['noun','pronoun','proper noun'].includes(entry.pos))add(entry,[ending.includes('데')?'-인데: copula with background or contrast; context decides':'-인지: copula with an embedded question; context decides',...(ending.endsWith('요')?['-요: polite sentence-final marker']:[])],'possible copula analysis');
+ }
  if(options.composed!==false && word.endsWith('면서')) {
   for(const result of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(result.formTags?.includes('conditional'))add(result,['-(으)면서: possible simultaneous/contrastive connective'],'possible connective analysis');
  }
@@ -81,9 +88,9 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
  for(const suffix of ['이냐','냐'])if(word.endsWith(suffix)) {
   const stem=word.slice(0,-suffix.length), final=stem ? (stem.charCodeAt(stem.length-1)-0xAC00)%28 : -1;
   if((suffix==='이냐')!==Boolean(final))continue;
-  for(const entry of lemmas.get(stem)||[])if(['noun','pronoun'].includes(entry.pos))add(entry,[`-${suffix}: informal question with the copula (be)`],'possible copula analysis');
+  for(const entry of lemmas.get(stem)||[])if(['noun','pronoun','proper noun'].includes(entry.pos))add(entry,[`-${suffix}: informal question with the copula (be)`],'possible copula analysis');
  }
- if(word.endsWith('들'))for(const entry of lemmas.get(word.slice(0,-1))||[])if(['noun','pronoun'].includes(entry.pos))add(entry,['-들: plural marker'],'possible plural analysis');
+ if(word.endsWith('들'))for(const entry of lemmas.get(word.slice(0,-1))||[])if(['noun','pronoun','proper noun'].includes(entry.pos))add(entry,['-들: plural marker'],'possible plural analysis');
  if(options.composed!==false && word.endsWith('까')) {
   for(const r of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(r.formTags?.includes('determiner')&&r.formTags.includes('future'))add(r,['-(으)ㄹ까: question, wondering or suggestion; context decides'],'possible question ending',{ending:'ㄹ까'});
  }
@@ -96,7 +103,7 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
  if(options.stacked!==false)for(const outer of ['는','도','만'])if(word.endsWith(outer)) {
   const stem=word.slice(0,-outer.length);
   if(!/(?:에서|에게|부터|까지|으로|에|로)$/.test(stem))continue;
-  for(const r of lookup(stem,data,{stacked:false,composed:false,compounds:false}))if(r.particle&&['noun','pronoun'].includes(r.pos))add(r,[...r.parts,`-${outer}: ${outer==='는'?'topic / contrast':outer==='도'?'also':'only'}`],'possible stacked particle analysis',{particle:r.particle});
+  for(const r of lookup(stem,data,{stacked:false,composed:false,compounds:false}))if(r.particle&&['noun','pronoun','proper noun'].includes(r.pos))add(r,[...r.parts,`-${outer}: ${outer==='는'?'topic / contrast':outer==='도'?'also':'only'}`],'possible stacked particle analysis',{particle:r.particle});
  }
  const form = data.forms?.[word];
  if (form && !forms.has(word)) for (const entry of lemmas.get(form[0]) || []) add(entry, form.slice(1), 'listed form');
@@ -109,9 +116,9 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   if (suffix === '으로' && (final === 0 || final === 8)) continue;
   if (suffix === '로' && final !== 0 && final !== 8) continue;
   for(const {entry,tags} of sourceForms(stem,data))if(tags.includes('noun-from-verb'))add(entry,['Source-listed nominalization', `-${suffix}: ${note}`],'possible nominalization + particle');
-  if(stem.endsWith('들'))for(const base of lemmas.get(stem.slice(0,-1))||[])if(['noun','pronoun'].includes(base.pos))add(base,['-들: plural marker',`-${suffix}: ${note}`],'possible plural + particle analysis',{particle:suffix});
+  if(stem.endsWith('들'))for(const base of lemmas.get(stem.slice(0,-1))||[])if(['noun','pronoun','proper noun'].includes(base.pos))add(base,['-들: plural marker',`-${suffix}: ${note}`],'possible plural + particle analysis',{particle:suffix});
   for (const base of lemmas.get(stem) || []) {
-   if (['noun','pronoun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis', {particle:suffix});
+   if (['noun','pronoun','proper noun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis', {particle:suffix});
   }
  }
  if(!out.length && options.compounds!==false) {
@@ -133,6 +140,22 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
    const {cut,left,right}=splits[0], parts=[word.slice(0,cut),word.slice(cut)];
    for(const [component,entries] of [left,right].entries())for(const entry of entries)add(entry,[`Possible noun compound: ${parts.join(' + ')}`,`Component ${component+1} of 2; not a whole-word translation`],'possible compound component',{compoundParts:parts});
   }
+ }
+ // Joined navigation labels may contain three or four nouns. Require a unique,
+ // complete segmentation with >=2 syllables per noun; never infer a whole-label gloss.
+ if(!out.length&&options.compounds!==false&&word.length>=6&&word.length<=24){
+  const paths=[];
+  function visit(offset,parts){
+   if(paths.length>1)return;
+   if(offset===word.length){if(parts.length>=3)paths.push(parts);return;}
+   if(parts.length>=4)return;
+   for(let end=offset+2;end<=word.length;end++){
+    const part=word.slice(offset,end),entries=(lemmas.get(part)||[]).filter(e=>e.pos==='noun');
+    if(entries.length)visit(end,[...parts,{part,entries}]);
+   }
+  }
+  visit(0,[]);
+  if(paths.length===1){const parts=paths[0].map(p=>p.part);for(const [i,component] of paths[0].entries())for(const entry of component.entries)add(entry,[`Possible joined nouns: ${parts.join(' + ')}`,`Component ${i+1} of ${parts.length}; not a whole-label translation`],'possible compound component',{compoundParts:parts});}
  }
  // One explicitly bounded spacing recovery for the pilot comment, not general segmentation.
  if(!out.length && options.composed!==false && word.startsWith('무슨')) {
@@ -224,14 +247,22 @@ function parseStudyCSV(input) {
  const levels={};for(const r of rows.slice(1)){const word=(r[wordCol]||'').trim().normalize('NFC'),value=(r[levelCol]||'').trim();if(!/^[가-힣]{1,80}$/.test(word)||!/^[1-6]$/.test(value))throw Error('Each row needs a Korean dictionary word and level 1–6.');const level=Number(value);levels[word]=Math.min(levels[word]||7,level);}
  if(!Object.keys(levels).length)throw Error('Empty study list.');return levels;
 }
-function highlightMatch(surface,words={},levels={},target=0) {
- const all=lookup(surface),exact=all.filter(r=>r.kind==='dictionary'),analyses=exact.length?exact:all;
+function highlightMatch(surface,words={},levels={},target=0,all=lookup(surface)) {
+ const exact=all.filter(r=>r.kind==='dictionary'),analyses=exact.length?exact:all;
  const lemmas=[...new Set(analyses.map(r=>r.lemma))];
  const grade=l=>Math.min(levels[l]||7,globalThis.SG_STUDY_DEFAULTS?.[l]||7);
  const matchedGrade=Math.min(grade(surface),...lemmas.map(grade));
  const study=target>0 && matchedGrade<=target;
  const statuses=lemmas.map(l=>words[l]||'unknown');
  return {level:matchedGrade<=6?matchedGrade:null,supported:!!analyses.length,status:statuses.length&&statuses.every(s=>s===statuses[0])?statuses[0]:'unknown',study:!!study,ambiguous:lemmas.length>1};
+}
+// Paint actual noun components at their own grades instead of grading the joined label.
+function highlightSpans(surface,words={},levels={},target=0){
+ const analyses=lookup(surface),parts=analyses[0]?.compoundParts;
+ if(parts&&parts.join('')===surface&&analyses.every(r=>r.kind==='possible compound component'&&JSON.stringify(r.compoundParts)===JSON.stringify(parts))){
+  let offset=0;return parts.map(part=>{const match={...highlightMatch(part,words,levels,target),offset,length:part.length};offset+=part.length;return match;});
+ }
+ return [{...highlightMatch(surface,words,levels,target,analyses),offset:0,length:surface.length}];
 }
 let studyCatalog,studyPatterns;const studyGrammarCache=new Map();
 const grammarNFD=value=>value.normalize('NFD').replace(/[ㄴㄹㅁㅂ]/g,c=>({'ㄴ':'ᆫ','ㄹ':'ᆯ','ㅁ':'ᆷ','ㅂ':'ᆸ'}[c]));
@@ -278,5 +309,5 @@ function sentenceAnalysis(input){
 }
 function examplesFor(entry){return (entry.senses||[]).flatMap(s=>(globalThis.SG_DICTIONARY_EXAMPLES?.[s.id]||[]).map(pair=>({korean:pair[0],english:pair[1],senseId:s.id,senseGloss:s.glosses.join('; '),source:entry.source,license:entry.license}))).slice(0,2);}
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,sentenceAnalysis,examplesFor,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,highlightSpans,studyGrammarMatches,sentenceAnalysis,examplesFor,grammarFor};
 })();

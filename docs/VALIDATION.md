@@ -93,5 +93,17 @@ The 61-token Café fixture is manually transcribed from the provided screenshot 
 
 The same CI run measured 325 ms first activation, 314 ms rescan for the synthetic 2,000-paragraph fixture, and 16.8 ms frame-gap p95 with no observed long tasks. Whole-renderer heap after the main reading flow was about 74 MB without forced GC. These are hosted-runner observations for the main-frame workload, not a per-tab memory guarantee or a multi-frame memory profile. The initial browser run failed because the new test tried to use search results after a deliberate library reload; reissuing the search corrected that test setup.
 
-## 0.14.0 pronunciation audio
+
+## 0.14.0 — fourth screenshots and suite name
+The screenshots show the current build, ordinary dictionary entries without curriculum grades (어떻게), an unsupported polite honorific question (해결하시는지요), a three-noun label (단체관람안내), and a missing proper name plus particle (기아타이거즈의). Several large banners appear to contain image lettering; no OCR support is claimed. Add regressions for the actual lookup cases, ungraded classification, per-component grades, strict-list preference and preserved settings. The old synthetic unknown probe 가짜교육표제 is now a possible three-noun chain, so the unknown-word assertion uses an unsupported Hangul string instead.
+
+55 local Node tests and static checks pass; Chromium adds neutral/strict-list ranges, level filtering, individual joined-noun ranges, new-name/version rendering and the screenshot lookup cases. [Actions 40239976738](https://github.com/dsuyu1/softgloss/actions/runs/40239976738) passes both jobs, including the screenshot-range, strict-list, target cutoff, component grading, iframe, FSRS and network checks. Desktop gap, narrow panel and toolbar screenshots were downloaded and visually inspected. Independent language review remains open.
+
+## 0.15.0 pronunciation audio
 9,709 of 9,719 curriculum lemmas have packaged Supertonic 3 clips (24 MB, 5,531 s). The automatic Whisper screen excluded 10 clips, which fall back to the device voice, and flagged 146 for listening; both lists are in extension/audio/manifest.json. Packing from the cached clips is byte-identical across runs. Locally, in an LF-normalized copy, 55 Node tests, all static/integrity checks and the Chromium smoke suite pass on Windows 11 / Ryzen 7 5800H / Chromium 141, including panel and library Listen playback with no external requests. Headless Chromium has no Korean voice, so only the no-voice fallback message was exercised. Native-speaker listening review and real-device fallback voices remain open.
+
+
+## 0.15.0 integration review
+Merge the audio branch with current Malnaru branding, fourth-pilot highlighting and FSRS data compatibility. 60 Node tests and static checks pass locally, including audio membership/codec headers/checksums and new offline-voice selection tests. Remote or unspecified voices are excluded and the selected engine ID is retained when available. The SDK 1.3.1 model revision matches the audio manifest; regeneration now rejects a differing SDK or revision override. The full model license is packaged and hashed, synthetic speech is disclosed on the button, and no model weights are added.
+
+Chromium now uses an actual pointer click for panel playback without bypassing autoplay policy; library playback also uses a real click. CI is pending for this combined revision. Native-speaker review and real Windows/macOS/ChromeOS offline-voice checks remain open.

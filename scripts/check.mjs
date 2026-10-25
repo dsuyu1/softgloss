@@ -39,3 +39,5 @@ console.log('Pinned offline FSRS scheduler integrity and license checks passed.'
 if(!m.permissions.includes('tts'))throw Error('Missing tts permission');
 const audio=JSON.parse(fs.readFileSync('extension/audio/manifest.json'));for(const file of audio.files){const p='extension/audio/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Audio checksum mismatch: '+p);execFileSync(process.execPath,['--check',p]);}
 console.log('Pronunciation audio integrity and syntax checks passed.');
+
+const audioLicense=JSON.parse(fs.readFileSync('data/audio-license-lock.json'));if(crypto.createHash('sha256').update(fs.readFileSync(audioLicense.file)).digest('hex')!==audioLicense.sha256)throw Error('Audio license checksum mismatch');

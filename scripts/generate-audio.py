@@ -11,6 +11,7 @@ Re-running reuses finished clips in --work, so an interrupted run resumes.
 import argparse,base64,collections,hashlib,json,os,pathlib,re,subprocess,sys,unicodedata
 root=pathlib.Path(__file__).resolve().parent.parent
 VOICE,SPEED,STEPS,SEEDS,BITRATE='F1',0.9,8,3,'24k'
+MODEL_REVISION='724fb5abbf5502583fb520898d45929e62f02c0b'
 ASR_MODEL='small'
 ACCEPT,REJECT=0.25,0.5  # jamo error rate after the ASR round trip
 SHARDS,BATCH=64,12
@@ -60,6 +61,9 @@ def encode(wav,sr):
 
 worker={}
 def init(threads):
+ from importlib.metadata import version
+ from supertonic.config import get_model_revision
+ if version('supertonic')!='1.3.1' or get_model_revision('supertonic-3')!=MODEL_REVISION:raise RuntimeError('Use supertonic 1.3.1 and the pinned model revision; remove revision overrides.')
  from supertonic import TTS
  from faster_whisper import WhisperModel
  worker['tts']=TTS(model='supertonic-3',intra_op_num_threads=threads,inter_op_num_threads=1)
@@ -110,7 +114,7 @@ def pack(work,words):
  for i in range(SHARDS):
   name=f'audio-{i:02}.js';content='Object.assign(globalThis.SG_AUDIO ??= {},'+json.dumps(dict(sorted(groups[i].items())),ensure_ascii=False,separators=(',',':'))+');\n'
   (folder/name).write_text(content,encoding='utf-8',newline='\n');files.append({'path':name,'sha256':hashlib.sha256(content.encode()).hexdigest(),'clips':len(groups[i])})
- manifest={'model':'Supertone/supertonic-3','modelRevision':'724fb5abbf5502583fb520898d45929e62f02c0b','modelLicense':'BigScience OpenRAIL-M',
+ manifest={'model':'Supertone/supertonic-3','modelRevision':MODEL_REVISION,'modelLicense':'BigScience OpenRAIL-M',
   'sdk':'supertonic 1.3.1','voice':VOICE,'speed':SPEED,'steps':STEPS,'codec':'Ogg Opus '+BITRATE+' mono','asrCheck':'faster-whisper '+ASR_MODEL+' int8, '+str(BATCH)+' clips per window; jamo error rate, ㅐ/ㅔ merged, digits read as Sino-Korean',
   'acceptErrorRate':ACCEPT,'rejectErrorRate':REJECT,'lemmas':len(words),'clips':len(kept),'shards':SHARDS,'seconds':round(sum(c['seconds'] for c in kept),1),
   'flagged':[[c['lemma'],c['heard'],c['errorRate']] for c in kept if c['errorRate']>ACCEPT],

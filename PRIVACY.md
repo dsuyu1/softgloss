@@ -1,5 +1,5 @@
 # Alpha privacy notice
-Bungeoppang has no network code, accounts, analytics or AI calls. When enabled manually or through optional automatic mode, it reads text in the current page for local Korean lookup and vocabulary highlighting. It skips editable fields. The user grants temporary activeTab access, scripting injects the packaged code, and storage retains local learning data.
+Malnaru Read has no network code, accounts, analytics or AI calls. When enabled manually or through optional automatic mode, it reads text in the current page for local Korean lookup and vocabulary highlighting. It skips editable fields. The user grants temporary activeTab access, scripting injects the packaged code, and storage retains local learning data.
 
 Saved sentence cards contain the selected word, gloss, nearby text (up to 2,000 characters), and page origin/path without query or fragment. Paths can themselves contain sensitive information; only save content you want to keep. Nothing is uploaded. JSON backups and TSV exports contain your saved material; handle them as personal data.
 
