@@ -7,11 +7,11 @@ async function enablePage(tab) {
   if (!loaded.result) await chrome.scripting.executeScript({target: {tabId: tab.id}, files: SG_DICTIONARY_FILES});
   await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['core.js', 'api.js', 'content.js']});
   await chrome.action.setBadgeText({tabId: tab.id, text: 'ON'});
-  await chrome.action.setTitle({tabId: tab.id, title: 'Open SoftGloss on this page'});
+  await chrome.action.setTitle({tabId: tab.id, title: 'Open Bungeoppang on this page'});
   return {ok:true};
  } catch {
   await chrome.action.setBadgeText({tabId: tab.id, text: '!'});
-  await chrome.action.setTitle({tabId: tab.id, title: 'SoftGloss cannot run here. Try a normal web article.'});
+  await chrome.action.setTitle({tabId: tab.id, title: 'Bungeoppang cannot run here. Try a normal web article.'});
   return {ok:false,error:'Could not activate this page. Reload the webpage and try again. Chrome settings, Web Store pages and PDFs are unsupported.'};
  }
 }

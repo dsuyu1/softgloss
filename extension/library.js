@@ -15,7 +15,7 @@ async function render() {
  Object.values(state.words).forEach(s => counts[s]++);
  $('stats').textContent = `${counts.known} known · ${counts.seen} seen · ${state.cards.length} saved sentences`;
  $('cards').replaceChildren();
- if (!state.cards.length) $('cards').textContent = 'No saved sentences yet. Enable SoftGloss on a Korean page to start.';
+ if (!state.cards.length) $('cards').textContent = 'No saved sentences yet. Enable Bungeoppang on a Korean page to start.';
  for (const c of state.cards) {
   const article = document.createElement('article');
   for (const text of [c.lemma + ' · ' + c.meaning, c.sentence, c.url, ...(c.source ? ['English Wiktionary contributors · CC BY-SA 4.0 · ' + c.source] : [])]) {

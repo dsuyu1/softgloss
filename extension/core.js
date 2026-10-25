@@ -215,9 +215,10 @@ function highlightMatch(surface,words={},levels={},target=0) {
  const all=lookup(surface),exact=all.filter(r=>r.kind==='dictionary'),analyses=exact.length?exact:all;
  const lemmas=[...new Set(analyses.map(r=>r.lemma))];
  const grade=l=>Math.min(levels[l]||7,globalThis.SG_STUDY_DEFAULTS?.[l]||7);
- const study=target>0 && (grade(surface)<=target || lemmas.some(l=>grade(l)<=target));
+ const matchedGrade=Math.min(grade(surface),...lemmas.map(grade));
+ const study=target>0 && matchedGrade<=target;
  const statuses=lemmas.map(l=>words[l]||'unknown');
- return {supported:!!analyses.length,status:statuses.length&&statuses.every(s=>s===statuses[0])?statuses[0]:'unknown',study:!!study,ambiguous:lemmas.length>1};
+ return {level:matchedGrade<=6?matchedGrade:null,supported:!!analyses.length,status:statuses.length&&statuses.every(s=>s===statuses[0])?statuses[0]:'unknown',study:!!study,ambiguous:lemmas.length>1};
 }
 let studyCatalog,studyPatterns;const studyGrammarCache=new Map();
 const grammarNFD=value=>value.normalize('NFD').replace(/[ㄴㄹㅁㅂ]/g,c=>({'ㄴ':'ᆫ','ㄹ':'ᆯ','ㅁ':'ᆷ','ㅂ':'ᆸ'}[c]));
@@ -255,6 +256,13 @@ function studyGrammarMatches(text,target) {
  }
  const matches=[...out.values()];if(String(text).length<=10000){if(studyGrammarCache.size>=256)studyGrammarCache.delete(studyGrammarCache.keys().next().value);studyGrammarCache.set(key,matches);}return matches;
 }
+function sentenceAnalysis(input){
+ const text=String(input).trim().normalize('NFC');if(!text||text.length>2000)return [];
+ return tokens(text).slice(0,80).map(({word})=>{const results=lookup(word),labels=new Set();
+  for(const r of results){labels.add(r.pos);for(const part of r.parts)labels.add(part);for(const tag of r.formTags||[])if(['past','future','present','conditional','determiner','noun-from-verb'].includes(tag))labels.add({'future':'future / prospective modifier (context needed)','past':'past form','present':'present form','determiner':'noun-modifying form','conditional':'conditional connective','noun-from-verb':'nominalized form'}[tag]||tag);}
+  return {surface:word,results,labels:[...labels],supported:!!results.length};
+ });
+}
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,sentenceAnalysis,grammarFor};
 })();

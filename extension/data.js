@@ -2,6 +2,7 @@
 (() => {
 globalThis.SG_PACK_ROWS = [];
 const rows = [
+['기자협회보','Journalists Association bulletin (publication name)','proper noun'],
 ['응답자','respondent; a person who answers a survey or question','noun'],
 ['지도부','leadership; a group of leaders','noun'],['하단','lower part; bottom section','noun'],['전원주택','a house in the countryside','noun'],['전원생활','life in the countryside','noun'],['청원인','petitioner','noun'],['신천지예수교증거장막성전','Shincheonji Church of Jesus (organization name)','proper noun'],
 

@@ -12,7 +12,8 @@
  document.addEventListener('pointermove',event=>{
   clearTimeout(timer);if(globalThis.__softgloss)return;
   timer=setTimeout(()=>{
-   const point=document.caretRangeFromPoint?.(event.clientX,event.clientY);
+   let point=document.caretRangeFromPoint?.(event.clientX,event.clientY);
+   if(event.target?.closest?.('a[href]')){const walker=document.createTreeWalker(event.target.closest('a[href]'),NodeFilter.SHOW_TEXT);let node,count=0;outer:while((node=walker.nextNode())&&count++<100){for(const match of node.textContent.matchAll(/[가-힣]+/gu)){const range=new Range();range.setStart(node,match.index);range.setEnd(node,match.index+match[0].length);if([...range.getClientRects()].some(r=>event.clientX>=r.left&&event.clientX<=r.right&&event.clientY>=r.top&&event.clientY<=r.bottom)){point=range;break outer;}}}}
    if(!point || point.startContainer.nodeType!==Node.TEXT_NODE)return;
    const node=point.startContainer;if(node.parentElement?.closest(skip))return;
    for(const match of node.textContent.matchAll(/[가-힣]+/gu)) {
