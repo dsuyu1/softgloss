@@ -40,3 +40,8 @@ test('sentence components expose particles and past forms without choosing a hom
  assert.equal(SG.highlightMatch('읽어요',{}, {},1).level,1);
  assert.ok(SG.lookup('기자협회보').length);assert.equal(SG_LEARNING_EXAMPLES['부르다'][0],'택시를 불러 주세요.');
 });
+
+test('original examples attach to specific dictionary entries, including the call verb',()=>{
+ for(const [word,example] of Object.entries(SG_LEARNING_EXAMPLES))assert.ok(SG.lookup(word).some(r=>r.id===example[2]),word);
+ assert.ok(SG.lookup('부르다').some(r=>r.id===SG_LEARNING_EXAMPLES['부르다'][2]&&r.pos==='verb'));
+});

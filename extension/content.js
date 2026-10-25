@@ -68,7 +68,7 @@
    const chip=el('span',type==='predicate'?'Predicate · '+r.pos:r.pos,card);chip.className='sg-chip'+(type?' sg-'+type:'');
    el('h3',r.lemma,card).lang='ko';if(phraseResult)el('small','From: '+[...new Set(r.surfaces)].join(' · '),card);
    el('p',r.meaning,card);
-   const example=globalThis.SG_LEARNING_EXAMPLES?.[r.lemma];if(example){const details=el('details','',card);el('summary','Learning example',details);el('p',example[0],details).lang='ko';el('p',example[1],details);el('small','Original learning example · may illustrate one meaning only',details);}
+   const example=globalThis.SG_LEARNING_EXAMPLES?.[r.lemma];if(example&&example[2]===r.id){const details=el('details','',card);el('summary','Learning example',details);el('p',example[0],details).lang='ko';el('p',example[1],details);el('small','Original learning example · may illustrate one meaning only',details);}
    const grade=globalThis.SG_STUDY_DEFAULTS?.[r.lemma];if(grade)el('small','NIKL curriculum grade '+grade,card);
    if(r.senses?.length>1){const details=el('details','',card);el('summary','All '+r.senses.length+' meanings',details);const senses=el('ol','',details);for(const sense of r.senses)el('li',(sense.tags.length?'['+sense.tags.join(', ')+'] ':'')+sense.glosses.join('; '),senses);}
    for(const part of new Set(r.parts)){const line=el('p',part,card);line.className='sg-meta';}
