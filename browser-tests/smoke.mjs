@@ -1,7 +1,7 @@
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdtemp, rm, mkdir, cp, readFile, writeFile} from 'node:fs/promises';
-import {tmpdir} from 'node:os';
+import os, {tmpdir} from 'node:os';
 import path from 'node:path';
 import {createServer} from 'node:http';
 const temporary = await mkdtemp(path.join(tmpdir(), 'softgloss-browser-'));
@@ -38,13 +38,17 @@ try {
  let worker = await launch();
  const id = new URL(worker.url()).host;
  const page = await context.newPage(); await page.goto(url);
+ const cdp = await context.newCDPSession(page); await cdp.send('Performance.enable');
+ const heapBefore = (await cdp.send('Performance.getMetrics')).metrics.find(m=>m.name==='JSHeapUsedSize')?.value;
  const tabId = await worker.evaluate(async url => (await chrome.tabs.query({url}))[0].id, url);
  // Test-only reference to a closed shadow root, captured in the isolated world.
  await worker.evaluate(async tabId => chrome.scripting.executeScript({target: {tabId}, func: () => {
   const original = Element.prototype.attachShadow;
   Element.prototype.attachShadow = function(options) {const root = original.call(this, options); if (this.id === 'softgloss-root') globalThis.__testRoot = root; return root;};
  }}), tabId);
+ const coldStart = performance.now();
  await worker.evaluate(tabId => enable({id: tabId}, true), tabId);
+ const injectionMilliseconds = performance.now()-coldStart;
  async function panel(action, value = null) {
   return worker.evaluate(async ({tabId, action, value}) => {
    const [result] = await chrome.scripting.executeScript({target: {tabId}, func: (action, value) => {
@@ -55,6 +59,9 @@ try {
     if (action === 'status') return root.querySelector('button[data-status=known]')?.getAttribute('aria-pressed');
     if (action === 'highlight') return CSS.highlights.get('softgloss-known')?.size || 0;
     if (action === 'focus') return root.activeElement?.id;
+    if (action === 'hasFocus') return Boolean(root.activeElement);
+    if (action === 'searchValue') return root.querySelector('input[type=search]').value;
+    if (action === 'hidden') return root.querySelector('section').hidden;
     if (action === 'grammarOpen') return [...root.querySelectorAll('details')].map(d=>d.open);
     if (action === 'expandGrammar') root.querySelector('summary')?.click();
     return root.querySelector('section').textContent;
@@ -82,6 +89,57 @@ try {
  await worker.evaluate(tabId => enable({id: tabId}), tabId);
  await eventually(() => panel('highlight'), 2);
  assert.equal(await page.locator('#softgloss-root').count(), 1);
+
+ // Real mouse coordinates and DOM selections exercise the reading entry points.
+ await worker.evaluate(tabId => enable({id:tabId},true),tabId);
+ await eventually(()=>panel('focus'),'sg-search');
+ await panel('click', 'Close');
+ assert.equal(await panel('hasFocus'), false);
+ const point = await page.evaluate(() => {
+  const text = document.getElementById('text').firstChild; const r=document.createRange(); r.setStart(text,0);r.setEnd(text,2);
+  const b=r.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};
+ });
+ await page.mouse.move(point.x, point.y);
+ await eventually(()=>panel('searchValue'),'책을');
+ const stable=await panel('searchValue');
+ await page.mouse.move(600,point.y); await page.waitForTimeout(350);
+ assert.equal(await panel('searchValue'),stable,'blank space must not look up the nearest word');
+ await panel('click','Close');
+ await page.evaluate(()=>{
+  const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,3);r.setEnd(node,6);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
+ });
+ await eventually(()=>panel('searchValue'),'읽어요');
+ await page.locator('#private').fill('학교');
+ await page.mouse.move(10,10); await page.locator('#private').hover();await page.waitForTimeout(350);
+ assert.equal(await panel('searchValue'),'읽어요','editable input must not trigger lookup');
+ await panel('click','Close');
+ const heapAfter = (await cdp.send('Performance.getMetrics')).metrics.find(m=>m.name==='JSHeapUsedSize')?.value;
+ await page.evaluate(()=>{
+  window.__sgFrameGaps=[];window.__sgLongTasks=[];window.__sgProfileRunning=true;
+  let previous=performance.now();function tick(now){if(!window.__sgProfileRunning)return;window.__sgFrameGaps.push(now-previous);previous=now;requestAnimationFrame(tick);}requestAnimationFrame(tick);
+  window.__sgObserver=new PerformanceObserver(list=>window.__sgLongTasks.push(...list.getEntries().map(e=>e.duration)));
+  window.__sgObserver.observe({type:'longtask',buffered:false});
+  const container=document.createElement('div');container.id='long-reading';const fragment=document.createDocumentFragment();
+  for(let i=0;i<2000;i++){const p=document.createElement('p');p.textContent='책 학교에서 읽어요.';fragment.append(p);}container.append(fragment);document.body.append(container);
+ });
+ const scanStart=performance.now();
+ await eventually(()=>panel('highlight'),2002);
+ const rescanMilliseconds=performance.now()-scanStart;
+ await page.waitForTimeout(1500);
+ const responsiveness=await page.evaluate(()=>{
+  window.__sgProfileRunning=false;window.__sgObserver.disconnect();
+  const frames=window.__sgFrameGaps.sort((a,b)=>a-b);
+  return {frames:frames.length,p95FrameGapMilliseconds:frames[Math.floor(frames.length*.95)],maxFrameGapMilliseconds:frames.at(-1),longTasksMilliseconds:window.__sgLongTasks};
+ });
+ assert.ok(responsiveness.frames>=30,'enough animation frames for the responsiveness sample');
+ assert.ok(responsiveness.p95FrameGapMilliseconds<100,'long-page frame-gap p95 must stay under 100 ms');
+ const profileEvidence={runtime:process.version,cpu:os.cpus()[0]?.model,platform:os.platform(),browser:await context.browser()?.version(),injectionMilliseconds,rendererJSHeapBefore:heapBefore,rendererJSHeapAfter:heapAfter,heapScope:'whole page renderer, not isolated extension or total browser RSS; no forced GC',fixture:{paragraphs:2000,tokensPerParagraph:3},rescanMilliseconds,...responsiveness};
+ await mkdir('test-results',{recursive:true});await writeFile('test-results/performance.json',JSON.stringify(profileEvidence,null,2));
+ console.log('Reading performance:',JSON.stringify(profileEvidence));
+ await page.evaluate(()=>document.getElementById('long-reading').remove());
+ await eventually(()=>panel('highlight'),2);
+
  const library = await context.newPage(); await library.goto(`chrome-extension://${id}/library.html`);
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
  await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();

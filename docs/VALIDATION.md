@@ -45,3 +45,8 @@ Browser findings must be recorded here before checking the corresponding PROJECT
 
 ## 0.5.0 validation
 Added regression checks for standard particle variants, the ㄹ + 로 exception, grammar attachment, pending/unknown score handling and stale or deleted review candidates. Browser CI checks the new expandable grammar hints. Independent linguistic evaluation and reviewed grammar remain uncompleted; synthetic examples do not satisfy them.
+
+## 0.5.1 browser/performance validation
+25 existing Node tests and static checks pass locally. Added real pointer-coordinate checks, blank-space hover rejection, selection/mouseup lookup, editable-input exclusion and close/focus regression tests in Chromium. Added first-activation, renderer heap, rescan and frame-gap/long-task measurements; see docs/PERFORMANCE.md for exact scope and limitations. CI outcome pending. No local Chromium assertions are claimed because the workspace's browser socket restriction remains.
+
+CI reference [40207430126](https://github.com/dsuyu1/softgloss/actions/runs/40207430126) passes both jobs, including the added hover/focus/blank-space/selection/editable-input checks, 2,000-paragraph workload, all 25 Node tests, offline rebuild, static checks and ZIP packaging. Chromium serialized empty focus as null; the test now checks an explicit boolean. Timing/heap evidence and its limitations are recorded in docs/PERFORMANCE.md. Real-device, manual permissions, assistive technology, actual zoom, Anki import and independent Korean review remain open.

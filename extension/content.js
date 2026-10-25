@@ -20,7 +20,7 @@
   try {await SGWrite(message); if (success) notice(success); return true;}
   catch (error) {notice(error.message); return false;}
  }
- function close() {panel.hidden = true; if (root.activeElement) previousFocus?.focus?.();}
+ function close() {panel.hidden = true; const focused = root.activeElement; focused?.blur(); if (focused) previousFocus?.focus?.();}
  function render() {
   panel.replaceChildren(); el('small', 'SOFTGLOSS · OFFLINE ALPHA');
   button('Close', close); button('My library', () => chrome.runtime.sendMessage({type: 'openLibrary'}));
@@ -97,15 +97,18 @@
  }
  document.addEventListener('pointermove', event => {
   clearTimeout(hoverTimer);
-  if (!enabled || event.composedPath().includes(host) || root.activeElement) return;
+  if (!enabled || event.composedPath().includes(host) || root.activeElement?.matches('input[type=search],textarea')) return;
   hoverTimer = setTimeout(() => {
-   if (!enabled || root.activeElement) return;
+   if (!enabled || root.activeElement?.matches('input[type=search],textarea')) return;
    const p = document.caretRangeFromPoint?.(event.clientX, event.clientY);
    if (!p || p.startContainer.nodeType !== Node.TEXT_NODE) return;
    const node = p.startContainer;
    if (node.parentElement?.closest(skip)) return;
    const token = SG.tokens(node.textContent).find(t => t.index <= p.startOffset && p.startOffset < t.index + t.word.length);
-   if (token) display(token.word, node.textContent.trim());
+   if (token) {
+    const range = new Range(); range.setStart(node, token.index); range.setEnd(node, token.index + token.word.length);
+    if ([...range.getClientRects()].some(r => event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom)) display(token.word, node.textContent.trim());
+   }
   }, 280);
  });
  document.addEventListener('mouseup', event => {
@@ -127,8 +130,9 @@
   let nodes = 0, characters = 0;
   function chunk() {
    if (epoch !== paintEpoch || !enabled) return;
-   let n, batch = 0;
-   while (batch++ < 100 && nodes < 10000 && characters < 500000 && (n = walker.nextNode())) {
+   let n, batch = 0; const started = performance.now();
+   // Yield between text nodes as well as at the fixed scan limits.
+   while (batch++ < 100 && (batch === 1 || performance.now() - started < 8) && nodes < 10000 && characters < 500000 && (n = walker.nextNode())) {
     nodes++;
     if (n.parentElement?.closest(skip)) continue;
     const text = n.textContent.slice(0, Math.min(10000, 500000 - characters)); characters += text.length;
