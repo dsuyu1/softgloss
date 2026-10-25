@@ -3,4 +3,6 @@ input[type=search],select{max-width:100%;box-sizing:border-box;padding:8px;borde
 
 #review{border-block:1px solid #e7e3e0;padding:16px 0;min-height:130px}#review h3{font-size:32px;margin:8px 0}.review-ratings{display:flex;flex-wrap:wrap;gap:6px}.review-ratings button{flex:1;min-width:120px}button:disabled{opacity:.5;cursor:default}#review-deck>div{padding:8px 0;border-bottom:1px solid #eee9e6}
 
-#review-session{scroll-margin-top:16px}#review:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #a34227;outline-offset:3px}#review-help{font-size:14px;color:#645952}#review small{letter-spacing:normal}#review-stats{font-variant-numeric:tabular-nums}
+#review-session,#review{scroll-margin-top:72px}#review:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #a34227;outline-offset:3px}#review-help{font-size:14px;color:#645952}#review small{letter-spacing:normal}#review-stats{font-variant-numeric:tabular-nums}
+
+#review>small{display:block;margin-top:10px}

@@ -225,5 +225,5 @@ Next executable work within the reading-beta scope: make the FSRS review flow pr
 - [x] Add single-action persisted undo, serialized stale-action protection and monotonic card revisions; clear undo on restore/delete/suspend and omit it from backups.
 - [x] Refresh idle due queues without taking focus; distinguish a suspended deck from an empty one.
 - [x] Test schedule/history recovery, stale cross-tab undo, double undo and failed-write retry locally.
-- [ ] Verify the combined keyboard/audio/undo/idle-refresh flow and narrow/reflow layouts in Chromium CI.
+- [x] Combined keyboard/audio/undo/idle-refresh and narrow/reflow layouts pass Chromium CI (Actions 40244266506); inspect desktop and narrow screenshots.
 - [ ] Complete screen-reader/real-zoom checks and learner pilots, then collect independent language/audio judgments.

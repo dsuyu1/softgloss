@@ -272,6 +272,8 @@ try {
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
  const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{}}));
  assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,2);
+ const backupDownload=library.waitForEvent('download');await library.locator('#backup').click();const exported=JSON.parse(await readFile(await (await backupDownload).path(),'utf8'));
+ assert.equal(exported.version,2);assert.equal(Object.hasOwn(exported,'reviewUndo'),false);assert.deepEqual(exported.reviewCards,backup.reviewCards);
  // Frame fixture: child highlights and selection use the top panel, preserving link behavior.
  const framePage=await context.newPage();await framePage.goto(url+'frames');
  const frameTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'frames');
