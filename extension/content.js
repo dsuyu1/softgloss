@@ -5,7 +5,7 @@
  document.documentElement.append(host);
  const root = host.attachShadow({mode: 'closed'});
  const style = document.createElement('style');
- style.textContent = `:host{all:initial}section{position:fixed;z-index:2147483647;right:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;background:#faf8f3;color:#253e34;border:1px solid #bfcfc2;border-radius:18px;padding:20px;box-shadow:0 8px 30px #0002;font:15px/1.6 system-ui}h2{font-size:22px;margin:6px 0}p{margin:8px 0;overflow-wrap:anywhere}button,input{font:inherit}button{cursor:pointer;border:1px solid #bfcfc2;border-radius:9px;background:#e7eee5;color:#253e34;padding:7px 11px;margin:4px 5px 4px 0}button[aria-pressed=true]{border:2px solid #253e34;font-weight:700}button:focus-visible,input:focus-visible{outline:3px solid #4c7656;outline-offset:2px}input[type=search]{width:100%;box-sizing:border-box;padding:8px;border:1px solid #8c9c8f;border-radius:8px;background:#fff;color:#253e34}small{display:block;color:#5c6d62}hr{border:0;border-top:1px solid #d9dfd6}#notice{min-height:1.5em}`;
+ style.textContent = `:host{all:initial}section{position:fixed;z-index:2147483647;right:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;background:#faf8f3;color:#253e34;border:1px solid #bfcfc2;border-radius:18px;padding:20px;box-shadow:0 8px 30px #0002;font:15px/1.6 system-ui}summary{cursor:pointer;font-weight:600}details{margin:10px 0}h2{font-size:22px;margin:6px 0}p{margin:8px 0;overflow-wrap:anywhere}button,input{font:inherit}button{cursor:pointer;border:1px solid #bfcfc2;border-radius:9px;background:#e7eee5;color:#253e34;padding:7px 11px;margin:4px 5px 4px 0}button[aria-pressed=true]{border:2px solid #253e34;font-weight:700}button:focus-visible,input:focus-visible{outline:3px solid #4c7656;outline-offset:2px}input[type=search]{width:100%;box-sizing:border-box;padding:8px;border:1px solid #8c9c8f;border-radius:8px;background:#fff;color:#253e34}small{display:block;color:#5c6d62}hr{border:0;border-top:1px solid #d9dfd6}#notice{min-height:1.5em}`;
  root.append(style);
  const panel = document.createElement('section');
  panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'SoftGloss Korean dictionary'); root.append(panel);
@@ -51,6 +51,14 @@
    if (r.source) {const link = el('a', 'Wiktionary contributors · CC BY-SA 4.0'); link.href = r.source; link.target = '_blank'; link.rel = 'noopener noreferrer';}
    if (results.length > 1) el('small', 'Several dictionary entries or analyses may fit; context decides.');
    r.parts.forEach(p => el('p', p));
+   for (const card of SG.grammarFor(r)) {
+    const details = el('details', ''); el('summary', 'Grammar hint · ' + card.title, details);
+    el('p', card.hint, details);
+    const more = el('details', '', details); el('summary', 'Explain and show an example', more);
+    el('p', card.explanation, more); el('p', card.example, more);
+    const link = el('a', 'Grammar source · Wiktionary contributors · CC BY-SA 4.0', more);
+    link.href = card.source; link.target = '_blank'; link.rel = 'noopener noreferrer';
+   }
    const statusLine = el('small', ''); statusLine.dataset.lemma = r.lemma;
    for (const status of ['unknown', 'seen', 'known']) {
     const b = button(status, () => write({type: 'setWord', lemma: r.lemma, status}, 'Vocabulary updated.'));

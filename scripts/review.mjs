@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import {prepare,grade} from './review-lib.mjs';
+import '../extension/dictionary-files.js';
+for(const file of SG_DICTIONARY_FILES) await import('../extension/'+file);
+await import('../extension/core.js');
+const [command,input,output]=process.argv.slice(2);
+if(!['prepare','grade'].includes(command)||!input)throw Error('Usage: node scripts/review.mjs prepare cases.json sheet.json | grade sheet.json [report.json]');
+const value=JSON.parse(fs.readFileSync(input,'utf8'));
+const result=command==='prepare'?prepare(value,SG.lookup):grade(value,SG.lookup);
+const text=JSON.stringify(result,null,2)+'\n';
+if(output){fs.writeFileSync(output,text,{flag:'wx'});console.log('Created '+output);}else process.stdout.write(text);

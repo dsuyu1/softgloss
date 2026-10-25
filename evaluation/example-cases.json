@@ -1,0 +1,5 @@
+[
+  {"id":"example-1","surface":"책을","context":"책을 읽어요.","source":"Synthetic SoftGloss example; not independent evidence"},
+  {"id":"example-2","surface":"걸었어요","context":"어제 걸었어요.","source":"Synthetic SoftGloss example; not independent evidence"},
+  {"id":"example-3","surface":"소프트글로스미지원단어","context":"소프트글로스미지원단어","source":"Synthetic unsupported-token probe; not independent evidence"}
+]

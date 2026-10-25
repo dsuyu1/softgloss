@@ -20,7 +20,7 @@ function lookup(input, data = globalThis.SG_DATA) {
  const word = String(input).normalize('NFC').replace(/^[^가-힣]+|[^가-힣]+$/gu,'');
  if (!word || word.length > 80) return [];
  const out = [], {lemmas, forms} = index(data);
- const add = (entry, parts, kind) => out.push({...entry, surface: word, parts, kind});
+ const add = (entry, parts, kind, details = {}) => out.push({...entry, surface: word, parts, kind, ...details});
  for (const entry of lemmas.get(word) || []) add(entry, [], 'dictionary');
  // Imported forms retain their own source entry, so homonyms do not borrow conjugations.
  for (const {entry, tags} of forms.get(word) || []) {
@@ -31,8 +31,14 @@ function lookup(input, data = globalThis.SG_DATA) {
  if (form && !forms.has(word)) for (const entry of lemmas.get(form[0]) || []) add(entry, form.slice(1), 'listed form');
  for (const [suffix,note] of particles) {
   if (!word.endsWith(suffix)) continue;
-  for (const base of lemmas.get(word.slice(0,-suffix.length)) || []) {
-   if (['noun','pronoun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis');
+  const stem = word.slice(0,-suffix.length);
+  const final = stem ? (stem.charCodeAt(stem.length-1)-0xAC00)%28 : -1;
+  const pairs = {은:true,는:false,이:true,가:false,을:true,를:false,과:true,와:false};
+  if (suffix in pairs && Boolean(final) !== pairs[suffix]) continue;
+  if (suffix === '으로' && (final === 0 || final === 8)) continue;
+  if (suffix === '로' && final !== 0 && final !== 8) continue;
+  for (const base of lemmas.get(stem) || []) {
+   if (['noun','pronoun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis', {particle:suffix});
   }
  }
  const unique = new Map();
@@ -78,5 +84,6 @@ function validateBackup(value) {
  return card;});
  return {version:1,words,cards};
 }
-globalThis.SG = {lookup,search,tokens,coverage,ankiTSV,validateBackup};
+function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
+globalThis.SG = {lookup,search,tokens,coverage,ankiTSV,validateBackup,grammarFor};
 })();
