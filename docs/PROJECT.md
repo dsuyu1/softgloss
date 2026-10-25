@@ -206,4 +206,5 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Source-gated polite -지요 questions, nominal copula backgrounds, proper-name particles and unique joined labels with three/four nouns.
 - [x] Paint joined nouns at their individual grades; do not grade a whole compound from its easiest component.
 - [x] Original 층간소음 and four team-name entries with original bilingual examples. Names checked against the official KBO club directory.
+- [x] Chromium screenshot/range and existing frame/FSRS regressions pass; desktop/narrow/toolbar screenshots inspected (Actions 40239976738).
 - [ ] Independently review the new analyses/examples. Image lettering/OCR, arbitrary unknown names and general spacing repair remain outside the supported parser.

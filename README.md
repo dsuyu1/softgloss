@@ -55,7 +55,7 @@ Bungeoppang (붕어빵), previously SoftGloss, preserves existing local vocabula
 
 Use **Break down sentence** after looking up page text for possible word classes, particle functions and source-listed tense/form labels. This is an analysis aid with alternatives, not a guaranteed syntactic parse. Bounds: 2,000 characters / 80 Korean tokens.
 
-Twenty-seven headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
+Thirty-two headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
 The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.14.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
@@ -74,7 +74,7 @@ The Naver Café pilot also adds source-gated conversational endings such as 놀�
 
 
 ### Malnaru Read and screenshot coverage (0.14.0)
-Malnaru (말나루) is the user-selected suite name, coined from 말 (language) and 나루 (a river crossing). This app is **Malnaru Read**; future Listen/Review apps are naming examples, not implemented products. Earlier names were Bungeoppang and SoftGloss. Existing storage, dictionary IDs, export filenames and repository identifiers remain compatible.
+Malnaru (말나루) is the user-selected suite name, coined from 말 (language) and 나루 (a river crossing). This app is **Malnaru Read**; future Listen/Review apps are naming examples, not implemented products. Earlier names were Bungeoppang and SoftGloss. Existing storage, dictionary IDs, export formats and repository identifiers remain compatible. Download filenames now use malnaru-read; older backups still restore.
 
 TOPIK mode now also marks supported dictionary words without a bundled/imported grade in dotted gray. This includes 어떻게 and ungraded proper names. They receive no invented TOPIK level; words with grades above the selected target stay excluded. Turn off **Also mark ungraded dictionary words** for strict graded-list scanning. Each lookup labels the lack of a study grade.
 

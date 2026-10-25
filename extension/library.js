@@ -74,8 +74,8 @@ $('search-form').onsubmit = event => {
   $('search-results').append(article);
  }
 };
-$('backup').onclick = async () => {await render(); download('softgloss-backup.json', JSON.stringify({version: 2, ...state}, null, 2), 'application/json');};
-$('anki').onclick = async () => {await render(); download('softgloss-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
+$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version: 2, ...state}, null, 2), 'application/json');};
+$('anki').onclick = async () => {await render(); download('malnaru-read-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
 $('clear').onclick = () => {
  if (confirm('Delete all vocabulary, saved sentences and review schedules from this browser? Export a backup first. This cannot be undone.')) write({type: 'clearLearning'}, 'Learning data deleted.');
 };

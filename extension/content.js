@@ -30,7 +30,7 @@
   const settings=el('details','');settings.className='sg-settings';el('summary','Reading settings',settings);
   const label=el('label','Highlight vocabulary ',settings),toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=state.preferences.highlights!==false;label.append(toggle);
   toggle.addEventListener('change',async()=>{if(!await write({type:'setHighlights',enabled:toggle.checked}))toggle.checked=state.preferences.highlights!==false;});
-  el('small','On-page highlights: gray = unknown · amber = seen · green = known. Grammar colors below always have labels.',settings);
+  el('small','Vocabulary-status mode: gray = unknown · amber = seen · green = known. TOPIK mode uses the grade colors below.',settings);
   const studyLabel=el('label','TOPIK study target ',settings),select=el('select','',studyLabel);select.id='sg-study-level';
   for(let level=0;level<=6;level++){const option=el('option',level?'Level '+level+' and below':'Off · vocabulary status',select);option.value=String(level);}select.value=String(state.preferences.studyLevel||0);
   select.addEventListener('change',async()=>{if(!await write({type:'setStudyLevel',level:Number(select.value)}))select.value=String(state.preferences.studyLevel||0);});

@@ -310,7 +310,7 @@ try {
  await popup.setViewportSize({width:350,height:700});await popup.screenshot({path:'test-results/popup.png',fullPage:true});
  await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
- const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
+ const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'malnaru-read-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
  await eventually(() => library.locator('#cards article').count(), 0);
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 0 cards');
