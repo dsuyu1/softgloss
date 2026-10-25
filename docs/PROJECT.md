@@ -217,3 +217,13 @@ User-requested on 2026-10-25. Free and offline for the public; paid per-request 
 - [x] Fall back to installed non-remote `chrome.tts` voices only; no network code, cloud voices or web-accessible resources.
 - [x] Add integrity checks, shard/codec tests and actual-click Chromium panel/library playback under normal autoplay policy. Combined 60-test/static/browser CI passes: Actions 40242136544.
 - [ ] Native-speaker review of flagged clips and a random sample; real-device fallback-voice checks on Windows, macOS and ChromeOS.
+
+
+## 0.16.0 — review pilot usability and keyboard hardening
+Next executable work within the reading-beta scope: make the FSRS review flow practical for daily learner testing. Independent Korean review, 100-token grading, native audio review, real browser permissions/zoom/assistive technology and actual Anki import remain separate human gates; this increment does not unlock reader/subtitle scope.
+- [x] Add Start review, scoped Space/1–4/P/U controls, audio after reveal and focus restoration across rating/undo.
+- [x] Add single-action persisted undo, serialized stale-action protection and monotonic card revisions; clear undo on restore/delete/suspend and omit it from backups.
+- [x] Refresh idle due queues without taking focus; distinguish a suspended deck from an empty one.
+- [x] Test schedule/history recovery, stale cross-tab undo, double undo and failed-write retry locally.
+- [ ] Verify the combined keyboard/audio/undo/idle-refresh flow and narrow/reflow layouts in Chromium CI.
+- [ ] Complete screen-reader/real-zoom checks and learner pilots, then collect independent language/audio judgments.

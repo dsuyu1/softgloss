@@ -46,3 +46,30 @@ test('failed review storage is recoverable and invalid card payloads never enter
  for(const invalid of [{...card,id:'__proto__',entryId:'__proto__'},{...card,url:'javascript:alert(1)'},{...card,source:'https://example.test',license:'CC-BY-SA-4.0'}])await assert.rejects(f.store.apply({type:'addReview',card:invalid}));
  assert.equal(Object.keys(f.read().reviewCards).length,1);
 });
+test('undo restores the prior schedule and history while invalidating old answer revisions',async()=>{
+ const f=fixture();await f.store.apply({type:'addReview',card});const original=f.read().reviewCards[card.id];
+ await f.store.apply({type:'rateReview',id:card.id,rating:4,revision:0});const rated=f.read().reviewCards[card.id];
+ await f.store.apply({type:'undoReview',id:card.id,revision:rated.revision});const undone=f.read().reviewCards[card.id];
+ assert.deepEqual(undone.schedule,original.schedule);assert.deepEqual(undone.history,original.history);assert.equal(undone.revision,2);assert.equal(f.read().reviewUndo,null);
+ await assert.rejects(f.store.apply({type:'rateReview',id:card.id,rating:3,revision:0}),/another tab/);
+ await assert.rejects(f.store.apply({type:'undoReview',id:card.id,revision:1}),/last rating changed/);
+ await f.store.apply({type:'rateReview',id:card.id,rating:4,revision:2});assert.equal(f.read().reviewCards[card.id].schedule.reps,1);
+});
+test('undo refuses a stale last-card action across tabs and cannot be applied twice',async()=>{
+ const f=fixture(),second={...card,id:'softgloss:학교',entryId:'softgloss:학교',lemma:'학교'};
+ await f.store.apply({type:'addReview',card});await f.store.apply({type:'addReview',card:second});
+ await f.store.apply({type:'rateReview',id:card.id,rating:4,revision:0});await f.store.apply({type:'rateReview',id:second.id,rating:4,revision:0});
+ await assert.rejects(f.store.apply({type:'undoReview',id:card.id,revision:1}),/last rating changed/);
+ const results=await Promise.allSettled([1,2].map(()=>f.store.apply({type:'undoReview',id:second.id,revision:1})));
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(f.read().reviewCards[second.id].schedule.reps,0);assert.equal(f.read().reviewCards[card.id].schedule.reps,1);
+});
+test('undo is cleared by restore, deletion, suspension and complete data reset',async()=>{
+ for(const operation of [{type:'suspendReview',id:card.id,suspended:true},{type:'removeReview',id:card.id},{type:'restore',backup:{version:1,words:{},cards:[]}},{type:'clearLearning'}]){
+  const f=fixture();await f.store.apply({type:'addReview',card});await f.store.apply({type:'rateReview',id:card.id,rating:4,revision:0});await f.store.apply(operation);assert.equal(f.read().reviewUndo,null);
+ }
+});
+test('failed undo writes leave the rated schedule intact and allow a later retry',async()=>{
+ const f=fixture();await f.store.apply({type:'addReview',card});await f.store.apply({type:'rateReview',id:card.id,rating:4,revision:0});const before=f.read();f.fail();
+ await assert.rejects(f.store.apply({type:'undoReview',id:card.id,revision:1}),/Storage full/);assert.deepEqual(f.read(),before);
+ await f.store.apply({type:'undoReview',id:card.id,revision:1});assert.equal(f.read().reviewCards[card.id].schedule.reps,0);
+});

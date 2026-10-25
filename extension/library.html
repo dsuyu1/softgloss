@@ -8,10 +8,12 @@
  <p>An offline Korean–English dictionary. Your vocabulary and saved sentences stay in this browser.</p>
  <p id="stats"></p>
  <p id="message" role="status"></p>
- <h2>Review your words</h2>
+ <section id="review-session" aria-labelledby="review-heading">
+ <h2 id="review-heading">Review your words</h2>
  <p>Save a word with “Add to reviews” while reading. Recall its meaning, reveal the answer, then rate your recall. Reviews use FSRS with a 90% target retention and default parameters.</p>
- <p id="review-stats" role="status"></p><div id="review" aria-live="polite"></div>
- <button id="refresh-reviews">Refresh review queue</button>
+ <p id="review-stats" role="status"></p><p id="review-help">Focus this review area to use Space to reveal, 1–4 to rate, P to listen after revealing, and U to undo the last rating. Shortcuts stay inactive while typing.</p><button id="start-review">Start review</button><div id="review" role="region" aria-label="Review card" aria-describedby="review-help" tabindex="-1" aria-live="polite"></div>
+ <button id="undo-review" hidden>Undo last rating</button><button id="refresh-reviews">Refresh review queue</button>
+ </section>
  <details><summary>Manage review deck</summary><label for="review-filter">Filter review words</label><input id="review-filter" type="search" maxlength="80"><div id="review-deck"></div></details>
  <h2>Dictionary search</h2>
  <form id="search-form"><label for="search">Korean word or English meaning</label><input id="search" type="search" maxlength="80" required><button type="submit">Search</button></form>

@@ -93,7 +93,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.15.0/);
+ assert.match(await panel('text'),/v0.16.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -235,18 +235,43 @@ try {
  await Promise.all([library, second].map(p => p.evaluate(card => SGWrite({type: 'saveCard', card}), card)));
  await library.reload(); await eventually(() => library.locator('#cards article').count(), 1);
  await library.locator('#search').fill('학교');await library.locator('#search-form button').click();
+ await library.bringToFront();
  // In-app FSRS: select an entry, reveal, answer, export and round-trip its schedule.
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'1 due · 1 new · 1 cards');
  assert.equal(await library.locator('#review').getByRole('button',{name:/^Good/}).count(),0,'rating requires answer reveal');
- await library.locator('#review').getByRole('button',{name:'Show answer',exact:true}).click();
+ // Shortcuts are scoped: typing in dictionary search cannot reveal or rate a card.
+ await library.locator('#search').fill('');await library.locator('#search').pressSequentially('1234 pu');
+ assert.equal(await library.locator('#review-show-answer').count(),1);
+ assert.equal(await library.evaluate(async()=>Object.values((await chrome.storage.local.get('reviewCards')).reviewCards)[0].schedule.reps),0);
+ await library.locator('#start-review').click();assert.equal(await library.evaluate(()=>document.activeElement.id),'review-show-answer');
+ await library.keyboard.press('1');assert.equal(await library.locator('#review-show-answer').count(),1);
+ await library.keyboard.press('Space');await library.locator('#review-rate-4').waitFor();
+ assert.equal(await library.evaluate(()=>document.activeElement.id),'review');
+ await library.keyboard.press('p');await eventually(()=>library.locator('#message').textContent(),'Machine-generated voice · Supertonic 3');
  await library.screenshot({path:'test-results/review-desktop.png',fullPage:true});
- await library.locator('#review').getByRole('button',{name:/^Easy/}).click();
+ // At a 200%-equivalent reduced CSS viewport, ratings and help reflow without overflow.
+ await library.setViewportSize({width:640,height:360});assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await library.setViewportSize({width:360,height:740});assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await library.locator('#review').scrollIntoViewIfNeeded();await library.screenshot({path:'test-results/review-mobile.png'});
+ await library.setViewportSize({width:1280,height:720});
+ await library.keyboard.press('4');await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
+ await library.keyboard.press('u');await eventually(()=>library.locator('#review-stats').textContent(),'1 due · 1 new · 1 cards');
+ assert.equal(await library.evaluate(()=>document.activeElement.id),'review-show-answer');
+ assert.equal(await library.evaluate(async()=>Object.values((await chrome.storage.local.get('reviewCards')).reviewCards)[0].schedule.reps),0);
+ await library.keyboard.press('Space');await library.keyboard.press('4');
+ await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
+ // Idle queues wake themselves when a scheduled card becomes due, without taking focus.
+ await library.locator('#search').focus();
+ await library.evaluate(async()=>{const {reviewCards}=await chrome.storage.local.get('reviewCards');for(const c of Object.values(reviewCards))c.schedule.due=new Date(Date.now()+750).toISOString();await chrome.storage.local.set({reviewCards});});
+ await eventually(()=>library.locator('#review-show-answer').count(),1);
+ assert.equal(await library.evaluate(()=>document.activeElement.id),'search');
+ await library.locator('#start-review').click();await library.keyboard.press('Space');await library.keyboard.press('4');
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
  const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{}}));
- assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,1);
+ assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,2);
  // Frame fixture: child highlights and selection use the top panel, preserving link behavior.
  const framePage=await context.newPage();await framePage.goto(url+'frames');
  const frameTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'frames');
