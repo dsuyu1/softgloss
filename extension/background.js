@@ -1,12 +1,11 @@
 importScripts('core.js', 'mutations.js', 'dictionary-files.js');
 const store = SGStore.createStore(chrome.storage.local);
-async function enable(tab, keyboard = false) {
+async function enablePage(tab) {
  if (!tab?.id) return {ok:false,error:'Open an ordinary website first.'};
  try {
   const [loaded] = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: () => Boolean(globalThis.SG_DATA?.loaded)});
   if (!loaded.result) await chrome.scripting.executeScript({target: {tabId: tab.id}, files: SG_DICTIONARY_FILES});
   await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['core.js', 'api.js', 'content.js']});
-  if (keyboard) await chrome.scripting.executeScript({target: {tabId: tab.id}, func: () => globalThis.__softgloss?.openSelection()});
   await chrome.action.setBadgeText({tabId: tab.id, text: 'ON'});
   await chrome.action.setTitle({tabId: tab.id, title: 'Open SoftGloss on this page'});
   return {ok:true};
@@ -15,6 +14,14 @@ async function enable(tab, keyboard = false) {
   await chrome.action.setTitle({tabId: tab.id, title: 'SoftGloss cannot run here. Try a normal web article.'});
   return {ok:false,error:'Could not activate this page. Reload the webpage and try again. Chrome settings, Web Store pages and PDFs are unsupported.'};
  }
+}
+const activationLoads=new Map();
+async function enable(tab,keyboard=false) {
+ if(!tab?.id)return {ok:false,error:'Open an ordinary website first.'};
+ if(!activationLoads.has(tab.id))activationLoads.set(tab.id,enablePage(tab).finally(()=>activationLoads.delete(tab.id)));
+ const result=await activationLoads.get(tab.id);
+ if(result?.ok && keyboard)await chrome.scripting.executeScript({target:{tabId:tab.id},func:()=>globalThis.__softgloss?.openSelection()});
+ return result;
 }
 chrome.action.onClicked.addListener(tab => enable(tab));
 chrome.commands.onCommand.addListener(async command => {

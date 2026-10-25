@@ -178,8 +178,9 @@ try {
  const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html`);
  assert.equal(await popup.locator('#enable').textContent(),'Enable on this page');
  assert.match(await popup.locator('main').textContent(),/No local server/);
- const activation=await popup.evaluate(tabId=>chrome.runtime.sendMessage({type:'enableCurrent',tabId}),tabId);
- assert.equal(activation.ok,true);
+ const inactiveTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'inactive');
+ const activations=await popup.evaluate(tabId=>Promise.all([chrome.runtime.sendMessage({type:'enableCurrent',tabId}),chrome.runtime.sendMessage({type:'enableCurrent',tabId})]),inactiveTab);
+ assert.ok(activations.every(r=>r.ok));assert.equal(await inactivePage.locator('#softgloss-root').count(),1);
  await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
