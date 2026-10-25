@@ -117,3 +117,11 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Reset partial dictionary-load buffers on retry.
 - [ ] Complete 100+ independent reading reviews and validate the declared reviewer evidence.
 - [ ] Independently review teaching notes; the reviewed-grammar beta gate is still open.
+
+## 0.5.1 browser/performance increment
+- [x] Fix hidden focus blocking hover after closing keyboard lookup.
+- [x] Reject hover outside the actual Korean token's text rectangles.
+- [x] Yield highlight scans between nodes after an elapsed-time budget.
+- [x] Add pointer, blank-space, selection and editable-input browser regressions.
+- [x] Add reproducible CI performance artifact for startup, renderer heap and a 2,000-paragraph dynamic page.
+- [ ] Record passing CI reference measurements; real-device profiling remains open.
