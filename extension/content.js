@@ -84,7 +84,7 @@
   if (!enabled) return;
   const value = word.trim();
   if (!manual && value === current && context === sentence && !panel.hidden) return;
-  current = value.slice(0,300); phraseResult = SG.phrase(current); sentence = context || (phraseResult ? current : ''); results = phraseResult ? phraseResult.components.flatMap(c=>c.results) : manual ? SG.search(current) : SG.lookup(current);
+  current = value.slice(0,300); phraseResult = SG.phrase(current); sentence = phraseResult && !context.includes(current) ? current : context; results = phraseResult ? phraseResult.components.flatMap(c=>c.results) : manual ? SG.search(current) : SG.lookup(current);
   panel.hidden = false; render();
  }
  function selected() {
