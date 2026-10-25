@@ -162,12 +162,13 @@ try {
  await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:true});await syncAuto();});
  const automaticPage=await context.newPage();await automaticPage.goto(url+'automatic');
  assert.equal(await automaticPage.locator('#softgloss-root').count(),0,'auto mode must stay lazy before Korean interaction');
+ const autoTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'automatic');
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softglossBootstrap)});return r.result;},autoTab),true);
  await automaticPage.evaluate(()=>{
   const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);const s=getSelection();s.removeAllRanges();s.addRange(r);
   document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
  });
  await automaticPage.locator('#softgloss-root').waitFor();
- const autoTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'automatic');
  assert.equal(await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(SG_DATA.loaded && __softgloss)});return r.result;},autoTab),true);
  await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
  assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
