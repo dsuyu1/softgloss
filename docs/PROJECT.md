@@ -154,4 +154,5 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Explain supported adjacent negation, ability and intention constructions; retain component definitions and unresolved tokens.
 - [x] Refresh the panel and toolbar popup with compact navigation, neutral surfaces and coral actions, inspired by the supplied Figma reference.
 - [x] Label grammar/part-of-speech colors, merge duplicate analyses per source entry and collapse secondary meanings/settings.
+- [x] Verify phrase selection, context saving, automatic activation and existing regressions in Chromium CI; inspect desktop/narrow-panel/popup screenshots (Actions 40213872396).
 - [ ] Independently review Korean-language accuracy and usability with learners; expand genuine headword coverage beyond these pilot misses.

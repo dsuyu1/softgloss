@@ -38,14 +38,14 @@
   if(!current)el('p','Hover a Korean word or select up to 8 words for a phrase breakdown. Alt+Shift+K opens the selection or search.');
   else if(!results.length&&!phraseResult)el('p','No supported entry yet. Try a dictionary form or select a shorter phrase.');
   if(phraseResult) {
-   const box=el('div','');box.className='sg-phrase';el('h3',phraseResult.constructions.length?'Construction hints':'Word-by-word breakdown',box);
-   for(const c of phraseResult.constructions){el('p',c.surface,box).lang='ko';const chip=el('span',c.pattern,box);chip.className='sg-chip sg-construction';el('p',c.meaning,box);}
-   el('small',phraseResult.constructions.length?'These patterns explain the marked construction, not a translation of the entire selection.':'Whole-phrase meaning is not resolved. Component meanings may change in idioms.',box);
+   const box=el('div','');box.className='sg-phrase';el('h3',phraseResult.constructions.length?'Phrase pattern':'Word-by-word breakdown',box);
+   for(const c of phraseResult.constructions){if(c.surface!==current)el('p',c.surface,box).lang='ko';const chip=el('span',c.pattern,box);chip.className='sg-chip sg-construction';el('p',c.meaning,box);}
+   el('small',phraseResult.constructions.length?'Pattern meaning; the full phrase may depend on other words.':'Whole-phrase meaning is not resolved. Component meanings may change in idioms.',box);
    const chips=el('div','',box);
    for(const component of phraseResult.components){const pos=component.results[0]?.pos;const role=['verb','adjective'].includes(pos)?'Predicate':['noun','pronoun'].includes(pos)?'Noun':pos||'No entry';const chip=el('span',component.surface+' · '+role,chips);chip.className='sg-chip'+(['verb','adjective'].includes(pos)?' sg-predicate':['noun','pronoun'].includes(pos)?' sg-noun':'');chip.lang='ko';}
   }
   const other=phraseResult?.components.filter(c=>c.alternatives?.length)||[];
-  if(other.length){const details=el('details','');el('summary','Other homonyms outside this pattern',details);for(const c of other){el('p',c.surface,details);for(const r of new Map(c.alternatives.map(r=>[r.id||r.lemma,r])).values())el('p',r.lemma+' · '+r.pos+' · '+r.meaning,details);button('Look up '+c.surface,()=>display(c.surface,'',true),details);}}
+  if(other.length){const details=el('details','');el('summary','Other word meanings',details);for(const c of other){el('p',c.surface,details);for(const r of new Map(c.alternatives.map(r=>[r.id||r.lemma,r])).values())el('p',r.lemma+' · '+r.pos+' · '+r.meaning,details);button('Look up '+c.surface,()=>display(c.surface,'',true),details);}}
   // Keep homonyms separate, but merge analyses of the same source entry.
   const groups=new Map();for(const r of results){const key=r.id||r.lemma;if(!groups.has(key))groups.set(key,{...r,parts:[],analyses:[],surfaces:[]});const g=groups.get(key);g.parts.push(...r.parts);g.analyses.push(r);g.surfaces.push(r.surface);}
   for(const r of groups.values()) {
