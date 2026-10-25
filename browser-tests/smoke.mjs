@@ -164,12 +164,15 @@ try {
  assert.equal(await automaticPage.locator('#softgloss-root').count(),0,'auto mode must stay lazy before Korean interaction');
  const autoTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'automatic');
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softglossBootstrap)});return r.result;},autoTab),true);
+ await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>{const original=Element.prototype.attachShadow;Element.prototype.attachShadow=function(options){const root=original.call(this,options);if(this.id==='softgloss-root')globalThis.__autoTestRoot=root;return root;};}}),autoTab);
  await automaticPage.evaluate(()=>{
   const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);const s=getSelection();s.removeAllRanges();s.addRange(r);
   document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
  });
- await automaticPage.locator('#softgloss-root').waitFor();
+ await automaticPage.locator('#softgloss-root').waitFor({state:'attached'});
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),true);
+ const autoResult=await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>({hidden:globalThis.__autoTestRoot.querySelector('section').hidden,word:globalThis.__autoTestRoot.querySelector('input[type=search]').value})});return r.result;},autoTab);
+ assert.deepEqual(autoResult,{hidden:false,word:'책을'});
  await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
  assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),false);
