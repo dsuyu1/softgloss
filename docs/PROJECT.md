@@ -143,5 +143,5 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Add bounded -면서 / -는지 and nominalization + particle candidates.
 - [x] Add labeled two-noun and noun + 하다/되다 component fallbacks.
 - [x] Record screenshot-derived probes without claiming independent reviewer approval.
-- [ ] Verify expanded pack in browser CI and long-page benchmark.
+- [x] Verify expanded pack, pilot examples, activation and long-page benchmark in Chromium CI: Actions 40211604984.
 - [ ] Broaden full headword coverage (청원인 is a tracked remaining miss); independently review new analyses.
