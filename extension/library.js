@@ -55,6 +55,11 @@ $('search-form').onsubmit = event => {
   const article = document.createElement('article');
   const title = document.createElement('h3'); title.textContent = r.lemma; title.lang = 'ko'; article.append(title);
   const p = document.createElement('p'); p.textContent = r.parts.join(' · '); article.append(p);
+  for (const card of SG.grammarFor(r)) {
+   const details = document.createElement('details'); const title = document.createElement('summary'); title.textContent = 'Grammar hint · ' + card.title; details.append(title);
+   for (const text of [card.hint, card.explanation, card.example]) {const p = document.createElement('p'); p.textContent = text; details.append(p);}
+   const source = document.createElement('a'); source.textContent = 'Wiktionary contributors · CC BY-SA 4.0'; source.href = card.source; source.target = '_blank'; source.rel = 'noopener noreferrer'; details.append(source); article.append(details);
+  }
   const list = document.createElement('ol');
   for (const sense of r.senses || [{glosses: [r.meaning], tags: []}]) {const li = document.createElement('li'); li.textContent = (sense.tags.length ? '[' + sense.tags.join(', ') + '] ' : '') + sense.glosses.join('; '); list.append(li);}
   article.append(list);

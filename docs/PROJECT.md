@@ -109,3 +109,11 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Keep vocabulary/backups compatible with existing lemma-based data.
 - [x] Add integrity, irregular-form, ambiguity and attribution regression coverage.
 - [x] Verify full-pack browser CI: [Actions run 40165006893](https://github.com/dsuyu1/softgloss/actions/runs/40165006893). Merge tracked in PR #7.
+
+## 0.5.0 grammar and accuracy-review increment
+- [x] Add offline review preparation/grading with analysis fingerprints, reviewer declarations and separate unknown/incorrect/pending metrics.
+- [x] Add three source-checked particle notes with expandable hints, original examples and source attribution. Independent Korean review remains open.
+- [x] Reject incompatible standard particle allomorphs; handle ㄹ + 로.
+- [x] Reset partial dictionary-load buffers on retry.
+- [ ] Complete 100+ independent reading reviews and validate the declared reviewer evidence.
+- [ ] Independently review teaching notes; the reviewed-grammar beta gate is still open.

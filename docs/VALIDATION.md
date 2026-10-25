@@ -42,3 +42,6 @@ Browser findings must be recorded here before checking the corresponding PROJECT
 
 ### Full-pack CI result
 [Actions run 40165006893](https://github.com/dsuyu1/softgloss/actions/runs/40165006893) passed both jobs: deterministic offline rebuild, 20 Node tests, syntax/integrity/safety checks, ZIP packaging and full-pack Chromium smoke tests. The browser suite exercises search, alternate senses, listed irregulars, source attribution, dynamic highlighting, disabling/re-enabling, multi-tab saves, backup round trips, narrow library layout, restart persistence and absence of outgoing HTTP requests. This is still distinct from manual activeTab/hover/assistive-technology/Anki checks and independent Korean-language validation.
+
+## 0.5.0 validation
+Added regression checks for standard particle variants, the ㄹ + 로 exception, grammar attachment, pending/unknown score handling and stale or deleted review candidates. Browser CI checks the new expandable grammar hints. Independent linguistic evaluation and reviewed grammar remain uncompleted; synthetic examples do not satisfy them.

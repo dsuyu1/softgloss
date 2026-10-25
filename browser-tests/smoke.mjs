@@ -55,6 +55,8 @@ try {
     if (action === 'status') return root.querySelector('button[data-status=known]')?.getAttribute('aria-pressed');
     if (action === 'highlight') return CSS.highlights.get('softgloss-known')?.size || 0;
     if (action === 'focus') return root.activeElement?.id;
+    if (action === 'grammarOpen') return [...root.querySelectorAll('details')].map(d=>d.open);
+    if (action === 'expandGrammar') root.querySelector('summary')?.click();
     return root.querySelector('section').textContent;
    }, args: [action, value]});
    return result.result;
@@ -66,6 +68,11 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
+ assert.match(await panel('search', '책을'), /Grammar hint/);
+ assert.match(await panel('search', '책을'), /Explain and show an example/);
+ assert.deepEqual(await panel('grammarOpen'), [false,false]);
+ await panel('expandGrammar');
+ assert.deepEqual(await panel('grammarOpen'), [true,false]);
  assert.match(await panel('search', 'BOOK'), /책/);
  await panel('click', 'known'); await eventually(() => panel('status'), 'true');
  await eventually(() => panel('highlight'), 1);
