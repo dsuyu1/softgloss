@@ -1,0 +1,1 @@
+{"manifest_version":3,"name":"SoftGloss — Korean reading companion","version":"0.2.0","description":"Offline Korean word lookup and sentence saving. Early alpha with a small starter dictionary.","permissions":["activeTab","scripting","storage"],"action":{"default_title":"Enable SoftGloss on this page"},"background":{"service_worker":"background.js"},"options_page":"library.html"}

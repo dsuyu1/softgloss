@@ -1,0 +1,88 @@
+# SoftGloss project scope and delivery checklist
+
+Owner: Damian Villarreal. Scope baseline: October 24, 2026.
+Working name: SoftGloss. Status: foundation alpha, not a public release.
+
+## Product commitment
+A free, useful Korean immersion companion without AI. Target learners know roughly 500+ words and want to read real content with less lookup friction. Long-term destination: dictionary, morphology, grammar, subtitles, sentence mining, vocabulary tracking, reader, recommendations and mobile. Build our own implementation; do not copy a competitor's code or content.
+
+Core lookup, local vocabulary tracking and sentence saving should remain usable without an account. Cloud services are optional additions. Do not promise every future hosted feature is free forever.
+
+## How we track work
+Check a box only when its stated deliverable is implemented and supporting evidence is recorded. “Implemented” is distinct from browser-verified or release-ready. Keep unverified gates open. Every increment updates this file and docs/VALIDATION.md. Once the repository exists, mirror milestone groups into GitHub issues and link their evidence here. Do not broaden the current release until its acceptance gates pass or a deliberate scope revision is recorded.
+
+## M0 — scope and foundation
+- [x] Recover and inspect original prototype. It contains two canned examples and optional remote AI; retain as reference, not the new runtime.
+- [x] Define account-free, offline first-release boundary and later milestones.
+- [x] Verify authenticated GitHub identity and Cloudflare account access.
+- [x] Create dependency-free Manifest V3 source scaffold, core tests and CI definition.
+- [x] Dedicated repository created and initialized: https://github.com/dsuyu1/softgloss
+- [ ] Import this source through the foundation pull request.
+- [ ] Run CI remotely after repository setup.
+
+## M1a — starter alpha (current increment)
+- [x] Toolbar enables lookup on current page with activeTab, scripting and storage permissions; no permanent host access.
+- [x] Implement dictionary-backed word lookup, explicitly listed conjugations and limited particle candidates.
+- [x] Render unknown-word fallback without invented translation.
+- [x] Implement Unknown / Seen / Known state keyed by lemma and local page colors.
+- [x] Implement local sentence cards, duplicate prevention and deletion.
+- [x] Implement JSON backup/restore with schema validation and replacement confirmation.
+- [x] Implement Anki-compatible TSV export with escaped HTML.
+- [x] Add original starter glosses and record that they are not a production dictionary.
+- [x] Add demo page and unpacked-install instructions.
+- [x] Automated core and static safety checks pass locally.
+- [ ] Verify extension installation, injection, hover, selection and library opening in Chrome.
+- [ ] Verify persistence after browser restart; backup round trip and actual Anki import.
+- [ ] Verify keyboard access, focus behavior, narrow screens and zoom.
+- [ ] Verify no outgoing requests in browser network logs.
+
+## M1b — useful reading beta (next implementation milestone)
+- [ ] Audit candidate dictionary licenses using upstream policy; record version, source, attribution, redistribution and commercial-use obligations before bundling.
+- [ ] Build reproducible offline dictionary import with stable IDs and bilingual senses.
+- [ ] Evaluate morphological analyzers against explicit forms/rules; measure browser footprint, ambiguity and lookup coverage before choosing.
+- [ ] Support irregular conjugations beyond starter forms; preserve multiple senses/analyses.
+- [ ] Add reviewed grammar entries and source attribution.
+- [ ] Show supported hanja, idioms and frequency data only after source approval; never fabricate missing fields.
+- [ ] Add manual dictionary search and keyboard lookup so hover is not required.
+- [ ] Add disable/enable controls, highlighting preferences and dynamic-page support.
+- [ ] Serialize vocabulary/card writes to avoid multi-tab lost updates.
+- [ ] Make unknown/seen/known distinguishable without relying on color alone.
+- [ ] Benchmark lookup latency and long-page responsiveness; target p95 under 100 ms after dictionary initialization on a documented reference machine.
+- [ ] Evaluate at least 100 independently checked tokens/forms; publish unsupported and incorrect cases. Target >=95% correct supported analyses; do not count unknowns as correct.
+- [ ] Pilot with Damian and 3–5 learners; log friction and prioritize fixes before expansion.
+
+## M1 release gates
+- [ ] All M1a manual tests and M1b tasks above resolved or explicitly moved out with rationale.
+- [ ] No AI runtime, no API keys, no telemetry, no lookup service dependency.
+- [ ] Full dictionary license/attribution, privacy notice, install/help and data deletion instructions reviewed.
+- [ ] Supported ordinary web pages work without breaking links, selection or editing.
+- [ ] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
+- [ ] All required checks pass, review complete, versioned release ZIP produced.
+
+## Later milestones — not promised in the current release
+M2: text/Markdown reader; EPUB with safe rendering; YouTube available subtitle tracks, dual display, word lookup and sentence capture. Each has separate acceptance tests. Missing subtitle translations are not generated.
+
+M3: optional account sync and data deletion; conflict resolution; authenticated Cloudflare Worker API and D1 metadata, R2 only for justified object storage; Netflix/Viki feasibility and maintenance testing. No cloud resources provisioned in this increment.
+
+M4: licensed, maintainable content catalog and recommendations using vocabulary coverage; iOS integration and shared dictionary/library format. Community features and opt-in leaderboards only after a demonstrated need. Android later.
+
+## Architecture and costs
+Current: isolated extension content script → local dictionary/rules → chrome.storage.local. No backend, no network calls, no runtime dependencies. Shadow DOM separates popup styles; CSS Custom Highlights avoids wrapping page text. Core is independent of Chrome APIs for future reuse.
+
+Cloudflare later: static documentation/download hosting first if useful, then optional sync. Do not provision accounts/database/object storage for functionality already handled locally. No deployment, DNS, billing changes or paid resources in this increment. Track hosting/storage/egress costs before offering sync without limits.
+
+## Decisions and limits
+The seed pack is deliberately small; it does not meet the useful-beta coverage gate. No monolingual dictionary, production parser, frequency ranks, hanja, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Current highlighting only scans the initial DOM (up to 10,000 text nodes); enable again to refresh. Concurrent multi-tab writes are an alpha limitation.
+
+## Next concrete work
+1. Merge the foundation pull request after checks pass.
+2. Run manual Chrome smoke tests and fix failures.
+3. Complete dictionary/data license audit and select a reproducible data pipeline.
+4. Expand morphology against a reviewed Korean fixture set.
+5. Reassess beta scope with evidence from the pilot.
+
+## GitHub work tracking
+- [Chrome verification #1](https://github.com/dsuyu1/softgloss/issues/1)
+- [Dictionary/data pipeline #2](https://github.com/dsuyu1/softgloss/issues/2)
+- [Morphology/accuracy #3](https://github.com/dsuyu1/softgloss/issues/3)
+- [UX hardening and beta gates #4](https://github.com/dsuyu1/softgloss/issues/4)
