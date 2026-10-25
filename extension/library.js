@@ -1,4 +1,4 @@
-let state,activeReview=null,answerShown=false;
+let state,activeReview=null,answerShown=false,reviewBusy=false,reviewTimer;
 const $ = id => document.getElementById(id);
 function download(name, text, type) {
  const url = URL.createObjectURL(new Blob([text], {type}));
@@ -10,7 +10,7 @@ async function write(message, success) {
  catch (error) {$('message').textContent = 'Could not save: ' + error.message;}
 }
 async function render() {
- state = await chrome.storage.local.get({words: {}, cards: [],reviewCards:{}});
+ state = await chrome.storage.local.get({words: {}, cards: [],reviewCards:{},reviewUndo:null});
  const counts = {unknown: 0, seen: 0, known: 0};
  Object.values(state.words).forEach(s => counts[s]++);
  $('stats').textContent = `${counts.known} known · ${counts.seen} seen · ${state.cards.length} saved sentences`;
@@ -83,7 +83,7 @@ $('search-form').onsubmit = event => {
   $('search-results').append(article);
  }
 };
-$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version: 2, ...state}, null, 2), 'application/json');};
+$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version:2,words:state.words,cards:state.cards,reviewCards:state.reviewCards}, null, 2), 'application/json');};
 $('anki').onclick = async () => {await render(); download('malnaru-read-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
 $('clear').onclick = () => {
  if (confirm('Delete all vocabulary, saved sentences and review schedules from this browser? Export a backup first. This cannot be undone.')) write({type: 'clearLearning'}, 'Learning data deleted.');
@@ -102,36 +102,68 @@ render();
 
 function reviewText(tag,text,parent){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
 function reviewButton(text,action,parent){const b=reviewText('button',text,parent);b.type='button';b.onclick=action;return b;}
+function focusReview(){const target=$('review-show-answer')||$('review');target.focus({preventScroll:true});}
+async function reviewAction(message,success){
+ if(reviewBusy)return;reviewBusy=true;renderReviews();
+ try{await SGWrite(message);answerShown=false;$('message').textContent=success;}
+ catch(e){$('message').textContent=e.message;}
+ finally{const focused=document.activeElement,restoreFocus=focused===document.body||$('review-session').contains(focused);reviewBusy=false;await render();if(restoreFocus)focusReview();}
+}
+function revealReview(){if(!activeReview||reviewBusy||answerShown)return;answerShown=true;renderReviews();$('review').focus({preventScroll:true});}
+function rateReview(rating){if(activeReview&&answerShown&&!reviewBusy)reviewAction({type:'rateReview',id:activeReview.id,rating,revision:activeReview.revision},'Review saved.');}
+function undoReview(){const undo=state.reviewUndo;if(undo&&!reviewBusy)reviewAction({type:'undoReview',id:undo.id,revision:undo.revision},'Last rating undone.');}
+function scheduleReviewRefresh(){
+ clearTimeout(reviewTimer);const now=Date.now(),future=Object.values(state.reviewCards).filter(c=>!c.suspended&&Date.parse(c.schedule.due)>now).map(c=>Date.parse(c.schedule.due));
+ if(!future.length)return;
+ const delay=Math.min(60000,Math.max(50,Math.min(...future)-now+25));
+ reviewTimer=setTimeout(()=>{if(!document.hidden&&!activeReview&&!reviewBusy)renderReviews();else scheduleReviewRefresh();},delay);
+}
 function renderReviews(){
- const deck=state.reviewCards,now=Date.now(),due=SGSRS.due(deck,now),all=Object.values(deck),box=$('review');
+ const box=$('review'),focused=document.activeElement,hadFocus=box.contains(focused),focusId=focused?.id;
+ const deck=state.reviewCards,now=Date.now(),due=SGSRS.due(deck,now),all=Object.values(deck);
  $('review-stats').textContent=due.length+' due · '+all.filter(c=>c.schedule.state===0&&!c.suspended).length+' new · '+all.length+' cards';
  const next=due[0];
  if(!next||next.id!==activeReview?.id||next.revision!==activeReview?.revision){activeReview=next||null;answerShown=false;}
- box.replaceChildren();
+ $('start-review').disabled=!next||reviewBusy;
+ const undo=$('undo-review');undo.hidden=!state.reviewUndo;undo.disabled=reviewBusy;undo.textContent='Undo last rating'+(state.reviewUndo?' · '+state.reviewUndo.before.lemma:'');
+ box.replaceChildren();box.setAttribute('aria-busy',String(reviewBusy));
  if(!next){
   const future=all.filter(c=>!c.suspended).sort((a,b)=>Date.parse(a.schedule.due)-Date.parse(b.schedule.due))[0];
-  reviewText('p',future?'You’re done for now. Next review: '+new Date(future.schedule.due).toLocaleString()+'.':'Your review deck is empty. Add a word from a dictionary result to begin.',box);
+  reviewText('p',future?'You’re done for now. Next review: '+new Date(future.schedule.due).toLocaleString()+'.':all.length?'All your review cards are suspended. Resume one in Manage review deck.':'Your review deck is empty. Add a word from a dictionary result to begin.',box);
  }else{
   reviewText('h3',next.lemma,box).lang='ko';
-  if(!answerShown)reviewButton('Show answer',()=>{answerShown=true;renderReviews();},box);
+  if(!answerShown){const show=reviewButton('Show answer',revealReview,box);show.id='review-show-answer';show.disabled=reviewBusy;}
   else{
    reviewText('p',next.meaning,box);
+   const listen=listenButton(next.lemma);listen.id='review-listen';listen.disabled=reviewBusy;box.append(listen);
    if(next.sentence)reviewText('p',next.sentence,box).lang='ko';
    const entry=SG.lookup(next.lemma).find(e=>e.id===next.entryId);
    if(entry)for(const example of SG.examplesFor(entry)){reviewText('p',example.korean,box).lang='ko';reviewText('p',example.english,box);}
    const learning=globalThis.SG_LEARNING_EXAMPLES?.[next.lemma];if(learning?.[2]===next.entryId){reviewText('small','Original learning example',box);reviewText('p',learning[0],box).lang='ko';reviewText('p',learning[1],box);}
    if(next.source){const a=reviewText('a','Wiktionary contributors · CC BY-SA 4.0',box);a.href=next.source;a.target='_blank';a.rel='noopener noreferrer';}
    const ratings=reviewText('div','',box);ratings.className='review-ratings';const preview=SGSRS.preview(next,new Date(now));
-   for(const [i,label] of ['Again','Hard','Good','Easy'].entries())reviewButton(label+' · '+SGSRS.interval(preview[i+1].card.due,now),async()=>{
-    for(const b of ratings.querySelectorAll('button'))b.disabled=true;
-    try{await SGWrite({type:'rateReview',id:next.id,rating:i+1,revision:next.revision});answerShown=false;await render();$('message').textContent='Review saved.';}
-    catch(e){$('message').textContent=e.message;await render();}
-   },ratings);
+   for(const [i,label] of ['Again','Hard','Good','Easy'].entries()){
+    const button=reviewButton(label+' · '+SGSRS.interval(preview[i+1].card.due,now),()=>rateReview(i+1),ratings);button.id='review-rate-'+(i+1);button.disabled=reviewBusy;button.setAttribute('aria-keyshortcuts',String(i+1));
+   }
    reviewText('small','Again: forgot · Hard: recalled with effort · Good: recalled · Easy: effortless',box);
   }
  }
- renderReviewDeck();
+ renderReviewDeck();scheduleReviewRefresh();
+ if(hadFocus){const restored=focusId&&$(focusId);(restored&&box.contains(restored)?restored:box).focus({preventScroll:true});}
 }
+$('start-review').onclick=()=>{focusReview();$('review-session').scrollIntoView({block:'start',behavior:'auto'});};
+$('undo-review').onclick=undoReview;
+$('review-session').addEventListener('keydown',event=>{
+ if(event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.target.closest('input,textarea,select,[contenteditable],[role=textbox]'))return;
+ let handled=false;
+ if(event.code==='Space'&&(event.target===$('review')||event.target.id==='review-show-answer'||event.target.id==='start-review')){revealReview();handled=true;}
+ else if(/^[1-4]$/.test(event.key)&&answerShown){rateReview(Number(event.key));handled=true;}
+ else if(event.key.toLowerCase()==='p'&&answerShown){$('review-listen')?.click();handled=true;}
+ else if(event.key.toLowerCase()==='u'&&state.reviewUndo){undoReview();handled=true;}
+ if(handled)event.preventDefault();
+});
+document.addEventListener('visibilitychange',()=>{if(state&&!document.hidden&&!activeReview&&!reviewBusy)renderReviews();});
+
 function renderReviewDeck(){
  const box=$('review-deck');box.replaceChildren();const query=$('review-filter').value.trim();
  const cards=Object.values(state.reviewCards).filter(c=>c.lemma.includes(query));
@@ -144,4 +176,4 @@ function renderReviewDeck(){
 }
 $('review-filter').oninput=renderReviewDeck;
 $('refresh-reviews').onclick=()=>render();
-chrome.storage.onChanged.addListener((changes,area)=>{if(state&&area==='local'&&changes.reviewCards){state.reviewCards=changes.reviewCards.newValue||{};renderReviews();}});
+chrome.storage.onChanged.addListener((changes,area)=>{if(state&&area==='local'&&(changes.reviewCards||changes.reviewUndo)){if(changes.reviewCards)state.reviewCards=changes.reviewCards.newValue||{};if(changes.reviewUndo)state.reviewUndo=changes.reviewUndo.newValue||null;renderReviews();}});

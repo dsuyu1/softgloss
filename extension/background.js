@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if(sender.tab?.id){chrome.action.setBadgeText({tabId:sender.tab.id,text:''});if(sender.frameId===0)chrome.scripting.executeScript({target:{tabId:sender.tab.id,allFrames:true},func:()=>{if(window!==top)globalThis.__softgloss?.disable();}}).catch(()=>{});}
   return;
  }
- const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'setUngradedHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','suspendReview','removeReview'];
+ const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'setUngradedHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','undoReview','suspendReview','removeReview'];
  if (!operations.includes(message?.type)) return;
  store.apply(message).then(respond, e => respond({ok: false, error: e.message}));
  return true;

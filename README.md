@@ -3,7 +3,7 @@ Free, offline Korean reading companion. **Offline dictionary alpha — broader c
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.15.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.16.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin Malnaru Read from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
@@ -59,7 +59,7 @@ Use **Break down sentence** after looking up page text for possible word classes
 Thirty-two headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
-The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.15.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
+The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.16.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
 
 The pinned dictionary now supplies 3,704 bilingual sentence pairs across 3,276 senses, reaching 2,814 of 33,796 dictionary entries (before original learning examples). Examples show their associated sense and source attribution. The corpus does not supply suitable bilingual examples for every entry; missing examples are labeled, not generated.
 
@@ -83,3 +83,9 @@ Supported question endings now include 해결하시는지요, and noun/copula ba
 
 ### Pronunciation (0.15.0)
 **Listen** on a dictionary card or library word plays the dictionary form. 9,709 of the 9,719 bundled curriculum lemmas have packaged clips (24 MB), machine-generated offline with the open-weight [Supertonic 3](https://huggingface.co/Supertone/supertonic-3) model (OpenRAIL-M). No model runs in the browser and nothing is sent anywhere. Other words use an offline Korean voice installed on your device, if one exists; cloud voices are skipped. An automatic speech-recognition screen flags uncertain clips, but native-speaker review is still pending. See [pronunciation audio](docs/AUDIO.md).
+
+
+### Daily review controls (0.16.0)
+Choose **Start review** in My library to focus the review card. **Space** reveals the answer; **1 / 2 / 3 / 4** rate Again / Hard / Good / Easy; **P** plays pronunciation after revealing; **U** undoes the last rating. Buttons remain available. Shortcuts are limited to the review area and never intercept typing in dictionary or deck filters. The next card receives focus after a rating or undo; an idle queue refreshes when a card becomes due without moving focus out of another field.
+
+Undo applies only to the latest rating across tabs. It restores that card’s earlier schedule/history while advancing its revision so an old answer cannot be submitted again. Another rating replaces the undo action. Suspending/removing that card, restoring a backup or deleting learning data clears it. Undo is retained locally across restart but is excluded from JSON exports. Existing v1/v2 backups and Anki content export remain compatible.
