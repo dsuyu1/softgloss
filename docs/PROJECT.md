@@ -208,3 +208,12 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Original 층간소음 and four team-name entries with original bilingual examples. Names checked against the official KBO club directory.
 - [x] Chromium screenshot/range and existing frame/FSRS regressions pass; desktop/narrow/toolbar screenshots inspected (Actions 40239976738).
 - [ ] Independently review the new analyses/examples. Image lettering/OCR, arbitrary unknown names and general spacing repair remain outside the supported parser.
+
+## 0.15.0 — explicit scope addition: pronunciation audio
+User-requested on 2026-10-25. Free and offline for the public; paid per-request TTS such as ElevenLabs was ruled out on cost and privacy. See docs/AUDIO.md.
+- [x] Compare open-weight Korean TTS licenses and fit; select Supertonic 3 (OpenRAIL-M) for offline pre-generation, not in-browser inference.
+- [x] Add a resumable generator pinned through SDK 1.3.1 to the model revision, voice, seed, steps and codec; reject SDK/revision overrides. Record per-clip ASR screen results; exclude gross failures and list flagged clips.
+- [x] Package curriculum clips as hashed shards loaded on demand; Listen in the panel and library; disclose machine-generated speech.
+- [x] Fall back to installed non-remote `chrome.tts` voices only; no network code, cloud voices or web-accessible resources.
+- [x] Add integrity checks, shard/codec tests and actual-click Chromium panel/library playback under normal autoplay policy. Combined 60-test/static/browser CI passes: Actions 40242136544.
+- [ ] Native-speaker review of flagged clips and a random sample; real-device fallback-voice checks on Windows, macOS and ChromeOS.

@@ -27,6 +27,15 @@ async function render() {
  }
  renderWords();renderReviews();
 }
+// Extension pages load audio shards as ordinary scripts.
+function loadAudio(file) {
+ return new Promise((resolve, reject) => {const s = document.createElement('script'); s.src = file; s.onload = resolve; s.onerror = () => reject(Error('Audio data is missing.')); document.head.append(s);});
+}
+function listenButton(lemma) {
+ const b = document.createElement('button'); b.textContent = 'Listen · synthetic'; b.setAttribute('aria-label', 'Listen to ' + lemma);
+ b.onclick = () => SGSpeech.listen(lemma, loadAudio).then(text => {$('message').textContent = text;}, e => {$('message').textContent = e.message;});
+ return b;
+}
 function renderWords() {
  $('words').replaceChildren();
  const query = $('word-filter').value.trim();
@@ -42,7 +51,7 @@ function renderWords() {
   }
   select.value = value;
   select.onchange = () => write({type: 'setWord', lemma, status: select.value}, 'Vocabulary updated.');
-  row.append(select); $('words').append(row);
+  row.append(select, listenButton(lemma)); $('words').append(row);
  }
  if (words.length > 200) $('word-count').textContent += ' · showing the first 200; filter to narrow the list';
 }
@@ -53,7 +62,7 @@ $('search-form').onsubmit = event => {
  if (!results.length) $('search-results').textContent = 'No supported entry in the starter dictionary.';
  for (const r of results) {
   const article = document.createElement('article');
-  const title = document.createElement('h3'); title.textContent = r.lemma; title.lang = 'ko'; article.append(title);
+  const title = document.createElement('h3'); title.textContent = r.lemma; title.lang = 'ko'; article.append(title, listenButton(r.lemma));
   const p = document.createElement('p'); p.textContent = r.parts.join(' · '); article.append(p);
   for (const card of SG.grammarFor(r)) {
    const details = document.createElement('details'); const title = document.createElement('summary'); title.textContent = 'Grammar hint · ' + card.title; details.append(title);
