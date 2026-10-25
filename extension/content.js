@@ -164,7 +164,12 @@
  });
  globalThis.__softgloss = {
   show() {automatic = false; enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
-  autoLookup(word,context) {automatic=true;display(word,context);},
+  async autoLookup(word,context) {
+   const {autoLookup}=await chrome.storage.local.get({autoLookup:false});
+   if(!autoLookup){disable();return;}
+   automatic=true;display(word,context);
+  },
+  isAutomatic() {return automatic && enabled;},
   stopAuto() {if(automatic)disable();},
   openSelection() {automatic=false;
    previousFocus = document.activeElement; enabled = true; observe();

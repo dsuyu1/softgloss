@@ -169,9 +169,10 @@ try {
   document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
  });
  await automaticPage.locator('#softgloss-root').waitFor();
- assert.equal(await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(SG_DATA.loaded && __softgloss)});return r.result;},autoTab),true);
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),true);
  await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
  assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
+ await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),false);
  const inactivePage=await context.newPage();await inactivePage.goto(url+'inactive');
  await inactivePage.evaluate(()=>{const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);getSelection().addRange(r);document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
  await inactivePage.waitForTimeout(350);assert.equal(await inactivePage.locator('#softgloss-root').count(),0);
