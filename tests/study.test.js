@@ -5,7 +5,7 @@ test('graded CSV supports BOM, quoted fields, TSV, duplicate lowest level and re
  for(const input of ['Korean,level\n책,7','Korean,level\nbook,1','Korean,level\n책,','Korean,level\n"책,1','Korean,level','책,1'])assert.throws(()=>SG.parseStudyCSV(input));
 });
 test('study threshold resolves inflected words, excludes higher/ungraded words and prefers exact entries',()=>{
- assert.equal(SG.highlightMatch('가짜교육표제',{}, {가짜교육표제:2},1).study,false);assert.equal(SG.highlightMatch('읽어요',{}, {읽다:2},2).study,true);assert.equal(SG.highlightMatch('가짜교육표제',{}, {},6).study,false);
+ assert.equal(SG.highlightMatch('쀍쀍쀍쀍',{}, {쀍쀍쀍쀍:2},1).study,false);assert.equal(SG.highlightMatch('읽어요',{}, {읽다:2},2).study,true);assert.equal(SG.highlightMatch('쀍쀍쀍쀍',{}, {},6).study,false);
  assert.equal(SG.highlightMatch('앞으로',{앞으로:'known'}).status,'known');assert.equal(SG.highlightMatch('인기글').supported,true);assert.equal(SG.highlightMatch('인기글').status,'unknown');
  assert.ok(SG.lookup('편하려고').some(r=>r.lemma==='편하다'));assert.ok(SG.lookup('응답자의').some(r=>r.lemma==='응답자'));
 });
@@ -49,4 +49,17 @@ test('original examples attach to specific dictionary entries, including the cal
 test('dictionary examples retain sense links, bilingual text and attribution',()=>{
  const entries=SG_DATA.entries.filter(r=>SG.examplesFor(r).length);assert.ok(entries.length>2800);
  for(const r of entries)for(const e of SG.examplesFor(r)){assert.ok(e.korean&&e.english);assert.ok(r.senses.some(s=>s.id===e.senseId));assert.equal(e.license,'CC-BY-SA-4.0');assert.match(e.source,/^https:\/\/en.wiktionary.org\/wiki\//);}
+});
+test('ungraded dictionary words retain unknown grade and compounds paint per component',()=>{
+ const match=SG.highlightMatch('어떻게',{}, {},6);assert.ok(match.supported);assert.equal(match.level,null);assert.equal(match.study,false);
+ assert.equal(SG.highlightMatch('해결하시는지요',{}, {},6).level,null);
+ const parts=SG.highlightSpans('단체관람안내',{}, {},6);assert.deepEqual(parts.map(p=>[p.offset,p.length,p.level]),[[0,2,3],[2,2,3],[4,2,1]]);
+ assert.ok(parts.every(p=>p.study));assert.deepEqual(SG.highlightSpans('기아타이거즈의',{}, {},6).map(p=>p.level),[null]);
+ assert.equal(SG.highlightSpans('단체관람안내',{}, {},1).filter(p=>p.study).length,1);
+ assert.equal(SG.highlightMatch('어떻게',{}, {어떻게:2},2).level,2);
+});
+test('ungraded highlighting preference preserves target and vocabulary settings',async()=>{
+ let value={words:{책:'known'},preferences:{highlights:true,studyLevel:2}};const storage={async get(d){return structuredClone({...d,...value});},async set(v){Object.assign(value,structuredClone(v));}};const store=SGStore.createStore(storage);
+ await store.apply({type:'setUngradedHighlights',enabled:false});assert.deepEqual(value.preferences,{highlights:true,studyLevel:2,ungradedHighlights:false});
+ await assert.rejects(store.apply({type:'setUngradedHighlights',enabled:'yes'}));assert.equal(value.preferences.ungradedHighlights,false);assert.equal(value.words.책,'known');
 });

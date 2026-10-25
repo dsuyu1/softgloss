@@ -1,11 +1,11 @@
-# Bungeoppang
+# Malnaru Read · 말나루
 Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No AI, server, login or API key. The FSRS scheduler is bundled locally.
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.13.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.14.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
-4. Open a normal webpage containing Korean text. Pin Bungeoppang from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
+4. Open a normal webpage containing Korean text. Pin Malnaru Read from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
 5. Hover a Korean word or select **one Korean word**. Multiword sentence selection, images and video subtitles are not supported lookup surfaces yet.
 6. For automatic lookup on websites, switch on **Automatically look up Korean on websites** in the toolbar panel and grant Chrome's website-access prompt. The small listener is installed on permitted HTTP/HTTPS pages, including new pages; the full dictionary waits for Korean interaction. Turn it off in the same panel to disable automatic lookup.
 7. Alt+Shift+K opens keyboard lookup; My library manages saves, vocabulary, backups and Anki export.
@@ -55,10 +55,10 @@ Bungeoppang (붕어빵), previously SoftGloss, preserves existing local vocabula
 
 Use **Break down sentence** after looking up page text for possible word classes, particle functions and source-listed tense/form labels. This is an analysis aid with alternatives, not a guaranteed syntactic parse. Bounds: 2,000 characters / 80 Korean tokens.
 
-Twenty-seven headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
+Thirty-two headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
-The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.13.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
+The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.14.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
 
 The pinned dictionary now supplies 3,704 bilingual sentence pairs across 3,276 senses, reaching 2,814 of 33,796 dictionary entries (before original learning examples). Examples show their associated sense and source attribution. The corpus does not supply suitable bilingual examples for every entry; missing examples are labeled, not generated.
 
@@ -71,3 +71,11 @@ Click **Add to reviews** on a word result to save that specific dictionary entry
 Review cards deduplicate by dictionary entry, so homonyms can be studied separately. Suspend/resume or remove cards in Manage review deck. JSON v2 backups preserve review schedules and up to 1,000 recent ratings per card; v1 backups still restore and replace the deck with an empty one. Anki TSV exports include review cards and sentence cards with their source credits. TSV carries content, not schedules, and requires mapping the four fields to your Anki note type; it is not live synchronization.
 
 The Naver Café pilot also adds source-gated conversational endings such as 놀랐네요, 했는데 and 같은데요, comparison/alternative particles, and seven original clothing/color/price glosses with bilingual examples. The screenshot-derived review fixture has 61 tokens, of which 44 currently return candidates and 17 remain unknown. These counts are coverage, not accuracy; all 61 still require independent review. See evaluation/naver-cafe-cases.json.
+
+
+### Malnaru Read and screenshot coverage (0.14.0)
+Malnaru (말나루) is the user-selected suite name, coined from 말 (language) and 나루 (a river crossing). This app is **Malnaru Read**; future Listen/Review apps are naming examples, not implemented products. Earlier names were Bungeoppang and SoftGloss. Existing storage, dictionary IDs, export formats and repository identifiers remain compatible. Download filenames now use malnaru-read; older backups still restore.
+
+TOPIK mode now also marks supported dictionary words without a bundled/imported grade in dotted gray. This includes 어떻게 and ungraded proper names. They receive no invented TOPIK level; words with grades above the selected target stay excluded. Turn off **Also mark ungraded dictionary words** for strict graded-list scanning. Each lookup labels the lack of a study grade.
+
+Supported question endings now include 해결하시는지요, and noun/copula backgrounds include 고민인데. Joined labels such as 단체관람안내 can expose a unique sequence of three/four dictionary nouns; each noun highlights at its own grade instead of assigning the entire label the lowest component grade. These are possible components, not a whole-label translation. Original entries/examples add 층간소음 and four baseball-team names. No OCR is performed: lettering drawn inside a page image still cannot highlight or respond to text selection.

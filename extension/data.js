@@ -2,6 +2,8 @@
 (() => {
 globalThis.SG_PACK_ROWS = [];
 const rows = [
+['층간소음','noise transmitted between floors, especially in apartment buildings','noun'],
+['기아타이거즈','KIA Tigers (Korean professional baseball team)','proper noun'],['두산베어스','Doosan Bears (Korean professional baseball team)','proper noun'],['삼성라이온즈','Samsung Lions (Korean professional baseball team)','proper noun'],['엘지트윈스','LG Twins (Korean professional baseball team)','proper noun'],
 ['저렴하다','be inexpensive; be affordable','adjective'],['베이지','beige (color)','noun'],['피코트','pea coat','noun'],['헤링본','herringbone pattern or fabric','noun'],['보온성','heat retention; ability to keep warmth','noun'],['원픽','first choice; favorite (informal)','noun'],['컬러풀하다','be colorful','adjective'],
 ['기자협회보','Journalists Association bulletin (publication name)','proper noun'],
 ['응답자','respondent; a person who answers a survey or question','noun'],

@@ -15,3 +15,8 @@ test('cafe screenshot conversational endings and clothing terms resolve without 
  assert.ok(SG.lookup('집이나').some(r=>r.lemma==='집'));
  for(const word of ['베이지','저렴하다','피코트','헤링본','보온성','원픽','컬러풀하다']){const entry=SG.lookup(word).find(r=>r.kind==='dictionary');assert.equal(SG_LEARNING_EXAMPLES[word][2],entry.id);}
 });
+test('fourth pilot handles honorific questions, noun copulas, joined labels and named-team particles',()=>{
+ for(const [word,lemma] of [['해결하시는지요','해결하다'],['고민인데','고민'],['고민인데요','고민'],['책인지요','책'],['기아타이거즈의','기아타이거즈'],['두산베어스를','두산베어스'],['층간소음','층간소음']])assert.ok(SG.lookup(word).some(r=>r.lemma===lemma),word);
+ const compound=SG.lookup('단체관람안내');assert.deepEqual([...new Set(compound.map(r=>r.lemma))],['단체','관람','안내']);assert.ok(compound.every(r=>r.parts.some(p=>p.includes('not a whole-label translation'))));
+ for(const word of ['가짜없는말하시는지요','가짜없는말인데','가짜없는말인지요','기아타이거즈를를'])assert.deepEqual(SG.lookup(word),[],word);
+});

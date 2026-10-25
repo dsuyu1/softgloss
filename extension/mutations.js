@@ -49,6 +49,9 @@
      case 'setHighlights':
       if (typeof message.enabled !== 'boolean') throw Error('Invalid preference.');
       await storage.set({preferences: {...state.preferences,highlights: message.enabled}}); break;
+     case 'setUngradedHighlights':
+      if(typeof message.enabled!=='boolean')throw Error('Invalid preference.');
+      await storage.set({preferences:{...state.preferences,ungradedHighlights:message.enabled}});break;
      case 'setStudyLevel':
       if(!Number.isInteger(message.level)||message.level<0||message.level>6)throw Error('Invalid study level.');
       await storage.set({preferences:{...state.preferences,studyLevel:message.level}});break;

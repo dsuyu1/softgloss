@@ -68,6 +68,8 @@ try {
     if (action === 'hidden') return root.querySelector('section').hidden;
     if(action==='studyImport'){const input=root.querySelector('input[type=file]'),dt=new DataTransfer();dt.items.add(new File([value],'study.csv',{type:'text/csv'}));input.files=dt.files;input.dispatchEvent(new Event('change'));}
     if(action==='studyLevel'){const select=root.querySelector('#sg-study-level');select.value=String(value);select.dispatchEvent(new Event('change'));}
+    if(action==='ungradedToggle')root.querySelector('#sg-ungraded').click();
+    if(action==='gapRanges'){const inside=key=>[...CSS.highlights.get('softgloss-'+key)||[]].filter(r=>r.startContainer.parentElement?.id==='coverage-gaps').map(r=>r.toString());return {graded:inside('study-word'),ungraded:inside('ungraded')};}
     if(action==='studyCounts')return [CSS.highlights.get('softgloss-study-word')?.size||0,CSS.highlights.get('softgloss-study-context')?.size||0];
     if(action==='levelColor')return getComputedStyle(document.body,'::highlight(softgloss-study-'+value+')').backgroundColor;
     if(action==='grammarCount')return CSS.highlights.get('softgloss-study-grammar')?.size||0;
@@ -89,7 +91,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.13.0/);
+ assert.match(await panel('text'),/v0.14.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -203,6 +205,20 @@ try {
  await page.screenshot({path:'test-results/topik-study.png'});
  await panel('studyLevel',0);await eventually(()=>panel('highlight'),2);
  await panel('click','Remove custom lists');await page.evaluate(()=>document.getElementById('study-inline').remove());
+ // Screenshot gaps: ungraded matches stay neutral; joined nouns use their own grades.
+ await page.evaluate(()=>{const p=document.createElement('p');p.id='coverage-gaps';p.textContent='어떻게 해결하시는지요 단체관람안내 기아타이거즈의 층간소음.';document.body.append(p);});
+ await panel('studyLevel',1);
+ await eventually(()=>panel('gapRanges'),{graded:['안내'],ungraded:['어떻게','해결하시는지요','기아타이거즈의','층간소음']});
+ await panel('ungradedToggle');await eventually(()=>panel('gapRanges'),{graded:['안내'],ungraded:[]});
+ await panel('ungradedToggle');await panel('studyLevel',6);
+ await eventually(()=>panel('gapRanges'),{graded:['단체','관람','안내'],ungraded:['어떻게','해결하시는지요','기아타이거즈의','층간소음']});
+ assert.match(await panel('search','어떻게'),/Dictionary match · no bundled or imported study grade/);
+ assert.match(await panel('text'),/Malnaru Read/);
+ await page.locator('#coverage-gaps').scrollIntoViewIfNeeded();await page.screenshot({path:'test-results/screenshot-gaps.png'});
+ assert.match(await panel('search','해결하시는지요'),/해결하다/);
+ assert.match(await panel('search','단체관람안내'),/not a whole-label translation/);
+ assert.match(await panel('search','기아타이거즈의'),/KIA Tigers/);
+ await panel('studyLevel',0);await page.evaluate(()=>document.getElementById('coverage-gaps').remove());
  const library = await context.newPage(); await library.goto(`chrome-extension://${id}/library.html`);
  await library.locator('#search').fill('학교'); await library.locator('#search-form button').click();
  await library.locator('#search-results article').first().getByRole('button', {name: 'Mark seen', exact: true}).click();
@@ -294,7 +310,7 @@ try {
  await popup.setViewportSize({width:350,height:700});await popup.screenshot({path:'test-results/popup.png',fullPage:true});
  await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
- const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
+ const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'malnaru-read-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
  await eventually(() => library.locator('#cards article').count(), 0);
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 0 cards');
