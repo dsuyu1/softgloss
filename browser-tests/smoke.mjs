@@ -45,7 +45,7 @@ try {
   Element.prototype.attachShadow = function(options) {const root = original.call(this, options); if (this.id === 'softgloss-root') globalThis.__testRoot = root; return root;};
  }}), tabId);
  await worker.evaluate(tabId => enable({id: tabId}, true), tabId);
- async function panel(action, value) {
+ async function panel(action, value = null) {
   return worker.evaluate(async ({tabId, action, value}) => {
    const [result] = await chrome.scripting.executeScript({target: {tabId}, func: (action, value) => {
     const root = globalThis.__testRoot;
