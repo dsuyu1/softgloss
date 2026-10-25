@@ -126,3 +126,11 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Add reproducible CI performance artifact for startup, renderer heap and a 2,000-paragraph dynamic page.
 - [x] Record passing CI reference measurements: Actions 40207430126; details in docs/PERFORMANCE.md.
 - [ ] Profile on learner hardware and assess memory across multiple enabled tabs.
+
+## 0.6.0 website activation fix
+- [x] Explain toolbar activation and remove the impression that a demo server is required.
+- [x] Add a toolbar panel with Enable on this page, version, errors and library access.
+- [x] Add optional automatic HTTP/HTTPS lookup with a user-initiated Chrome permission request.
+- [x] Register a lightweight listener; load the dictionary only on Korean hover/selection.
+- [x] Handle opt-out and permission revocation; retain manual mode.
+- [ ] Verify new-page automatic activation and disabling in Chromium CI; Chrome's permission dialog and actual toolbar activeTab grant remain manual.

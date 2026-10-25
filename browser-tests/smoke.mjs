@@ -158,6 +158,28 @@ try {
  });
  assert.ok(performanceEvidence.p95BatchMeanMilliseconds < 100);
  console.log('Warm browser lookup timing:', JSON.stringify(performanceEvidence));
+ // Automatic registration uses only the temporary test copy's localhost grant.
+ await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:true});await syncAuto();});
+ const automaticPage=await context.newPage();await automaticPage.goto(url+'automatic');
+ assert.equal(await automaticPage.locator('#softgloss-root').count(),0,'auto mode must stay lazy before Korean interaction');
+ await automaticPage.evaluate(()=>{
+  const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
+ });
+ await automaticPage.locator('#softgloss-root').waitFor();
+ const autoTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'automatic');
+ assert.equal(await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(SG_DATA.loaded && __softgloss)});return r.result;},autoTab),true);
+ await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
+ assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
+ const inactivePage=await context.newPage();await inactivePage.goto(url+'inactive');
+ await inactivePage.evaluate(()=>{const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);getSelection().addRange(r);document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
+ await inactivePage.waitForTimeout(350);assert.equal(await inactivePage.locator('#softgloss-root').count(),0);
+ const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html`);
+ assert.equal(await popup.locator('#enable').textContent(),'Enable on this page');
+ assert.match(await popup.locator('main').textContent(),/No local server/);
+ const activation=await popup.evaluate(tabId=>chrome.runtime.sendMessage({type:'enableCurrent',tabId}),tabId);
+ assert.equal(activation.ok,true);
+ await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
