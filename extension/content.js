@@ -1,68 +1,154 @@
 (async () => {
- if(globalThis.__softgloss){globalThis.__softgloss.show();return;}
- const {SG}=globalThis;
- const host=document.createElement('div'); host.id='softgloss-root'; document.documentElement.append(host);
- const root=host.attachShadow({mode:'closed'});
- const style=document.createElement('style');style.textContent=`:host{all:initial}section{position:fixed;z-index:2147483647;right:20px;top:20px;width:min(360px,calc(100vw - 40px));max-height:80vh;overflow:auto;box-sizing:border-box;background:#faf8f3;color:#253e34;border:1px solid #bfcfc2;border-radius:18px;padding:20px;box-shadow:0 8px 30px #0002;font:15px/1.6 system-ui}h2{font-size:22px;margin:6px 0}p{margin:8px 0}button{cursor:pointer;border:1px solid #bfcfc2;border-radius:9px;background:#e7eee5;color:#253e34;padding:7px 11px;margin:4px 5px 4px 0;font:inherit}button:focus-visible{outline:3px solid #6e8874}small{display:block;color:#5c6d62}hr{border:0;border-top:1px solid #d9dfd6}#notice{min-height:1.5em}a{color:#355f48}`;
- root.append(style); const panel=document.createElement('section');panel.setAttribute('aria-label','SoftGloss Korean dictionary');root.append(panel);
- let state=await chrome.storage.local.get({words:{},cards:[]}), current='', sentence='', results=[];
- function el(tag,text,parent=panel){const e=document.createElement(tag);e.textContent=text;parent.append(e);return e;}
- function button(label,fn,parent=panel){const e=el('button',label,parent);e.type='button';e.addEventListener('click',fn);return e;}
- function render(){
-  panel.replaceChildren();el('small','SOFTGLOSS · OFFLINE ALPHA');button('Close',()=>panel.hidden=true);
-  button('My library',()=>chrome.runtime.sendMessage({type:'openLibrary'}));
-  el('h2',current||'A little help reading Korean.');
-  el('small','Starter dictionary · limited coverage · no AI');
-  if(!current)el('p','Hover a Korean word or select text to look it up. Enable again with the toolbar button after navigating.');
-  else if(!results.length)el('p','No supported entry yet. This is a small starter pack, not a full Korean parser.');
-  for(const r of results){
-   el('hr','');el('h2',r.lemma);el('p',r.meaning);el('small',r.pos+' · '+r.kind);
-   r.parts.forEach(p=>el('p',p));el('small','Status: '+(state.words[r.lemma]||'unknown'));
-   for(const status of ['unknown','seen','known'])button(status,async()=>{
-    const latest=await chrome.storage.local.get({words:{}});latest.words[r.lemma]=status;
-    await chrome.storage.local.set({words:latest.words});state.words=latest.words;paint();render();
-   });
-   button('Save sentence',async()=>{
-    const latest=await chrome.storage.local.get({cards:[]});
-    const card={lemma:r.lemma,meaning:r.meaning,sentence:sentence.slice(0,2000),url:location.origin+location.pathname};
-    if(!latest.cards.some(c=>c.lemma===card.lemma&&c.sentence===card.sentence))latest.cards.push(card);
-    try{await chrome.storage.local.set({cards:latest.cards});root.getElementById('notice').textContent='Saved to your library.';}catch{root.getElementById('notice').textContent='Could not save. Export your library and free up storage.';}
-   });
-  }
-  el('p','').id='notice';el('small','Nothing leaves this browser. Saved cards include the page address without query parameters.');
+ if (globalThis.__softgloss) {globalThis.__softgloss.show(); return;}
+ const {SG} = globalThis;
+ const host = document.createElement('div'); host.id = 'softgloss-root';
+ document.documentElement.append(host);
+ const root = host.attachShadow({mode: 'closed'});
+ const style = document.createElement('style');
+ style.textContent = `:host{all:initial}section{position:fixed;z-index:2147483647;right:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;background:#faf8f3;color:#253e34;border:1px solid #bfcfc2;border-radius:18px;padding:20px;box-shadow:0 8px 30px #0002;font:15px/1.6 system-ui}h2{font-size:22px;margin:6px 0}p{margin:8px 0;overflow-wrap:anywhere}button,input{font:inherit}button{cursor:pointer;border:1px solid #bfcfc2;border-radius:9px;background:#e7eee5;color:#253e34;padding:7px 11px;margin:4px 5px 4px 0}button[aria-pressed=true]{border:2px solid #253e34;font-weight:700}button:focus-visible,input:focus-visible{outline:3px solid #4c7656;outline-offset:2px}input[type=search]{width:100%;box-sizing:border-box;padding:8px;border:1px solid #8c9c8f;border-radius:8px;background:#fff;color:#253e34}small{display:block;color:#5c6d62}hr{border:0;border-top:1px solid #d9dfd6}#notice{min-height:1.5em}`;
+ root.append(style);
+ const panel = document.createElement('section');
+ panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'SoftGloss Korean dictionary'); root.append(panel);
+ let state = await chrome.storage.local.get({words: {}, preferences: {highlights: true}});
+ let current = '', sentence = '', results = [], enabled = true, previousFocus = null;
+ let hoverTimer, paintTimer, paintEpoch = 0;
+ const skip = 'script,style,noscript,input,textarea,select,[contenteditable],[role=textbox]';
+ function el(tag, text, parent = panel) {const e = document.createElement(tag); e.textContent = text; parent.append(e); return e;}
+ function button(label, fn, parent = panel) {const e = el('button', label, parent); e.type = 'button'; e.addEventListener('click', fn); return e;}
+ function notice(text) {root.getElementById('notice').textContent = text;}
+ async function write(message, success) {
+  try {await SGWrite(message); if (success) notice(success); return true;}
+  catch (error) {notice(error.message); return false;}
  }
- function display(word,context){if(word===current&&!panel.hidden)return;current=word;sentence=context;results=SG.lookup(word);panel.hidden=false;render();}
- let timer;
- document.addEventListener('pointermove',event=>{
-  clearTimeout(timer);if(event.composedPath().includes(host))return;
-  timer=setTimeout(()=>{
-   const p=document.caretRangeFromPoint?.(event.clientX,event.clientY);if(!p||p.startContainer.nodeType!==Node.TEXT_NODE)return;
-   const node=p.startContainer;if(node.parentElement?.closest('input,textarea,[contenteditable],script,style'))return;
-   const text=node.textContent, offset=p.startOffset;
-   const token=SG.tokens(text).find(t=>t.index<=offset&&offset<t.index+t.word.length);
-   if(token)display(token.word,text.trim());
-  },280);
- });
- document.addEventListener('mouseup',event=>{
-  if(event.composedPath().includes(host))return;
-  const selection=getSelection();if(selection?.anchorNode?.parentElement?.closest('input,textarea,[contenteditable]'))return;
-  const text=selection?.toString().trim();if(text&&text.length<=80&&SG.tokens(text).length===1)display(text,selection.anchorNode?.parentElement?.textContent||text);
- });
- document.addEventListener('keydown',e=>{if(e.key==='Escape')panel.hidden=true;});
- function paint(){
-  if(!globalThis.CSS?.highlights||!globalThis.Highlight)return;
-  const sets={unknown:new Highlight(),seen:new Highlight(),known:new Highlight()};
-  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n,count=0;
-  while((n=walker.nextNode())&&count++<10000){
-   if(n.parentElement?.closest('script,style,input,textarea,[contenteditable]'))continue;
-   for(const t of SG.tokens(n.textContent)){
-    const a=SG.lookup(t.word);if(a.length!==1)continue;const status=state.words[a[0].lemma]||'unknown';
-    const range=new Range();range.setStart(n,t.index);range.setEnd(n,t.index+t.word.length);sets[status].add(range);
+ function close() {panel.hidden = true; if (root.activeElement) previousFocus?.focus?.();}
+ function render() {
+  panel.replaceChildren(); el('small', 'SOFTGLOSS · OFFLINE ALPHA');
+  button('Close', close); button('My library', () => chrome.runtime.sendMessage({type: 'openLibrary'}));
+  button('Disable on this page', () => {
+   enabled = false; clearTimeout(hoverTimer); clearTimeout(paintTimer); paintEpoch++;
+   observer.disconnect(); clearHighlights(); close(); chrome.runtime.sendMessage({type: 'pageDisabled'});
+  });
+  const label = el('label', 'Highlight vocabulary ');
+  const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.checked = state.preferences.highlights !== false; label.append(toggle);
+  toggle.addEventListener('change', async () => {if (!await write({type: 'setHighlights', enabled: toggle.checked})) toggle.checked = state.preferences.highlights !== false;});
+  const form = el('form', ''); const searchLabel = el('label', 'Korean word or English meaning', form);
+  const input = document.createElement('input'); input.type = 'search'; input.maxLength = 80; input.id = 'sg-search';
+  searchLabel.htmlFor = input.id; input.value = current; form.append(input);
+  const submit = el('button', 'Search', form); submit.type = 'submit';
+  form.addEventListener('submit', e => {e.preventDefault(); display(input.value, '', true); root.getElementById('sg-search').focus();});
+  el('h2', current || 'A little help reading Korean.');
+  el('small', 'Starter dictionary · limited coverage · no AI');
+  if (!current) el('p', 'Hover or select a Korean word. Press Alt+Shift+K to look up a selection or focus search. Change the shortcut at chrome://extensions/shortcuts.');
+  else if (!results.length) el('p', 'No supported entry yet. Try a dictionary form or an English meaning.');
+  for (const r of results) {
+   el('hr', ''); el('h2', r.lemma).lang = 'ko'; el('p', r.meaning); el('small', r.pos + ' · ' + r.kind);
+   r.parts.forEach(p => el('p', p));
+   const statusLine = el('small', ''); statusLine.dataset.lemma = r.lemma;
+   for (const status of ['unknown', 'seen', 'known']) {
+    const b = button(status, () => write({type: 'setWord', lemma: r.lemma, status}, 'Vocabulary updated.'));
+    b.dataset.lemma = r.lemma; b.dataset.status = status;
+    b.setAttribute('aria-label', `Mark ${r.lemma} ${status}`);
    }
+   const save = button('Save sentence', () => write({type: 'saveCard', card: {
+    lemma: r.lemma, meaning: r.meaning, sentence: sentence.slice(0, 2000), url: location.origin + location.pathname
+   }}, 'Saved to your library.'));
+   save.disabled = !sentence.trim();
   }
-  for(const [k,v]of Object.entries(sets))CSS.highlights.set('softgloss-'+k,v);
+  const message = el('p', ''); message.id = 'notice'; message.setAttribute('role', 'status');
+  el('small', sentence ? 'Saved cards include nearby text and the page address without query parameters.' : 'Select or hover page text to capture a sentence. Manual search does not save unrelated page text.');
+  updateStatuses();
  }
- const colorStyle=document.createElement('style');colorStyle.textContent='::highlight(softgloss-unknown){text-decoration:underline;background-color:#f5e2d5}::highlight(softgloss-seen){background-color:#eee8b8}::highlight(softgloss-known){background-color:#d8eadb}';document.head.append(colorStyle);
- chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.words){state.words=changes.words.newValue||{};paint();}});
- globalThis.__softgloss={show(){panel.hidden=false;render();paint();}};render();paint();
+ function updateStatuses() {
+  for (const node of root.querySelectorAll('[data-lemma]')) {
+   const status = state.words[node.dataset.lemma] || 'unknown';
+   if (node.tagName === 'BUTTON') node.setAttribute('aria-pressed', String(status === node.dataset.status));
+   else node.textContent = 'Status: ' + status;
+  }
+ }
+ function display(word, context, manual = false) {
+  if (!enabled) return;
+  const value = word.trim();
+  if (!manual && value === current && context === sentence && !panel.hidden) return;
+  current = value; sentence = context; results = manual ? SG.search(value) : SG.lookup(value);
+  panel.hidden = false; render();
+ }
+ function selected() {
+  const selection = getSelection();
+  if (selection?.anchorNode?.parentElement?.closest(skip) || selection?.focusNode?.parentElement?.closest(skip)) return null;
+  const text = selection?.toString().trim();
+  if (!text || text.length > 80 || SG.tokens(text).length !== 1) return null;
+  return {word: text, context: selection.anchorNode?.parentElement?.textContent || text};
+ }
+ document.addEventListener('pointermove', event => {
+  clearTimeout(hoverTimer);
+  if (!enabled || event.composedPath().includes(host) || root.activeElement) return;
+  hoverTimer = setTimeout(() => {
+   if (!enabled || root.activeElement) return;
+   const p = document.caretRangeFromPoint?.(event.clientX, event.clientY);
+   if (!p || p.startContainer.nodeType !== Node.TEXT_NODE) return;
+   const node = p.startContainer;
+   if (node.parentElement?.closest(skip)) return;
+   const token = SG.tokens(node.textContent).find(t => t.index <= p.startOffset && p.startOffset < t.index + t.word.length);
+   if (token) display(token.word, node.textContent.trim());
+  }, 280);
+ });
+ document.addEventListener('mouseup', event => {
+  if (!enabled || event.composedPath().includes(host)) return;
+  const value = selected(); if (value) display(value.word, value.context);
+ });
+ document.addEventListener('keydown', e => {if (enabled && e.key === 'Escape' && !panel.hidden) close();});
+ function clearHighlights() {for (const key of ['unknown', 'seen', 'known']) globalThis.CSS?.highlights?.delete('softgloss-' + key);}
+ function schedulePaint() {
+  if (!enabled) return;
+  clearTimeout(paintTimer); paintEpoch++;
+  paintTimer = setTimeout(paint, 160);
+ }
+ function paint() {
+  const epoch = ++paintEpoch; clearHighlights();
+  if (!enabled || state.preferences.highlights === false || !globalThis.CSS?.highlights || !globalThis.Highlight || !document.body) return;
+  const sets = {unknown: new Highlight(), seen: new Highlight(), known: new Highlight()};
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let nodes = 0, characters = 0;
+  function chunk() {
+   if (epoch !== paintEpoch || !enabled) return;
+   let n, batch = 0;
+   while (batch++ < 100 && nodes < 10000 && characters < 500000 && (n = walker.nextNode())) {
+    nodes++;
+    if (n.parentElement?.closest(skip)) continue;
+    const text = n.textContent.slice(0, Math.min(10000, 500000 - characters)); characters += text.length;
+    for (const t of SG.tokens(text)) {
+     const a = SG.lookup(t.word); if (a.length !== 1) continue;
+     const range = new Range(); range.setStart(n, t.index); range.setEnd(n, t.index + t.word.length);
+     sets[state.words[a[0].lemma] || 'unknown'].add(range);
+    }
+   }
+   for (const [key, value] of Object.entries(sets)) CSS.highlights.set('softgloss-' + key, value);
+   if (n && nodes < 10000 && characters < 500000) paintTimer = setTimeout(chunk, 0);
+  }
+  chunk();
+ }
+ const colorStyle = document.createElement('style');
+ colorStyle.textContent = '::highlight(softgloss-unknown){background-color:#f5e2d5}::highlight(softgloss-seen){background-color:#eee8b8}::highlight(softgloss-known){background-color:#d8eadb}';
+ (document.head || document.documentElement).append(colorStyle);
+ const observer = new MutationObserver(schedulePaint);
+ function observe() {if (document.body) observer.observe(document.body, {childList: true, subtree: true, characterData: true});}
+ chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+  if (changes.words) {state.words = changes.words.newValue || {}; updateStatuses();}
+  if (changes.preferences) {
+   state.preferences = changes.preferences.newValue || {highlights: true};
+   const toggle = root.querySelector('input[type=checkbox]'); if (toggle) toggle.checked = state.preferences.highlights !== false;
+  }
+  if (changes.words || changes.preferences) schedulePaint();
+ });
+ globalThis.__softgloss = {
+  show() {enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
+  openSelection() {
+   previousFocus = document.activeElement; enabled = true; observe();
+   const value = selected();
+   if (value) display(value.word, value.context); else {panel.hidden = false; render();}
+   root.getElementById('sg-search').focus(); schedulePaint();
+  }
+ };
+ render(); observe(); schedulePaint();
 })();

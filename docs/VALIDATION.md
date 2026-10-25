@@ -16,8 +16,18 @@ No browser automation runtime or Chrome executable was found in this workspace. 
 6. Save twice; library should contain one card; delete it.
 7. Save several cards, export JSON, change state, restore; compare words/cards; reject malformed backup without altering stored state.
 8. Import TSV into Anki with HTML enabled; four fields align; special characters display as text.
-9. Restart browser and inspect persistence. Use a second tab to identify potential write races (known alpha limitation).
+9. Restart browser and inspect persistence. Use a second tab to verify concurrent writes preserve both changes.
 10. Check DevTools network: no extension-origin outgoing requests during lookup/save/export.
 11. Test narrow viewport, 200% zoom, long page and restricted-page error badge.
 
 Browser findings must be recorded here before checking the corresponding PROJECT.md gates.
+
+## 0.3.0 validation — reading UX
+- Fourteen local Node tests pass: the six original checks plus search, original Unicode offsets, concurrent vocabulary writes, concurrent/deduplicated cards, failed-write recovery, restore ordering, invalid-operation isolation and deletion preserving preferences.
+- Static checks pass. Runtime remains network-free and dependency-free; activeTab/scripting/storage permissions unchanged.
+- Added Playwright CI smoke tests using a real unpacked extension and persistent Chromium profile. Test-only shadow-root capture is injected by the harness, not shipped. The harness copies the extension to a temporary directory and grants that copy localhost-only host access because automation cannot supply the toolbar gesture that grants activeTab. This does not verify the real activeTab permission flow. Tests cover search/focus, real storage messaging, dynamic highlights, disabling/re-enabling, two-tab duplicate saves, TSV download, JSON restore/rejection, narrow library layout and profile restart.
+- The runtime browser download returned invalid ZIPs. Installing the pinned Playwright version succeeded through its fallback CDN, but Chromium launch failed because this workspace forbids its process-singleton socket (`socket() failed: Operation not permitted`). No browser test assertions ran. Local end-to-end validation is not claimed. CI is pending GitHub publication approval.
+- Still manual: pointer hover, OS shortcut delivery, editable-page interaction, screen-reader behavior, 200% zoom, actual Anki import and interactive network-panel inspection.
+
+### Starter lookup timing (not the browser release gate)
+`node scripts/benchmark.mjs`: Node v24.22.1, Linux x64, AMD EPYC 9V74; 52 entries, 10,000 warm samples. Observed p95 0.000601 ms and maximum 0.196 ms. This small-pack Node microbenchmark does not establish browser responsiveness, long-page latency, or production-pack performance; that checklist item remains open.

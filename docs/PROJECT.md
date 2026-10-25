@@ -43,10 +43,10 @@ Check a box only when its stated deliverable is implemented and supporting evide
 - [ ] Support irregular conjugations beyond starter forms; preserve multiple senses/analyses.
 - [ ] Add reviewed grammar entries and source attribution.
 - [ ] Show supported hanja, idioms and frequency data only after source approval; never fabricate missing fields.
-- [ ] Add manual dictionary search and keyboard lookup so hover is not required.
-- [ ] Add disable/enable controls, highlighting preferences and dynamic-page support.
-- [ ] Serialize vocabulary/card writes to avoid multi-tab lost updates.
-- [ ] Make unknown/seen/known distinguishable without relying on color alone.
+- [x] Add manual dictionary search and keyboard lookup so hover is not required. Implemented in 0.3.0; browser evidence tracked separately.
+- [x] Add disable/enable controls, highlighting preferences and dynamic-page support. Implemented in 0.3.0; browser evidence tracked separately.
+- [x] Serialize vocabulary/card writes to avoid multi-tab lost updates. Implemented in 0.3.0; browser evidence tracked separately.
+- [x] Make unknown/seen/known distinguishable without relying on color alone. Implemented in 0.3.0; browser evidence tracked separately.
 - [ ] Benchmark lookup latency and long-page responsiveness; target p95 under 100 ms after dictionary initialization on a documented reference machine.
 - [ ] Evaluate at least 100 independently checked tokens/forms; publish unsupported and incorrect cases. Target >=95% correct supported analyses; do not count unknowns as correct.
 - [ ] Pilot with Damian and 3–5 learners; log friction and prioritize fixes before expansion.
@@ -67,15 +67,15 @@ M3: optional account sync and data deletion; conflict resolution; authenticated 
 M4: licensed, maintainable content catalog and recommendations using vocabulary coverage; iOS integration and shared dictionary/library format. Community features and opt-in leaderboards only after a demonstrated need. Android later.
 
 ## Architecture and costs
-Current: isolated extension content script → local dictionary/rules → chrome.storage.local. No backend, no network calls, no runtime dependencies. Shadow DOM separates popup styles; CSS Custom Highlights avoids wrapping page text. Core is independent of Chrome APIs for future reuse.
+Current: isolated extension content script → local dictionary/rules; writes → service-worker queue → chrome.storage.local. No backend, no network calls, no runtime dependencies. Shadow DOM separates popup styles; CSS Custom Highlights avoids wrapping page text. Core is independent of Chrome APIs for future reuse.
 
 Cloudflare later: static documentation/download hosting first if useful, then optional sync. Do not provision accounts/database/object storage for functionality already handled locally. No deployment, DNS, billing changes or paid resources in this increment. Track hosting/storage/egress costs before offering sync without limits.
 
 ## Decisions and limits
-The seed pack is deliberately small; it does not meet the useful-beta coverage gate. No monolingual dictionary, production parser, frequency ranks, hanja, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Current highlighting only scans the initial DOM (up to 10,000 text nodes); enable again to refresh. Concurrent multi-tab writes are an alpha limitation.
+The seed pack is deliberately small; it does not meet the useful-beta coverage gate. No monolingual dictionary, production parser, frequency ranks, hanja, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
 
 ## Next concrete work
-1. Merge the foundation pull request after checks pass.
+1. Complete the reading-UX PR and its automated browser smoke tests.
 2. Run manual Chrome smoke tests and fix failures.
 3. Complete dictionary/data license audit and select a reproducible data pipeline.
 4. Expand morphology against a reviewed Korean fixture set.
@@ -86,3 +86,14 @@ The seed pack is deliberately small; it does not meet the useful-beta coverage g
 - [Dictionary/data pipeline #2](https://github.com/dsuyu1/softgloss/issues/2)
 - [Morphology/accuracy #3](https://github.com/dsuyu1/softgloss/issues/3)
 - [UX hardening and beta gates #4](https://github.com/dsuyu1/softgloss/issues/4)
+
+## 0.3.0 reading-UX increment
+- [x] Korean/English manual search in the overlay and library; Alt+Shift+K entry point.
+- [x] Filterable vocabulary list, explicit status labels and selected-button states.
+- [x] Page disable/re-enable, shared highlighting preference, bounded dynamic rescans.
+- [x] Single-writer queue for status, cards, restore and deletion; failed writes do not block later operations.
+- [x] Confirmed delete-all control and consistent save errors.
+- [x] Correct DOM offsets after decomposed Unicode characters; reuse dictionary indexes.
+- [x] Regression tests for concurrent writes, failure recovery, restore ordering and search.
+- [x] Add CI browser smoke suite with restart and backup round-trip checks.
+- [ ] Confirm browser suite passes; manual hover, actual shortcut routing, zoom, Anki import and assistive-technology checks remain open.
