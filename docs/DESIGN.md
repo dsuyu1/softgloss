@@ -7,3 +7,6 @@ Dictionary cards group analyses of the same source entry, preserve separate homo
 For recognized patterns, compatible predicate forms and construction-specific 수/있다 entries are shown first. Other homonyms remain available in a disclosure with a standalone lookup button. This avoids presenting unrelated dictionary senses as the phrase meaning.
 
 On-page highlights set both the pale background and a dark foreground, preserving text contrast on dark host pages as well as white pages. This does not change unhighlighted host text.
+
+## Bungeoppang (붕어빵), 0.11.0
+Name chosen by the user. Existing internal identifiers remain for compatibility. Grade palette: 1 blue #c1ddfa, 2 teal #bce8e5, 3 green #d3e8b4, 4 gold #f6e4a3, 5 peach #f6d1b9, 6 purple #e0cef4. A text legend and source-grade labels supplement color. Grammar uses underlining rather than covering grade backgrounds. No logo artwork or ownership/uniqueness claim is introduced.

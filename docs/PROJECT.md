@@ -173,3 +173,10 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Make custom lists additive; removing custom lists retains defaults.
 - [ ] Independently review grammar detection and 100+ real tokens; complete manual accessibility/zoom and Anki checks.
 Next implementation: improve supported grammar/inflection coverage against the imported catalog and add review evidence. Reader/subtitle work remains after the beta gates.
+
+## 0.11.0 — Bungeoppang reading update
+- [x] User-selected Bungeoppang / 붕어빵 branding, preserving internal IDs and local data.
+- [x] Six grade colors, grammar underlines that preserve grade backgrounds, nested-link hover fallback without click interception.
+- [x] Bounded sentence component view with possible POS/particle/form/tense labels and unknowns.
+- [x] Twenty original bilingual learning examples, explicitly distinct from dictionary quotations.
+- [ ] Independently review examples and syntactic accuracy; expand licensed example coverage beyond the original starter bank.

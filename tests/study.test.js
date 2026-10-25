@@ -33,3 +33,15 @@ test('successive custom imports add words without deleting earlier imports or de
  assert.deepEqual(value.studyLevels,{가짜단어:3,다른단어:2});assert.equal(SG.highlightMatch('읽어요',{},value.studyLevels,1).study,true);
  await store.apply({type:'clearStudyList'});assert.equal(SG.highlightMatch('읽어요',{},value.studyLevels,1).study,true);
 });
+test('sentence components expose particles and past forms without choosing a homonym sense',()=>{
+ const parts=SG.sentenceAnalysis('책을 읽었어요.');assert.equal(parts[0].surface,'책을');assert.ok(parts[0].labels.some(l=>l.includes('object')));assert.ok(parts[1].labels.some(l=>l.includes('past')));
+ assert.ok(SG.sentenceAnalysis('부르면')[0].labels.includes('verb'));assert.ok(SG.sentenceAnalysis('부르면')[0].labels.includes('adjective'));
+ assert.equal(SG.sentenceAnalysis('가짜없는단어')[0].supported,false);assert.deepEqual(SG.sentenceAnalysis('가'.repeat(2001)),[]);
+ assert.equal(SG.highlightMatch('읽어요',{}, {},1).level,1);
+ assert.ok(SG.lookup('기자협회보').length);assert.equal(SG_LEARNING_EXAMPLES['부르다'][0],'택시를 불러 주세요.');
+});
+
+test('original examples attach to specific dictionary entries, including the call verb',()=>{
+ for(const [word,example] of Object.entries(SG_LEARNING_EXAMPLES))assert.ok(SG.lookup(word).some(r=>r.id===example[2]),word);
+ assert.ok(SG.lookup('부르다').some(r=>r.id===SG_LEARNING_EXAMPLES['부르다'][2]&&r.pos==='verb'));
+});

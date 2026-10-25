@@ -1,11 +1,11 @@
-# SoftGloss
+# Bungeoppang
 Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No AI, server, login, API key or runtime dependencies.
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on SoftGloss, and check that it shows version **0.10.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.11.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
-4. Open a normal webpage containing Korean text. Pin SoftGloss from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
+4. Open a normal webpage containing Korean text. Pin Bungeoppang from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
 5. Hover a Korean word or select **one Korean word**. Multiword sentence selection, images and video subtitles are not supported lookup surfaces yet.
 6. For automatic lookup on websites, switch on **Automatically look up Korean on websites** in the toolbar panel and grant Chrome's website-access prompt. The small listener is installed on permitted HTTP/HTTPS pages, including new pages; the full dictionary waits for Korean interaction. Turn it off in the same panel to disable automatic lookup.
 7. Alt+Shift+K opens keyboard lookup; My library manages saves, vocabulary, backups and Anki export.
@@ -35,17 +35,24 @@ The adapted dictionary is CC BY-SA 4.0; credit and license are included in the e
 ## Grammar hints and language review
 Particle results can show expandable notes for topic/contrast, subject and object markers. These simplified notes have source links; independent Korean review is pending. See [accuracy-review workflow](docs/ACCURACY_REVIEW.md) for collecting and grading real reading samples offline.
 
-## Expanded endings (0.10.0)
+## Expanded endings (0.11.0)
 The pilot-driven update adds 188,285 source-listed spellings beyond the initial table pack, including noun-modifying forms, connectives, questions and nominalizations. Try `중단하는`, `드러내기`, `있는`, `다루면서` and `있는지`. `인기글` can show a possible `인기 + 글` breakdown; `반영된` can show `반영 + 되다`. Component definitions are not whole-word translations. Genuine headword gaps and context ambiguity remain; see [morphology limits](docs/MORPHOLOGY.md).
 
-### Phrase breakdowns (0.10.0)
+### Phrase breakdowns (0.11.0)
 Select up to 8 Korean words, or type a short Korean phrase in the reading panel. Supported negation, ability/possibility and intention patterns get a construction hint above their dictionary components. Other phrases show individual entries and missing words, without claiming a whole-phrase translation. Each **Save sentence** button saves its word with the selected phrase or surrounding text.
 
 The refreshed panel uses labeled colors: blue nouns, purple predicates, amber grammar and teal constructions. Page highlights track vocabulary separately: gray unknown, amber seen and green known. Reading settings holds the highlight toggle and page-disable control.
 
-### TOPIK preparation / official curriculum study mode (0.10.0)
+### TOPIK preparation / official curriculum study mode (0.11.0)
 Open **Reading settings** and choose a grade: the bundled official NIKL curriculum provides 9,719 normalized vocabulary lemmas and a catalog of 336 graded grammar entries. No import is required. Vocabulary is blue; possible supported grammar is amber; sentence context is softer blue. Select a grade to include it and all lower grades. Grammar recognition uses supported morphology and expression patterns, not every possible inflection of every catalog entry. Grades are NIKL curriculum grades, not an asserted exhaustive TOPIK exam syllabus.
 
 Custom CSV/TSV lists (`Korean,level`, 1–6) add to the defaults and previous imports. Lower grades win on duplicate words. **Remove custom lists** leaves bundled data available. All scanning works offline. Keep custom CSVs: vocabulary/card backups still do not include them.
 
 Default material: National Institute of Korean Language, 2017 International Standard Curriculum for Korean Language Education, grade appendix revised 2020-11-17. [Official source](https://www.korean.go.kr/front/reportData/reportDataView.do?mn_id=45&report_seq=932), KOGL Type 1; full attribution and transformation notes in packaged credits and `docs/CURRICULUM.md`.
+
+### Bungeoppang reading update (0.11.0)
+Bungeoppang (붕어빵), previously SoftGloss, preserves existing local vocabulary/settings and the repository/package identifiers. Each study grade has a separate labeled color; grammar uses an underline. Hovered link text has a nested-text fallback and normal navigation is preserved.
+
+Use **Break down sentence** after looking up page text for possible word classes, particle functions and source-listed tense/form labels. This is an analysis aid with alternatives, not a guaranteed syntactic parse. Bounds: 2,000 characters / 80 Korean tokens.
+
+Twenty headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.

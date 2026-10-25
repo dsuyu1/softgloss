@@ -76,3 +76,6 @@ No graded dataset is redistributed or estimated. Settings link to https://everyk
 
 ## 0.10.0 official curriculum defaults
 43 Node tests pass locally, including default matching without imports, source grammar expression/particle/conditional recognition, rejection of a modifier false positive in 읽으면, and additive imports/removal preserving defaults. Static checks cover study shards. CI rebuilds the official extract offline and adds bundled vocabulary/grammar browser assertions to the prior study-mode suite. Recognition is candidate analysis, not independent accuracy validation; not every form of the 336 catalog entries is recognized. See CURRICULUM.md for exact source and omissions.
+
+## 0.11.0 reading analysis
+Adds regression checks for sentence object/past labels, retained 부르다 verb/adjective ambiguity, unknown/oversized context and level metadata. Chromium cases cover nested-link hover, native hash navigation, six distinct highlight colors, sentence breakdown and example rendering. Existing browser checks and offline data rebuilds remain. These are implementation regressions, not independent language review. Screenshot 기자협회보 is treated as a missing publication-name entry; existing screenshot links already show highlights, so not all misses were link-handling failures. Original examples are authored locally, not copied from an external dictionary.

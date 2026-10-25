@@ -65,6 +65,7 @@ try {
     if(action==='studyImport'){const input=root.querySelector('input[type=file]'),dt=new DataTransfer();dt.items.add(new File([value],'study.csv',{type:'text/csv'}));input.files=dt.files;input.dispatchEvent(new Event('change'));}
     if(action==='studyLevel'){const select=root.querySelector('#sg-study-level');select.value=String(value);select.dispatchEvent(new Event('change'));}
     if(action==='studyCounts')return [CSS.highlights.get('softgloss-study-word')?.size||0,CSS.highlights.get('softgloss-study-context')?.size||0];
+    if(action==='levelColor')return getComputedStyle(document.body,'::highlight(softgloss-study-'+value+')').backgroundColor;
     if(action==='grammarCount')return CSS.highlights.get('softgloss-study-grammar')?.size||0;
     if(action==='studyContext')return [...CSS.highlights.get('softgloss-study-context')||[]].map(r=>r.toString());
     if (action === 'grammarOpen') return [...root.querySelectorAll('.sg-grammar, .sg-grammar details')].map(d=>d.open);
@@ -114,6 +115,8 @@ try {
  await eventually(() => panel('highlight'), 2);
  assert.equal(await page.locator('#softgloss-root').count(), 1);
 
+ assert.match(await panel('search','부르면'),/Learning example/);
+ assert.match(await panel('search','부르면'),/Please call a taxi/);
  // Real mouse coordinates and DOM selections exercise the reading entry points.
  await worker.evaluate(tabId => enable({id:tabId},true),tabId);
  await eventually(()=>panel('focus'),'sg-search');
@@ -140,10 +143,16 @@ try {
  await page.evaluate(()=>{const p=document.createElement('p');p.id='phrase';p.append(Object.assign(document.createElement('span'),{textContent:'보이지'}),document.createTextNode(' '),Object.assign(document.createElement('span'),{textContent:'않는다'}));document.body.append(p);const range=document.createRange();range.setStart(p.firstChild.firstChild,0);range.setEnd(p.lastChild.firstChild,3);const selection=getSelection();selection.removeAllRanges();selection.addRange(range);p.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
  await eventually(()=>panel('searchValue'),'보이지 않는다');
  assert.match(await panel('text'),/Negation/);
+ await panel('click','Break down sentence');assert.match(await panel('text'),/Sentence components/);
  await panel('click','Save sentence');
  await eventually(()=>worker.evaluate(async()=>{const {cards=[]}=await chrome.storage.local.get('cards');return cards.some(c=>c.lemma==='보이다'&&c.sentence==='보이지 않는다');}),true);
  await worker.evaluate(async()=>{const {cards=[]}=await chrome.storage.local.get('cards');for(const card of cards)await store.apply({type:'deleteCard',card});});
  await page.evaluate(()=>{getSelection().removeAllRanges();document.getElementById('phrase').remove();});
+ await panel('click','Close');
+ await page.evaluate(()=>{const a=document.createElement('a');a.id='nested-link';a.href='#link-target';const span=document.createElement('span');span.textContent='기자협회보';a.append(span);document.body.append(a);});
+ await page.locator('#nested-link span').hover();await eventually(()=>panel('searchValue'),'기자협회보');
+ await page.locator('#nested-link').click();assert.ok(page.url().endsWith('#link-target'),'normal link navigation must remain intact');
+ await page.evaluate(()=>{document.getElementById('nested-link').remove();history.replaceState(null,'',location.pathname);});
  await panel('click','Close');
  const heapAfter = (await cdp.send('Performance.getMetrics')).metrics.find(m=>m.name==='JSHeapUsedSize')?.value;
  await page.evaluate(()=>{
@@ -183,6 +192,7 @@ try {
  assert.ok((await panel('studyContext')).some(t=>t==='학교에서는 읽어요.'));
  await worker.evaluate(()=>store.apply({type:'setHighlights',enabled:false}));await eventually(()=>panel('studyCounts'),[0,0]);
  await worker.evaluate(()=>store.apply({type:'setHighlights',enabled:true}));await eventually(()=>panel('studyCounts'),[7,5]);
+ const colors=await Promise.all([1,2,3,4,5,6].map(l=>panel('levelColor',l)));assert.equal(new Set(colors).size,6);
  await page.screenshot({path:'test-results/topik-study.png'});
  await panel('studyLevel',0);await eventually(()=>panel('highlight'),2);
  await panel('click','Remove custom lists');await page.evaluate(()=>document.getElementById('study-inline').remove());
