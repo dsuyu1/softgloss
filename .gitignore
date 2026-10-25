@@ -3,3 +3,6 @@ node_modules/
 *.zip
 .DS_Store
 test-results/
+
+__pycache__/
+*.pyc

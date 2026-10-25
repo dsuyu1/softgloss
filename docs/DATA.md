@@ -41,3 +41,8 @@ To audit the original input, download the URL in `source-lock.json` and verify i
 
 ## Language validation still required
 The regression suite checks dictionary integrity, 20 familiar conjugations, ambiguity and source-to-form associations. It is not the independently reviewed 100-token accuracy evaluation or learner pilot required by the beta scope. Upstream/extraction mistakes, incomplete senses and unsupported endings remain possible.
+
+## Supplemental conjugation tables (0.7.0)
+`scripts/import-morphology.py` selects additional conjugation rows from the **same original input hash** recorded above. It excludes metadata and error-tagged rows, preserves source entry IDs and source tags, then losslessly groups shared Hangul NFD stem-to-surface transformations with entry whitelists. This is another adaptation of the same CC BY-SA 4.0 text/table data, covered by the packaged credits and per-entry URLs. No new media, examples or dictionary provider is imported.
+
+The selected relation snapshot is `data/morphology-source.json.gz`; its checksum is in `data/morphology-lock.json`. Rebuild with `python3 scripts/import-morphology.py data/morphology-source.json.gz`. File hashes and coverage counts are in `data/morphology-manifest.json`. CI rebuilds both packs without network access. The additional form count is 188,285 over the original **source-listed** spellings; headword count remains unchanged.

@@ -19,3 +19,7 @@ if(!fs.existsSync('extension/licenses/CC-BY-SA-4.0.txt')||!fs.existsSync('extens
 console.log('Dictionary shard integrity, syntax and packaged attribution checks passed.');
 
 if(JSON.stringify(m.optional_host_permissions)!==JSON.stringify(["http://*/*","https://*/*"]))throw Error("Unexpected optional host access");
+
+const morphology=JSON.parse(fs.readFileSync('data/morphology-manifest.json'));
+for(const file of morphology.files){const p='extension/morphology/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Morphology checksum mismatch');execFileSync(process.execPath,['--check',p]);}
+console.log('Extended morphology integrity and syntax checks passed.');

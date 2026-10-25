@@ -72,6 +72,10 @@ try {
  await eventually(() => panel('focus'), 'sg-search');
  assert.match(await panel('search', '먹었어요'), /먹다/);
  assert.match(await panel('search', '걸었어요'), /걷다/);
+ assert.match(await panel('search', '다루면서'), /다루다/);
+ assert.match(await panel('search', '중단하는'), /중단하다/);
+ assert.match(await panel('search', '인기글'), /Possible noun compound/);
+ assert.match(await panel('search', '반영된'), /Possible derived predicate/);
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);

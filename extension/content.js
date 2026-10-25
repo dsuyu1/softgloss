@@ -49,7 +49,8 @@
    el('small', r.pos + ' · ' + r.kind);
    if (r.hanja?.length) el('small', 'Hanja spelling: ' + r.hanja.join(' · '));
    if (r.source) {const link = el('a', 'Wiktionary contributors · CC BY-SA 4.0'); link.href = r.source; link.target = '_blank'; link.rel = 'noopener noreferrer';}
-   if (results.length > 1) el('small', 'Several dictionary entries or analyses may fit; context decides.');
+   if (r.compoundParts) el('small', 'Component definition from a possible breakdown; the whole expression may have a different meaning.');
+   else if (results.length > 1) el('small', 'Several dictionary entries or analyses may fit; context decides.');
    r.parts.forEach(p => el('p', p));
    for (const card of SG.grammarFor(r)) {
     const details = el('details', ''); el('summary', 'Grammar hint · ' + card.title, details);

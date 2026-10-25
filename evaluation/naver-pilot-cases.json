@@ -1,0 +1,44 @@
+[
+  {
+    "id": "naver-pilot-1",
+    "surface": "인기글",
+    "context": "인기글",
+    "source": "User-provided Naver screenshot, October 25, 2026; image.png: clicked popup miss"
+  },
+  {
+    "id": "naver-pilot-2",
+    "surface": "다루면서",
+    "context": "다루면서",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: news probe"
+  },
+  {
+    "id": "naver-pilot-3",
+    "surface": "중단하는",
+    "context": "중단하는",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: news probe"
+  },
+  {
+    "id": "naver-pilot-4",
+    "surface": "드러내기",
+    "context": "드러내기",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: news probe"
+  },
+  {
+    "id": "naver-pilot-5",
+    "surface": "있는",
+    "context": "있는",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: news probe"
+  },
+  {
+    "id": "naver-pilot-6",
+    "surface": "반영된",
+    "context": "반영된",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: news probe"
+  },
+  {
+    "id": "naver-pilot-7",
+    "surface": "청원인은",
+    "context": "청원인은",
+    "source": "User-provided Naver screenshot, October 25, 2026; image(1).png: remaining headword gap"
+  }
+]

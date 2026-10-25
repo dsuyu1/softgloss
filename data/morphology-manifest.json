@@ -1,0 +1,35 @@
+{
+  "formSurfaces": 227945,
+  "newSurfaceCount": 188285,
+  "entries": 4650,
+  "transforms": 638,
+  "links": 255759,
+  "bytes": 1438997,
+  "files": [
+    {
+      "path": "morphology-00.js",
+      "bytes": 341066,
+      "sha256": "c44a8cef0d4d8f65c84c3b53c47419fe822ddb1582489915b61b254fb3497343"
+    },
+    {
+      "path": "morphology-01.js",
+      "bytes": 342197,
+      "sha256": "3534ef15d185728f9b61371589ee227a4f8b7d3f644bf96fc53ad079857b5181"
+    },
+    {
+      "path": "morphology-02.js",
+      "bytes": 348516,
+      "sha256": "fbed28b3b99ba4ada9c58ff276f46b62235d7959e9be8c3604a4cee65b20fa39"
+    },
+    {
+      "path": "morphology-03.js",
+      "bytes": 350437,
+      "sha256": "44c1948bafd5b61e5d3c8d83e7d59ec7d6e289108492c7560b9743f4eba7465d"
+    },
+    {
+      "path": "morphology-04.js",
+      "bytes": 56781,
+      "sha256": "f46b6e715f0ffb4937ed850fa72ef90d9dbb58151fc5a8c1a7dc9bd9f6153b2e"
+    }
+  ]
+}

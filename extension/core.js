@@ -3,7 +3,10 @@ const particles = [['에서','location of an action; starting point'],['에게',
 const indexes = new WeakMap();
 function index(data) {
  if (!indexes.has(data)) {
-  const lemmas = new Map(), forms = new Map();
+  const lemmas = new Map(), forms = new Map(), transforms = new Map();
+  const morphology = globalThis.SG_MORPHOLOGY;
+  const positions = new Map((morphology?.entryIds || []).map((id,i)=>[id,i]));
+  for(const rule of morphology?.rules || []) {if(!transforms.has(rule[1]))transforms.set(rule[1],[]);transforms.get(rule[1]).push(rule);}
   for (const e of data.entries) {
    if (!lemmas.has(e.lemma)) lemmas.set(e.lemma, []);
    lemmas.get(e.lemma).push(e);
@@ -12,11 +15,29 @@ function index(data) {
     forms.get(surface).push({entry: e, tags});
    }
   }
-  indexes.set(data, {lemmas, forms});
+  indexes.set(data, {lemmas, forms, transforms, positions});
  }
  return indexes.get(data);
 }
-function lookup(input, data = globalThis.SG_DATA) {
+function allowed(values,target) {
+ let low=0,high=values.length-1;
+ while(low<=high){const mid=(low+high)>>1;if(values[mid]===target)return true;if(values[mid]<target)low=mid+1;else high=mid-1;}
+ return false;
+}
+function sourceForms(word,data,derived = false) {
+ const {lemmas,transforms,positions}=index(data), nfd=word.normalize('NFD'), out=[];
+ for(let i=0;i<=nfd.length;i++)for(const [from,to,tags,entries] of transforms.get(nfd.slice(i)) || []) {
+  const lemma=(nfd.slice(0,i)+from).normalize('NFC')+'다';
+  if(!derived)for(const entry of lemmas.get(lemma)||[])if(allowed(entries,positions.get(entry.id)))out.push({entry,tags});
+  if(derived && !lemmas.has(lemma) && /(?:하다|되다)$/.test(lemma)) {
+   const noun=lemma.slice(0,-2),verb=lemma.slice(-2);
+   const bases=(lemmas.get(noun)||[]).filter(e=>e.pos==='noun');
+   if(bases.length)for(const entry of lemmas.get(verb)||[])if(allowed(entries,positions.get(entry.id)))out.push({entry,tags,bases,noun,verb});
+  }
+ }
+ return out;
+}
+function lookup(input, data = globalThis.SG_DATA, options = {}) {
  const word = String(input).normalize('NFC').replace(/^[^가-힣]+|[^가-힣]+$/gu,'');
  if (!word || word.length > 80) return [];
  const out = [], {lemmas, forms} = index(data);
@@ -26,6 +47,16 @@ function lookup(input, data = globalThis.SG_DATA) {
  for (const {entry, tags} of forms.get(word) || []) {
   const labels = tags.map(t => ({past:'past tense', 'non-past':'non-past', polite:'polite speech', informal:'informal style', formal:'formal style', indicative:'declarative table form'}[t] || t));
   add(entry, ['Listed conjugation: ' + labels.join(' · ')], 'listed conjugation');
+ }
+ for(const {entry,tags} of sourceForms(word,data)) {
+  const labels=tags.filter(t=>!['formal','informal','polite'].includes(t)).map(t=>({'determiner':'noun-modifying form','noun-from-verb':'nominalized form','conditional':'conditional connective','conjunctive':'linking connective','contrastive':'contrast/background connective','causative':'connective (context needed)','interrogative':'question-form table entry','motive-form':'purpose/intention connective'}[t]||t));
+  add(entry,['Source-listed form: '+labels.join(' · ')],'listed extended conjugation',{formTags:tags});
+ }
+ if(options.composed!==false && word.endsWith('면서')) {
+  for(const result of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(result.formTags?.includes('conditional'))add(result,['-(으)면서: possible simultaneous/contrastive connective'],'possible connective analysis');
+ }
+ if(options.composed!==false && word.endsWith('는지')) {
+  for(const result of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(result.formTags?.includes('determiner')&&result.formTags.includes('present'))add(result,['-는지: possible embedded-question ending'],'possible connective analysis');
  }
  const form = data.forms?.[word];
  if (form && !forms.has(word)) for (const entry of lemmas.get(form[0]) || []) add(entry, form.slice(1), 'listed form');
@@ -37,8 +68,29 @@ function lookup(input, data = globalThis.SG_DATA) {
   if (suffix in pairs && Boolean(final) !== pairs[suffix]) continue;
   if (suffix === '으로' && (final === 0 || final === 8)) continue;
   if (suffix === '로' && final !== 0 && final !== 8) continue;
+  for(const {entry,tags} of sourceForms(stem,data))if(tags.includes('noun-from-verb'))add(entry,['Source-listed nominalization', `-${suffix}: ${note}`],'possible nominalization + particle');
   for (const base of lemmas.get(stem) || []) {
    if (['noun','pronoun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis', {particle:suffix});
+  }
+ }
+ if(!out.length && options.compounds!==false) {
+  for(const {entry,tags,bases,noun,verb} of sourceForms(word,data,true)) {
+   const parts=[noun,verb];
+   for(const base of bases)add(base,[`Possible derived predicate: ${parts.join(' + ')}`, 'Noun component; not a whole-word translation'],'possible derived predicate component',{compoundParts:parts});
+   add(entry,[`Possible derived predicate: ${parts.join(' + ')}`, 'Source-listed verb form: '+tags.filter(t=>!['formal','informal','polite'].includes(t)).join(' · ')],'possible derived predicate component',{compoundParts:parts});
+  }
+ }
+ if(!out.length && options.compounds!==false && word.length>=3 && word.length<=16) {
+  const splits=[];
+  for(let cut=1;cut<word.length;cut++) {
+   const left=(lemmas.get(word.slice(0,cut))||[]).filter(e=>e.pos==='noun');
+   const right=(lemmas.get(word.slice(cut))||[]).filter(e=>e.pos==='noun');
+   if(left.length&&right.length)splits.push({cut,left,right});
+  }
+  // One possible segmentation only; ambiguity is shown in the component senses.
+  if(splits.length===1) {
+   const {cut,left,right}=splits[0], parts=[word.slice(0,cut),word.slice(cut)];
+   for(const [component,entries] of [left,right].entries())for(const entry of entries)add(entry,[`Possible noun compound: ${parts.join(' + ')}`,`Component ${component+1} of 2; not a whole-word translation`],'possible compound component',{compoundParts:parts});
   }
  }
  const unique = new Map();
