@@ -16,12 +16,12 @@
       break;
      }
      case 'rateReview': {
-      const card=state.reviewCards[message.id];if(!card)throw Error('Review card no longer exists.');
+      const card=Object.hasOwn(state.reviewCards,message.id)?state.reviewCards[message.id]:null;if(!card)throw Error('Review card no longer exists.');
       state.reviewCards[message.id]=SGSRS.rate(card,message.rating,message.revision);
       await storage.set({reviewCards:state.reviewCards});break;
      }
      case 'suspendReview': {
-      const card=state.reviewCards[message.id];if(!card||typeof message.suspended!=='boolean')throw Error('Invalid review card.');
+      const card=Object.hasOwn(state.reviewCards,message.id)?state.reviewCards[message.id]:null;if(!card||typeof message.suspended!=='boolean')throw Error('Invalid review card.');
       card.suspended=message.suspended;card.revision++;await storage.set({reviewCards:state.reviewCards});break;
      }
      case 'removeReview':

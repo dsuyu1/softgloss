@@ -25,7 +25,7 @@ let context;
 async function launch() {
  context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]});
  context.on('page', page => page.on('pageerror', e => errors.push(e.message)));
- context.on('request', req => {if (/^https?:/.test(req.url()) && !req.url().startsWith(url)) external.push(req.url());});
+ context.on('request', req => {if (/^https?:/.test(req.url()) && !req.url().startsWith(url) && !req.url().startsWith(url.replace('127.0.0.1','localhost'))) external.push(req.url());});
  let worker = context.serviceWorkers()[0];
  if (!worker) worker = await context.waitForEvent('serviceworker');
  return worker;
@@ -212,6 +212,7 @@ try {
  const card = await library.evaluate(url => {const r = SG.lookup('책')[0]; return {lemma:r.lemma, meaning:r.meaning, sentence:'책을 읽어요.', url, entryId:r.id, source:r.source, license:r.license};}, url);
  await Promise.all([library, second].map(p => p.evaluate(card => SGWrite({type: 'saveCard', card}), card)));
  await library.reload(); await eventually(() => library.locator('#cards article').count(), 1);
+ await library.locator('#search').fill('학교');await library.locator('#search-form button').click();
  // In-app FSRS: select an entry, reveal, answer, export and round-trip its schedule.
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'1 due · 1 new · 1 cards');
@@ -243,6 +244,11 @@ try {
  await eventually(()=>worker.evaluate(async()=>Object.keys((await chrome.storage.local.get({reviewCards:{}})).reviewCards).length),2);
  const frameReview=await worker.evaluate(async()=>Object.values((await chrome.storage.local.get({reviewCards:{}})).reviewCards).find(c=>c.lemma==='책'));
  assert.equal(frameReview.url,url+'article');
+ // An unrelated frame origin without a host grant must stay untouched.
+ const deniedLoaded=framePage.waitForEvent('framenavigated',{predicate:f=>f.url().startsWith(url.replace('127.0.0.1','localhost')),timeout:10000});
+ await framePage.evaluate(src=>{const iframe=document.createElement('iframe');iframe.title='No website permission';iframe.src=src;document.body.append(iframe);},url.replace('127.0.0.1','localhost')+'article');
+ const deniedFrame=await deniedLoaded;
+ await deniedFrame.locator('#frame-text').waitFor();assert.equal(await deniedFrame.locator('#softgloss-root').count(),0);
  await framePage.evaluate(()=>{const iframe=document.createElement('iframe');iframe.title='Late article';iframe.src='/article?late=1';document.body.append(iframe);});
  await eventually(async()=>(await frameState()).filter(r=>r.child&&r.enabled&&r.highlights>0).length,2);
  // Remove the extra test card before the baseline backup/restore checks.

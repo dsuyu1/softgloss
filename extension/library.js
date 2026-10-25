@@ -110,6 +110,7 @@ function renderReviews(){
    if(next.sentence)reviewText('p',next.sentence,box).lang='ko';
    const entry=SG.lookup(next.lemma).find(e=>e.id===next.entryId);
    if(entry)for(const example of SG.examplesFor(entry)){reviewText('p',example.korean,box).lang='ko';reviewText('p',example.english,box);}
+   const learning=globalThis.SG_LEARNING_EXAMPLES?.[next.lemma];if(learning?.[2]===next.entryId){reviewText('small','Original learning example',box);reviewText('p',learning[0],box).lang='ko';reviewText('p',learning[1],box);}
    if(next.source){const a=reviewText('a','Wiktionary contributors · CC BY-SA 4.0',box);a.href=next.source;a.target='_blank';a.rel='noopener noreferrer';}
    const ratings=reviewText('div','',box);ratings.className='review-ratings';const preview=SGSRS.preview(next,new Date(now));
    for(const [i,label] of ['Again','Hard','Good','Easy'].entries())reviewButton(label+' · '+SGSRS.interval(preview[i+1].card.due,now),async()=>{
