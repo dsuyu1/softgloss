@@ -82,3 +82,11 @@ Adds regression checks for sentence object/past labels, retained 부르다 verb/
 
 ## 0.12.0 examples and loaded build
 46 Node tests include bilingual source text, sense membership, attribution and example coverage. Offline CI rebuilds the selected example snapshot and checks shard hashes. Chromium checks version visibility and dictionary-example rendering alongside the earlier six-color, link and persistence cases. Screenshot review identified an older SoftGloss panel, not proof of a failed rename in current code.
+
+
+## 0.13.0 — frames and FSRS
+52 Node tests pass locally, including learning/relearning transitions, future-card exclusion, duplicate enrollment, multi-tab stale answers, storage failure recovery, malformed schedule rejection, attributed schedule/history backup round-trip and legacy restore. Static checks pin the unmodified scheduler bundle SHA-256 and require its MIT notice. Conversational ending regressions remain source-gated; seven new original entries/examples are not independently language-reviewed.
+
+Chromium regressions now exercise same-origin embedded article highlights, native frame link navigation, frame selection routed to one main panel, review capture with the article URL and whole-page disable. Review UI checks reveal-before-rating, next due intervals, deduplication, JSON v2 restore and browser-restart persistence. Browser CI and screenshot inspection are pending; no manual Naver verification or real Anki import is claimed.
+
+The 61-token Café fixture is manually transcribed from the provided screenshot and keeps context/source labels. Current lookup returns candidates for 44 tokens and no result for 17, with zero reviewed judgments. To prepare a fresh independent review: `node scripts/review.mjs prepare evaluation/naver-cafe-cases.json cafe-sheet.json`, then grade with the existing review workflow. Coverage is not accuracy, and this sample alone is smaller than the 100-token release gate.

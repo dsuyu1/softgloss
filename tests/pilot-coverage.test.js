@@ -9,3 +9,9 @@ test('stacked particles and ending candidates stay bounded to supported bases',(
  for(const w of ['가짜없는말에는','가짜없는말려면','가짜없는말까','책다면','집으로는는'])assert.deepEqual(SG.lookup(w),[],w);
  assert.ok(SG.phrase('그렇다면 전원생활이 성공하려면 무엇부터 준비해야 할까').components.every(c=>c.results.length));
 });
+test('cafe screenshot conversational endings and clothing terms resolve without guessed names',()=>{
+ for(const [word,lemma] of [['놀랐네요','놀라다'],['상당하네요','상당하다'],['했는데','하다'],['같은데요','같다'],['떨어져도','떨어지다'],['깃털처럼','깃털'],['가격대나','가격대'],['베이지의','베이지'],['보온성은','보온성'],['피코트를','피코트'],['저렴한','저렴하다'],['컬러풀함에','컬러풀하다']])assert.ok(SG.lookup(word).some(r=>r.lemma===lemma),word);
+ for(const w of ['가짜없는말네요','책네요','살네요','가짜없는말처럼','책이나나','집나','학교이나'])assert.deepEqual(SG.lookup(w),[],w);
+ assert.ok(SG.lookup('집이나').some(r=>r.lemma==='집'));
+ for(const word of ['베이지','저렴하다','피코트','헤링본','보온성','원픽','컬러풀하다']){const entry=SG.lookup(word).find(r=>r.kind==='dictionary');assert.equal(SG_LEARNING_EXAMPLES[word][2],entry.id);}
+});

@@ -13,7 +13,11 @@ await cp(path.resolve('extension'), extension, {recursive: true});
 const manifest = JSON.parse(await readFile(path.join(extension, 'manifest.json'), 'utf8'));
 manifest.host_permissions = ['http://127.0.0.1/*'];
 await writeFile(path.join(extension, 'manifest.json'), JSON.stringify(manifest));
-const server = createServer((req, res) => {res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end('<!doctype html><html><head><title>Reading fixture</title></head><body><p id="text">책을 읽어요. 학교에서 공부해요.</p><input id="private" value="책"><div contenteditable>먹었어요</div></body></html>');});
+const server = createServer((req,res)=>{
+ res.setHeader('Content-Type','text/html; charset=utf-8');
+ const body=req.url?.startsWith('/frames')?'<p>학교에서 읽어요.</p><iframe title="Cafe article" src="/article"></iframe>':req.url?.startsWith('/article')?'<p id="frame-text"><a href="#next"><span>책을</span></a> 읽어요. 가격대나 보온성은 상당하네요.</p><p id="next">학교에서 공부해요.</p>':'<p id="text">책을 읽어요. 학교에서 공부해요.</p><input id="private" value="책"><div contenteditable>먹었어요</div>';
+ res.end('<!doctype html><html><head><title>Reading fixture</title></head><body>'+body+'</body></html>');
+});
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const url = `http://127.0.0.1:${server.address().port}/`;
 const errors = [], external = [];
@@ -85,7 +89,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.12.0/);
+ assert.match(await panel('text'),/v0.13.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -208,7 +212,44 @@ try {
  const card = await library.evaluate(url => {const r = SG.lookup('책')[0]; return {lemma:r.lemma, meaning:r.meaning, sentence:'책을 읽어요.', url, entryId:r.id, source:r.source, license:r.license};}, url);
  await Promise.all([library, second].map(p => p.evaluate(card => SGWrite({type: 'saveCard', card}), card)));
  await library.reload(); await eventually(() => library.locator('#cards article').count(), 1);
- const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: []}));
+ // In-app FSRS: select an entry, reveal, answer, export and round-trip its schedule.
+ await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
+ await eventually(()=>library.locator('#review-stats').textContent(),'1 due · 1 new · 1 cards');
+ assert.equal(await library.locator('#review').getByRole('button',{name:/^Good/}).count(),0,'rating requires answer reveal');
+ await library.locator('#review').getByRole('button',{name:'Show answer',exact:true}).click();
+ await library.screenshot({path:'test-results/review-desktop.png',fullPage:true});
+ await library.locator('#review').getByRole('button',{name:/^Easy/}).click();
+ await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
+ await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
+ await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
+ const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{}}));
+ assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,1);
+ // Frame fixture: child highlights and selection use the top panel, preserving link behavior.
+ const framePage=await context.newPage();await framePage.goto(url+'frames');
+ const frameTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'frames');
+ await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId,allFrames:true},func:()=>{
+  const original=Element.prototype.attachShadow;Element.prototype.attachShadow=function(options){const root=original.call(this,options);if(this.id==='softgloss-root')globalThis.__frameTestRoot=root;return root;};
+ }}),frameTab);
+ await worker.evaluate(tabId=>enable({id:tabId}),frameTab);
+ async function frameState(){return worker.evaluate(async tabId=>(await chrome.scripting.executeScript({target:{tabId,allFrames:true},func:()=>({child:window!==top,enabled:globalThis.__softgloss?.isEnabled(),hidden:globalThis.__frameTestRoot?.querySelector('section')?.hidden,word:globalThis.__frameTestRoot?.querySelector('input[type=search]')?.value,highlights:CSS.highlights.get('softgloss-known')?.size||0})})).map(r=>r.result),frameTab);}
+ await eventually(async()=>(await frameState()).some(r=>r.child&&r.enabled&&r.hidden&&r.highlights>0),true);
+ const articleFrame=framePage.frames().find(f=>f.url()===url+'article');
+ await articleFrame.locator('a').click();assert.match(articleFrame.url(),/#next$/);
+ await articleFrame.evaluate(()=>{const n=document.querySelector('#frame-text a span').firstChild,r=new Range();r.selectNodeContents(n);getSelection().removeAllRanges();getSelection().addRange(r);n.parentElement.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
+ await eventually(async()=>(await frameState()).some(r=>!r.child&&r.word==='책을'),true);
+ assert.ok((await frameState()).every(r=>!r.child||r.hidden),'child frame panel stays hidden');
+ // Save a review from the frame: source URL is the article, without query/fragment.
+ await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>[...globalThis.__frameTestRoot.querySelectorAll('button')].find(b=>b.textContent==='Add to reviews').click()}),frameTab);
+ await eventually(()=>worker.evaluate(async()=>Object.keys((await chrome.storage.local.get({reviewCards:{}})).reviewCards).length),2);
+ const frameReview=await worker.evaluate(async()=>Object.values((await chrome.storage.local.get({reviewCards:{}})).reviewCards).find(c=>c.lemma==='책'));
+ assert.equal(frameReview.url,url+'article');
+ await framePage.evaluate(()=>{const iframe=document.createElement('iframe');iframe.title='Late article';iframe.src='/article?late=1';document.body.append(iframe);});
+ await eventually(async()=>(await frameState()).filter(r=>r.child&&r.enabled&&r.highlights>0).length,2);
+ // Remove the extra test card before the baseline backup/restore checks.
+ await worker.evaluate(id=>store.apply({type:'removeReview',id}),frameReview.id);
+ await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>globalThis.__softgloss.disable()}),frameTab);
+ await eventually(async()=>(await frameState()).every(r=>!r.enabled),true);
+ await framePage.close();
  assert.equal(backup.cards[0].source, card.source); assert.equal(backup.cards[0].license, 'CC-BY-SA-4.0');
  const performanceEvidence = await library.evaluate(() => {
   const inputs = ['병원', '학교에서', '걸었어요', '배', '먹었어요'];
@@ -250,9 +291,11 @@ try {
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
  await eventually(() => library.locator('#cards article').count(), 0);
+ await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 0 cards');
  library.once('dialog', d => d.accept());
- await library.locator('#restore').setInputFiles({name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({version: 1, ...backup}))});
+ await library.locator('#restore').setInputFiles({name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({version: 2, ...backup}))});
  await eventually(() => library.locator('#cards article').count(), 1);
+ assert.deepEqual(await library.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),backup.reviewCards);
  await library.locator('#restore').setInputFiles({name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"version":2}')});
  await eventually(() => library.locator('#message').textContent(), 'Restore failed: Unsupported backup.');
  assert.equal(await library.locator('#cards article').count(), 1);
@@ -264,6 +307,7 @@ try {
  worker = await launch();
  const restored = await context.newPage(); await restored.goto(`chrome-extension://${id}/library.html`);
  await eventually(() => restored.locator('#cards article').count(), 1);
+ assert.deepEqual(await restored.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),backup.reviewCards);
  await eventually(() => restored.locator('#stats').textContent(), '1 known · 1 seen · 1 saved sentences');
  assert.deepEqual(errors, []); assert.deepEqual(external, []);
  console.log('PASS: unpacked extension, keyboard entry, search, status, dynamic highlights, disable/re-enable, multi-tab saves, export, backup/restore, invalid backup, narrow library and persistence. No external HTTP requests observed.');

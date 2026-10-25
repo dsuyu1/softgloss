@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import '../extension/vendor/ts-fsrs-5.4.2.js';
+import '../extension/srs.js';
 import '../extension/core.js';
 import '../extension/mutations.js';
 function fixture() {
@@ -44,7 +46,7 @@ test('invalid operations leave learning data intact', async () => {
  for (const message of [
   {type: 'saveCard', card: {...card, sentence: ''}},
   {type: 'setWord', lemma: '책', status: 'admin'},
-  {type: 'restore', backup: {version: 2}},
+  {type: 'restore', backup: {version: 99}},
   {type: 'setHighlights', enabled: 'false'}
  ]) await assert.rejects(f.store.apply(message));
  assert.deepEqual(f.read().cards, [card]);
@@ -54,5 +56,5 @@ test('data deletion preserves display preferences', async () => {
  await f.store.apply({type: 'setHighlights', enabled: false});
  await f.store.apply({type: 'saveCard', card});
  await f.store.apply({type: 'clearLearning'});
- assert.deepEqual(f.read(), {words: {}, cards: [], preferences: {highlights: false}});
+ assert.deepEqual(f.read(), {words: {}, cards: [], reviewCards:{},preferences: {highlights: false}});
 });

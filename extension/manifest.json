@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bungeoppang — Korean reading companion",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Offline Korean–English dictionary, listed conjugations, vocabulary tracking and sentence saving. No account or AI.",
   "permissions": [
     "activeTab",

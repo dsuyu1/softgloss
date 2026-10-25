@@ -11,7 +11,7 @@
  panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Bungeoppang Korean dictionary'); root.append(panel);
  let state = await chrome.storage.local.get({words: {}, preferences: {highlights: true},studyLevels:{},studySource:''});
  let current = '', sentence = '', results = [], phraseResult = null, enabled = true, previousFocus = null, automatic = false;
- let analyzingSentence=false;
+ let analyzingSentence=false, contextURL=location.origin+location.pathname;
  let hoverTimer, paintTimer, paintEpoch = 0;
  const skip = 'script,style,noscript,input,textarea,select,[contenteditable],[role=textbox]';
  function el(tag, text, parent = panel) {const e = document.createElement(tag); e.textContent = text; parent.append(e); return e;}
@@ -50,7 +50,7 @@
   if(!current)el('p','Hover a Korean word or select up to 8 words for a phrase breakdown. Alt+Shift+K opens the selection or search.');
   else if(!results.length&&!phraseResult)el('p','No supported entry yet. Try a dictionary form or select a shorter phrase.');
   if(sentence.trim())button('Break down sentence',()=>{analyzingSentence=true;render();});
-  if(analyzingSentence){const box=el('div','');box.className='sg-phrase';el('h3','Sentence components',box);el('small','Possible word classes and form markers; alternatives remain when context is ambiguous. This is not a full syntactic parse.',box);for(const component of SG.sentenceAnalysis(sentence)){const row=el('div','',box);button(component.surface,()=>{analyzingSentence=false;display(component.surface,sentence);},row);el('small',component.supported?component.labels.join(' · '):'No supported analysis',row);}button('Hide sentence breakdown',()=>{analyzingSentence=false;render();},box);}
+  if(analyzingSentence){const box=el('div','');box.className='sg-phrase';el('h3','Sentence components',box);el('small','Possible word classes and form markers; alternatives remain when context is ambiguous. This is not a full syntactic parse.',box);for(const component of SG.sentenceAnalysis(sentence)){const row=el('div','',box);button(component.surface,()=>{analyzingSentence=false;display(component.surface,sentence,false,contextURL);},row);el('small',component.supported?component.labels.join(' · '):'No supported analysis',row);}button('Hide sentence breakdown',()=>{analyzingSentence=false;render();},box);}
   if(phraseResult) {
    const box=el('div','');box.className='sg-phrase';el('h3',phraseResult.constructions.length?'Phrase pattern':'Word-by-word breakdown',box);
    for(const c of phraseResult.constructions){if(c.surface!==current)el('p',c.surface,box).lang='ko';const chip=el('span',c.pattern,box);chip.className='sg-chip sg-construction';el('p',c.meaning,box);}
@@ -70,7 +70,7 @@
    el('h3',r.lemma,card).lang='ko';if(phraseResult)el('small','From: '+[...new Set(r.surfaces)].join(' · '),card);
    el('p',r.meaning,card);
    const sourcedExamples=SG.examplesFor(r);for(const example of sourcedExamples){const details=el('details','',card);el('summary','Dictionary sentence example',details);el('small','Sense: '+example.senseGloss,details);el('p',example.korean,details).lang='ko';el('p',example.english,details);const credit=el('a','Wiktionary contributors · CC BY-SA 4.0',details);credit.href=example.source;credit.target='_blank';credit.rel='noopener noreferrer';}
-   if(!sourcedExamples.length&&!globalThis.SG_LEARNING_EXAMPLES?.[r.lemma])el('small','No bundled bilingual sentence example for this entry yet.',card);
+   if(!sourcedExamples.length&&globalThis.SG_LEARNING_EXAMPLES?.[r.lemma]?.[2]!==r.id)el('small','No bundled bilingual sentence example for this entry yet.',card);
    const example=globalThis.SG_LEARNING_EXAMPLES?.[r.lemma];if(example&&example[2]===r.id){const details=el('details','',card);el('summary','Learning example',details);el('p',example[0],details).lang='ko';el('p',example[1],details);el('small','Original learning example · may illustrate one meaning only',details);}
    const grade=globalThis.SG_STUDY_DEFAULTS?.[r.lemma];if(grade)el('small','NIKL curriculum grade '+grade,card);
    if(r.senses?.length>1){const details=el('details','',card);el('summary','All '+r.senses.length+' meanings',details);const senses=el('ol','',details);for(const sense of r.senses)el('li',(sense.tags.length?'['+sense.tags.join(', ')+'] ':'')+sense.glosses.join('; '),senses);}
@@ -87,7 +87,8 @@
    const statusLine=el('small','',card);statusLine.dataset.lemma=r.lemma;
    const statuses=el('div','',card);statuses.className='sg-status';
    for(const status of ['unknown','seen','known']){const b=button(status,()=>write({type:'setWord',lemma:r.lemma,status},'Vocabulary updated.'),statuses);b.dataset.lemma=r.lemma;b.dataset.status=status;b.setAttribute('aria-label',`Mark ${r.lemma} ${status}`);}
-   const save=button('Save sentence',()=>write({type:'saveCard',card:{lemma:r.lemma,meaning:r.meaning,...(r.source?{entryId:r.id,source:r.source,license:r.license}:{}),sentence:sentence.slice(0,2000),url:location.origin+location.pathname}},'Saved to your library.'),card);save.disabled=!sentence.trim();
+   button('Add to reviews',()=>write({type:'addReview',card:{id:r.id||'softgloss:'+r.lemma,entryId:r.id||'softgloss:'+r.lemma,lemma:r.lemma,meaning:r.meaning,sentence:sentence.slice(0,2000),url:contextURL,...(r.source?{source:r.source,license:r.license}:{})}},'Added to your review deck. Open My library to study.'),card);
+   const save=button('Save sentence',()=>write({type:'saveCard',card:{lemma:r.lemma,meaning:r.meaning,...(r.source?{entryId:r.id,source:r.source,license:r.license}:{}),sentence:sentence.slice(0,2000),url:contextURL}},'Saved to your library.'),card);save.disabled=!sentence.trim();
   }
   const message=el('p','');message.id='notice';message.setAttribute('role','status');
   const footer=el('small',sentence?'Save sentence keeps this word with nearby text and the page address.':'Select page text to capture a sentence. Your vocabulary stays on this device.');footer.className='sg-footer';updateStatuses();
@@ -101,8 +102,10 @@
    else node.textContent = 'Status: ' + status;
   }
  }
- function display(word, context, manual = false) {
+ function display(word, context, manual = false, sourceURL=location.origin+location.pathname) {
   if (!enabled) return;
+  if(window!==top){chrome.runtime.sendMessage({type:'frameLookup',word,context:context.slice(0,2000)}).catch(()=>{});return;}
+  contextURL=sourceURL;
   const value = word.trim();
   if (!manual && value === current && context === sentence && !panel.hidden) return;
   analyzingSentence=false;current = value.slice(0,300); phraseResult = SG.phrase(current); sentence = phraseResult && !context.includes(current) ? current : context; results = phraseResult ? phraseResult.components.flatMap(c=>c.results) : manual ? SG.search(current) : SG.lookup(current);
@@ -198,6 +201,9 @@
   if (changes.words || changes.preferences || changes.studyLevels) schedulePaint();
  });
  globalThis.__softgloss = {
+  hide:close, disable, isEnabled:()=>enabled,
+  markAutomatic(){automatic=true;},
+  fromFrame(word,context,url){display(word,context,false,url);},
   version:chrome.runtime.getManifest().version,
   show() {automatic = false; enabled = true; panel.hidden = false; observe(); render(); schedulePaint();},
   async autoLookup(word,context) {
@@ -214,5 +220,6 @@
    root.getElementById('sg-search').focus(); schedulePaint();
   }
  };
- render(); observe(); schedulePaint();
+ let frameTimer;document.addEventListener('load',event=>{if(enabled&&window===top&&event.target?.tagName==='IFRAME'){clearTimeout(frameTimer);frameTimer=setTimeout(()=>chrome.runtime.sendMessage({type:'refreshFrames'}).catch(()=>{}),200);}},true);
+ render();if(window!==top)panel.hidden=true;observe();schedulePaint();
 })();

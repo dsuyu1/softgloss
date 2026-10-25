@@ -1,9 +1,9 @@
 # Bungeoppang
-Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No AI, server, login, API key or runtime dependencies.
+Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No AI, server, login or API key. The FSRS scheduler is bundled locally.
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.12.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Bungeoppang, and check that it shows version **0.13.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin Bungeoppang from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
 5. Hover a Korean word or select **one Korean word**. Multiword sentence selection, images and video subtitles are not supported lookup surfaces yet.
@@ -55,9 +55,19 @@ Bungeoppang (붕어빵), previously SoftGloss, preserves existing local vocabula
 
 Use **Break down sentence** after looking up page text for possible word classes, particle functions and source-listed tense/form labels. This is an analysis aid with alternatives, not a guaranteed syntactic parse. Bounds: 2,000 characters / 80 Korean tokens.
 
-Twenty headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
+Twenty-seven headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
-The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.12.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
+The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.13.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
 
 The pinned dictionary now supplies 3,704 bilingual sentence pairs across 3,276 senses, reaching 2,814 of 33,796 dictionary entries (before original learning examples). Examples show their associated sense and source attribution. The corpus does not supply suitable bilingual examples for every entry; missing examples are labeled, not generated.
+
+
+### Embedded articles and offline reviews (0.13.0)
+Enable the page to scan accessible embedded articles as well as the main document. Word hover and selection inside a frame use the single main-page panel; saved cards retain the article URL. Chrome must grant access to the frame’s website. Cross-origin content without permission, canvas text and PDFs remain unsupported. Automatic website access also registers the lightweight listener in permitted child frames. After updating, reload both the extension and the webpage.
+
+Click **Add to reviews** on a word result to save that specific dictionary entry and its nearby sentence. Open **My library → Review your words**, recall the meaning, click **Show answer**, then choose **Again / Hard / Good / Easy**. The locally bundled MIT-licensed ts-fsrs 5.4.2 scheduler uses default FSRS parameters, a 90% target retention, 1/10 minute learning steps and a 10 minute relearning step. There is no personal parameter optimizer, account or network request. Vocabulary status and review membership are separate; rating a card does not mark a word Known.
+
+Review cards deduplicate by dictionary entry, so homonyms can be studied separately. Suspend/resume or remove cards in Manage review deck. JSON v2 backups preserve review schedules and up to 1,000 recent ratings per card; v1 backups still restore and replace the deck with an empty one. Anki TSV exports include review cards and sentence cards with their source credits. TSV carries content, not schedules, and requires mapping the four fields to your Anki note type; it is not live synchronization.
+
+The Naver Café pilot also adds source-gated conversational endings such as 놀랐네요, 했는데 and 같은데요, comparison/alternative particles, and seven original clothing/color/price glosses with bilingual examples. The screenshot-derived review fixture has 61 tokens, of which 44 currently return candidates and 17 remain unknown. These counts are coverage, not accuracy; all 61 still require independent review. See evaluation/naver-cafe-cases.json.

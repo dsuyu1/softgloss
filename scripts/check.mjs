@@ -28,3 +28,10 @@ const study=JSON.parse(fs.readFileSync('extension/study/manifest.json'));for(con
 console.log('Official curriculum integrity and syntax checks passed.');
 
 const examples=JSON.parse(fs.readFileSync('extension/examples/manifest.json'));for(const f of examples.files){const p='extension/examples/'+f.path;if(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')!==f.sha256)throw Error('Example checksum mismatch');execFileSync(process.execPath,['--check',p]);}
+
+const scheduler=JSON.parse(fs.readFileSync('data/scheduler-lock.json'));
+if(crypto.createHash('sha256').update(fs.readFileSync(scheduler.file)).digest('hex')!==scheduler.sha256)throw Error('Scheduler checksum mismatch');
+execFileSync(process.execPath,['--check',scheduler.file]);
+if(!fs.existsSync('extension/licenses/ts-fsrs-MIT.txt'))throw Error('Missing scheduler license');
+const schedulerSource=fs.readFileSync(scheduler.file,'utf8');if(/\beval\s*\(|new Function|\bfetch\s*\(|XMLHttpRequest|WebSocket/.test(schedulerSource))throw Error('Unexpected scheduler runtime code');
+console.log('Pinned offline FSRS scheduler integrity and license checks passed.');

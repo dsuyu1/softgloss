@@ -2,6 +2,7 @@
 (() => {
 globalThis.SG_PACK_ROWS = [];
 const rows = [
+['저렴하다','be inexpensive; be affordable','adjective'],['베이지','beige (color)','noun'],['피코트','pea coat','noun'],['헤링본','herringbone pattern or fabric','noun'],['보온성','heat retention; ability to keep warmth','noun'],['원픽','first choice; favorite (informal)','noun'],['컬러풀하다','be colorful','adjective'],
 ['기자협회보','Journalists Association bulletin (publication name)','proper noun'],
 ['응답자','respondent; a person who answers a survey or question','noun'],
 ['지도부','leadership; a group of leaders','noun'],['하단','lower part; bottom section','noun'],['전원주택','a house in the countryside','noun'],['전원생활','life in the countryside','noun'],['청원인','petitioner','noun'],['신천지예수교증거장막성전','Shincheonji Church of Jesus (organization name)','proper noun'],
@@ -11,6 +12,7 @@ const rows = [
 ['학교','school','noun'],['학생','student','noun'],['한국어','Korean language','noun'],['한국','Korea','noun'],['책','book','noun'],['밥','cooked rice; meal','noun'],['물','water','noun'],['친구','friend','noun'],['사람','person','noun'],['집','home; house','noun'],['오늘','today','noun'],['내일','tomorrow','noun'],['어제','yesterday','noun'],['시간','time','noun'],['음식','food','noun'],['커피','coffee','noun'],['영화','movie','noun'],['음악','music','noun'],['이야기','story','noun'],['선생님','teacher','noun'],['도서관','library','noun'],['저','I (humble); that','pronoun'],['나','I (informal)','pronoun'],['우리','we; our','pronoun'],['정말','really','adverb'],['매일','every day','adverb'],['같이','together','adverb']
 ];
 const forms = {
+'저렴한':['저렴하다','-ㄴ: adjective modifying a noun'], '컬러풀함에':['컬러풀하다','-ㅁ: nominalization','-에: relation / location (context needed)'],
 '편하려고':['편하다','-려고: intention/purpose in this expression; comfortable / at ease'],
 '끌어모으려고':['끌어모으다','-(으)려고: purpose/intention connective'], '끌어모으려는':['끌어모으다','-(으)려는: intention/purpose modifying a noun'],
 '먹었어요':['먹다','-었-: past tense','-어요: polite ending'], '먹어요':['먹다','-어요: polite ending'],
