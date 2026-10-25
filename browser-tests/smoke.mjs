@@ -59,6 +59,7 @@ try {
     if (action === 'status') return root.querySelector('button[data-status=known]')?.getAttribute('aria-pressed');
     if (action === 'highlight') return CSS.highlights.get('softgloss-known')?.size || 0;
     if (action === 'focus') return root.activeElement?.id;
+    if (action === 'hasFocus') return Boolean(root.activeElement);
     if (action === 'searchValue') return root.querySelector('input[type=search]').value;
     if (action === 'hidden') return root.querySelector('section').hidden;
     if (action === 'grammarOpen') return [...root.querySelectorAll('details')].map(d=>d.open);
@@ -91,7 +92,7 @@ try {
 
  // Real mouse coordinates and DOM selections exercise the reading entry points.
  await panel('click', 'Close');
- assert.equal(await panel('focus'), undefined);
+ assert.equal(await panel('hasFocus'), false);
  const point = await page.evaluate(() => {
   const text = document.getElementById('text').firstChild; const r=document.createRange(); r.setStart(text,0);r.setEnd(text,2);
   const b=r.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};

@@ -97,9 +97,9 @@
  }
  document.addEventListener('pointermove', event => {
   clearTimeout(hoverTimer);
-  if (!enabled || event.composedPath().includes(host) || root.activeElement?.matches('input,textarea')) return;
+  if (!enabled || event.composedPath().includes(host) || root.activeElement?.matches('input[type=search],textarea')) return;
   hoverTimer = setTimeout(() => {
-   if (!enabled || root.activeElement?.matches('input,textarea')) return;
+   if (!enabled || root.activeElement?.matches('input[type=search],textarea')) return;
    const p = document.caretRangeFromPoint?.(event.clientX, event.clientY);
    if (!p || p.startContainer.nodeType !== Node.TEXT_NODE) return;
    const node = p.startContainer;
