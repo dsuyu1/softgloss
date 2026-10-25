@@ -263,6 +263,7 @@ function sentenceAnalysis(input){
   return {surface:word,results,labels:[...labels],supported:!!results.length};
  });
 }
+function examplesFor(entry){return (entry.senses||[]).flatMap(s=>(globalThis.SG_DICTIONARY_EXAMPLES?.[s.id]||[]).map(pair=>({korean:pair[0],english:pair[1],senseId:s.id,senseGloss:s.glosses.join('; '),source:entry.source,license:entry.license}))).slice(0,2);}
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,sentenceAnalysis,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,parseStudyCSV,highlightMatch,studyGrammarMatches,sentenceAnalysis,examplesFor,grammarFor};
 })();

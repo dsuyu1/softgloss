@@ -1,0 +1,51 @@
+{
+  "license": "CC-BY-SA-4.0",
+  "sourceSenses": 3276,
+  "pairs": 3704,
+  "files": [
+    {
+      "path": "examples-00.js",
+      "sha256": "4cab8af5a8e80077679c810851508c1d8a75bb9613f717395fffa119857e63bf"
+    },
+    {
+      "path": "examples-01.js",
+      "sha256": "e40fb68043b7fa50d293bd5af8e50d92838fd7196c22a81d23111a54774c7f58"
+    },
+    {
+      "path": "examples-02.js",
+      "sha256": "89dae29f4adc69064b05fd385ae26d3df021820f38e2ef8d985c794d8c93c5b7"
+    },
+    {
+      "path": "examples-03.js",
+      "sha256": "8e0b5c4ec578f1411dffb4a78fa22ad5d392d3671243af2d019e4b4053f7b2b5"
+    },
+    {
+      "path": "examples-04.js",
+      "sha256": "97c3f7e68e00a884c95de5b6f7cff84c93c7e32dd45b3afa9c830158a1df906d"
+    },
+    {
+      "path": "examples-05.js",
+      "sha256": "2f73b1a14e53f27d707ccf9bbfcfd56dfe01ae191d69ecf7baa87ce480ac57d7"
+    },
+    {
+      "path": "examples-06.js",
+      "sha256": "acee67e4f6b4cb88e575d6abdf0228c9e271eca0a704ca79635d6c8f3fa1765b"
+    },
+    {
+      "path": "examples-07.js",
+      "sha256": "85e0f994f603dac4995f79e219e0906ec3e84f91c3113762e9ced2fc670ec114"
+    },
+    {
+      "path": "examples-08.js",
+      "sha256": "b3df4394f85c9c890a2f82b734940e1add699cfc2d665e734d99770dafaa5db6"
+    },
+    {
+      "path": "examples-09.js",
+      "sha256": "262f7b39f9ddb9f7fe1dce3cc215ee176d8a41a4432ef8ec3a0cf983d7d836bb"
+    },
+    {
+      "path": "examples-10.js",
+      "sha256": "991df693a69d9e622cfac6e2c723530eab65d3db0e931f1242196606cf8fd3b1"
+    }
+  ]
+}

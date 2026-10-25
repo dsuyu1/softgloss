@@ -79,3 +79,6 @@ No graded dataset is redistributed or estimated. Settings link to https://everyk
 
 ## 0.11.0 reading analysis
 Adds regression checks for sentence object/past labels, retained 부르다 verb/adjective ambiguity, unknown/oversized context and level metadata. Chromium cases cover nested-link hover, native hash navigation, six distinct highlight colors, sentence breakdown and example rendering. Existing browser checks and offline data rebuilds remain. These are implementation regressions, not independent language review. Screenshot 기자협회보 is treated as a missing publication-name entry; existing screenshot links already show highlights, so not all misses were link-handling failures. Original examples are authored locally, not copied from an external dictionary.
+
+## 0.12.0 examples and loaded build
+46 Node tests include bilingual source text, sense membership, attribution and example coverage. Offline CI rebuilds the selected example snapshot and checks shard hashes. Chromium checks version visibility and dictionary-example rendering alongside the earlier six-color, link and persistence cases. Screenshot review identified an older SoftGloss panel, not proof of a failed rename in current code.

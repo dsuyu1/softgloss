@@ -180,3 +180,9 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Bounded sentence component view with possible POS/particle/form/tense labels and unknowns.
 - [x] Twenty original bilingual learning examples, explicitly distinct from dictionary quotations.
 - [ ] Independently review examples and syntactic accuracy; expand licensed example coverage beyond the original starter bank.
+
+## 0.12.0 — expanded source examples and visible build status
+- [x] Import 3,704 bilingual dictionary example pairs, linked by sense ID and credited under the existing dictionary license; preserve original learning examples separately.
+- [x] Label missing examples; document coverage of 2,814 dictionary entries without claiming full coverage.
+- [x] Show loaded version and six color swatches, reject stale panels with reload guidance.
+- [ ] Expand licensed example coverage and independently review translations and sense alignment.

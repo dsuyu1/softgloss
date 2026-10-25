@@ -1,0 +1,9 @@
+{
+  "sourceLock": "data/source-lock.json",
+  "sourceSha256": "3cd601d27f59c56b6d58b96896076335d5a2c6d219a272d94f39f5e8ad217e99",
+  "snapshotSha256": "c728152e313bf9582740e2f5f1370e75ce2908eefc5e344f5cb4c6da803f4794",
+  "license": "CC-BY-SA-4.0",
+  "selectedSenses": 3276,
+  "pairs": 3704,
+  "selection": "Source type=example, no ref, bilingual, Korean sentence punctuation, length bounds, maximum two pairs per sense; quotations and fragments omitted."
+}
