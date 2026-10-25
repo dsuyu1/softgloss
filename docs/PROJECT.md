@@ -1,7 +1,7 @@
 # SoftGloss project scope and delivery checklist
 
 Owner: Damian Villarreal. Scope baseline: October 24, 2026.
-Product name: Bungeoppang (formerly SoftGloss). Status: offline dictionary alpha, not a public release.
+Product name: Malnaru Read (말나루), in the Malnaru suite; formerly Bungeoppang / SoftGloss. Status: offline dictionary alpha, not a public release.
 
 ## Product commitment
 A free, useful Korean immersion companion without AI. Target learners know roughly 500+ words and want to read real content with less lookup friction. Long-term destination: dictionary, morphology, grammar, subtitles, sentence mining, vocabulary tracking, reader, recommendations and mobile. Build our own implementation; do not copy a competitor's code or content.
@@ -198,3 +198,12 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Prepare 61 screenshot-derived review probes: 44 supported candidates, 17 unknown, zero independently reviewed. This does not satisfy the 100-token accuracy gate.
 - [ ] Verify actual Naver Café article with the learner; independently review new Korean analyses/examples and remaining unknowns.
 - [ ] Complete manual accessibility/zoom, learner hardware profiling and real Anki import; parameter optimization, deck collections and live Anki sync remain future scope.
+
+
+## 0.14.0 — Malnaru suite branding and fourth pilot coverage
+- [x] User selected Malnaru / 말나루; rename this extension Malnaru Read across panel, toolbar, library, manifest, credits and current help. Preserve data/IDs.
+- [x] Default neutral marks for ungraded dictionary matches during study mode, explicit no-grade lookup labels and a strict-list toggle; do not invent curriculum grades or include higher-grade words.
+- [x] Source-gated polite -지요 questions, nominal copula backgrounds, proper-name particles and unique joined labels with three/four nouns.
+- [x] Paint joined nouns at their individual grades; do not grade a whole compound from its easiest component.
+- [x] Original 층간소음 and four team-name entries with original bilingual examples. Names checked against the official KBO club directory.
+- [ ] Independently review the new analyses/examples. Image lettering/OCR, arbitrary unknown names and general spacing repair remain outside the supported parser.

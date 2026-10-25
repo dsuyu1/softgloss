@@ -4,7 +4,7 @@ const store = SGStore.createStore(chrome.storage.local);
 async function loadFrame(tabId, frameId, quiet=false) {
  const target={tabId,frameIds:[frameId]};
  const [probe]=await chrome.scripting.executeScript({target,func:()=>({version:globalThis.__softgloss?.version,loaded:!!globalThis.SG_DATA?.loaded})});
- if(probe.result.version&&probe.result.version!==chrome.runtime.getManifest().version)throw Error('Reload the webpage to load Bungeoppang '+chrome.runtime.getManifest().version+'.');
+ if(probe.result.version&&probe.result.version!==chrome.runtime.getManifest().version)throw Error('Reload the webpage to load Malnaru Read '+chrome.runtime.getManifest().version+'.');
  if(!probe.result.loaded)await chrome.scripting.executeScript({target,files:SG_DICTIONARY_FILES});
  await chrome.scripting.executeScript({target,files:['core.js','api.js','content.js']});
  if(quiet)await chrome.scripting.executeScript({target,func:()=>globalThis.__softgloss?.hide()});
@@ -72,7 +72,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if(sender.tab?.id){chrome.action.setBadgeText({tabId:sender.tab.id,text:''});if(sender.frameId===0)chrome.scripting.executeScript({target:{tabId:sender.tab.id,allFrames:true},func:()=>{if(window!==top)globalThis.__softgloss?.disable();}}).catch(()=>{});}
   return;
  }
- const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','suspendReview','removeReview'];
+ const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'setUngradedHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','suspendReview','removeReview'];
  if (!operations.includes(message?.type)) return;
  store.apply(message).then(respond, e => respond({ok: false, error: e.message}));
  return true;

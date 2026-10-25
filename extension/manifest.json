@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Bungeoppang — Korean reading companion",
-  "version": "0.13.0",
-  "description": "Offline Korean–English dictionary, listed conjugations, vocabulary tracking and sentence saving. No account or AI.",
+  "name": "Malnaru Read — Korean reading companion",
+  "version": "0.14.0",
+  "description": "Offline Korean reading, dictionary lookup, grammar, study highlights and spaced repetition. Part of Malnaru. No account or AI.",
   "permissions": [
     "activeTab",
     "scripting",
     "storage"
   ],
   "action": {
-    "default_title": "Enable Bungeoppang on this page",
+    "default_title": "Enable Malnaru Read on this page",
     "default_popup": "popup.html"
   },
   "background": {
@@ -27,5 +27,6 @@
   "optional_host_permissions": [
     "http://*/*",
     "https://*/*"
-  ]
+  ],
+  "short_name": "Malnaru Read"
 }
