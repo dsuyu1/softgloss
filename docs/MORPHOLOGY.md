@@ -25,3 +25,10 @@ Two bounded composition candidates are added: -(으)면서 is backed by the entr
 When a word has no direct or listed analysis, a bounded fallback can show a unique two-noun split such as 인기 + 글, or a dictionary noun plus a source-attested form of 하다/되다 such as 반영 + 되다. Results show component definitions with their own source links. They do not assert that concatenating the English meanings translates the whole expression. Vocabulary status and saving operate on each displayed component; compound coverage is not comprehension.
 
 The root dictionary still lacks some full headwords: 청원인 remains unsupported in this increment. Wider headword coverage, better compound disambiguation, stacked endings and a production parser remain open.
+
+## 0.8.0 construction lens
+Phrase analysis accepts 2–8 Hangul word tokens, up to 300 characters and 80 per token. It resolves components with the existing dictionary and source-attested forms. Adjacent -지 + 않다/못하다, future noun-modifying form + 수 + 있다/없다, and purpose form + 하다 produce original English construction summaries. Punctuation prevents matching across clauses. Unknown components remain visible; no generic phrase translation is synthesized. Each saved component retains its dictionary attribution and the phrase/context as the sentence.
+
+New bounded word candidates include known predicate stem + 지, source-listed purpose form -려고/-으려고 → -려는/-으려는, known noun/pronoun + 들 (+ one standard particle), and known noun/pronoun + copula question 냐/이냐 with standard coda checks. The only spacing recovery is the explicit prefix 무슨 before a recognized noun/copula question, presented as a possible segmentation. These are candidates; exact meanings still depend on context.
+
+References consulted, 2026-10-25: [NIKL on -(으)려는](https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=57&pageIndex=1&qna_seq=335456), [NIKL on negation and -ㄹ 수 있다 constituents](https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=216&pageIndex=1&qna_seq=276708&searchCondition=&searchKeyword=). Explanations are original summaries, not imported source text. Native review remains pending.

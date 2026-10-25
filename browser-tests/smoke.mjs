@@ -62,8 +62,8 @@ try {
     if (action === 'hasFocus') return Boolean(root.activeElement);
     if (action === 'searchValue') return root.querySelector('input[type=search]').value;
     if (action === 'hidden') return root.querySelector('section').hidden;
-    if (action === 'grammarOpen') return [...root.querySelectorAll('details')].map(d=>d.open);
-    if (action === 'expandGrammar') root.querySelector('summary')?.click();
+    if (action === 'grammarOpen') return [...root.querySelectorAll('.sg-grammar, .sg-grammar details')].map(d=>d.open);
+    if (action === 'expandGrammar') root.querySelector('.sg-grammar summary')?.click();
     return root.querySelector('section').textContent;
    }, args: [action, value]});
    return result.result;
@@ -84,9 +84,23 @@ try {
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
  await panel('expandGrammar');
  assert.deepEqual(await panel('grammarOpen'), [true,false]);
+ assert.match(await panel('search','기업들의'),/기업/);
+ assert.match(await panel('search','끌어모으려는'),/끌어모으다/);
+ assert.match(await panel('search','무슨성역이냐'),/성역/);
+ assert.match(await panel('search','보이지 않는다'),/Negation/);
+ assert.match(await panel('search','할 수 있다'),/Ability \/ possibility/);
+ await mkdir('test-results',{recursive:true});
+ await page.screenshot({path:'test-results/panel-phrase.png'});
+ await page.setViewportSize({width:360,height:740});
+ await page.screenshot({path:'test-results/panel-phrase-mobile.png'});
+ await page.setViewportSize({width:1280,height:720});
  assert.match(await panel('search', 'BOOK'), /책/);
  await panel('click', 'known'); await eventually(() => panel('status'), 'true');
  await eventually(() => panel('highlight'), 1);
+ await page.evaluate(()=>{document.body.style.background='#121212';document.body.style.color='#fff';});
+ assert.equal(await page.evaluate(()=>getComputedStyle(document.body,'::highlight(softgloss-known)').color),'rgb(35, 35, 35)','vocabulary highlights must stay readable on dark pages');
+ await panel('search','책을');await page.screenshot({path:'test-results/panel-dark-page.png'});
+ await page.evaluate(()=>{document.body.style.background='';document.body.style.color='';});
  await page.evaluate(() => {const p = document.createElement('p'); p.textContent = '책'; document.body.append(p);});
  await eventually(() => panel('highlight'), 2);
  await panel('click', 'Disable on this page'); await eventually(() => panel('highlight'), 0);
@@ -117,6 +131,13 @@ try {
  await page.locator('#private').fill('학교');
  await page.mouse.move(10,10); await page.locator('#private').hover();await page.waitForTimeout(350);
  assert.equal(await panel('searchValue'),'읽어요','editable input must not trigger lookup');
+ await page.evaluate(()=>{const p=document.createElement('p');p.id='phrase';p.append(Object.assign(document.createElement('span'),{textContent:'보이지'}),document.createTextNode(' '),Object.assign(document.createElement('span'),{textContent:'않는다'}));document.body.append(p);const range=document.createRange();range.setStart(p.firstChild.firstChild,0);range.setEnd(p.lastChild.firstChild,3);const selection=getSelection();selection.removeAllRanges();selection.addRange(range);p.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));});
+ await eventually(()=>panel('searchValue'),'보이지 않는다');
+ assert.match(await panel('text'),/Negation/);
+ await panel('click','Save sentence');
+ await eventually(()=>worker.evaluate(async()=>{const {cards=[]}=await chrome.storage.local.get('cards');return cards.some(c=>c.lemma==='보이다'&&c.sentence==='보이지 않는다');}),true);
+ await worker.evaluate(async()=>{const {cards=[]}=await chrome.storage.local.get('cards');for(const card of cards)await store.apply({type:'deleteCard',card});});
+ await page.evaluate(()=>{getSelection().removeAllRanges();document.getElementById('phrase').remove();});
  await panel('click','Close');
  const heapAfter = (await cdp.send('Performance.getMetrics')).metrics.find(m=>m.name==='JSHeapUsedSize')?.value;
  await page.evaluate(()=>{
@@ -170,13 +191,13 @@ try {
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softglossBootstrap)});return r.result;},autoTab),true);
  await worker.evaluate(tabId=>chrome.scripting.executeScript({target:{tabId},func:()=>{const original=Element.prototype.attachShadow;Element.prototype.attachShadow=function(options){const root=original.call(this,options);if(this.id==='softgloss-root')globalThis.__autoTestRoot=root;return root;};}}),autoTab);
  await automaticPage.evaluate(()=>{
-  const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,2);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  const node=document.getElementById('text').firstChild;const r=document.createRange();r.setStart(node,0);r.setEnd(node,6);const s=getSelection();s.removeAllRanges();s.addRange(r);
   document.getElementById('text').dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
  });
  await automaticPage.locator('#softgloss-root').waitFor({state:'attached'});
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),true);
  const autoResult=await worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>({hidden:globalThis.__autoTestRoot.querySelector('section').hidden,word:globalThis.__autoTestRoot.querySelector('input[type=search]').value})});return r.result;},autoTab);
- assert.deepEqual(autoResult,{hidden:false,word:'책을'});
+ assert.deepEqual(autoResult,{hidden:false,word:'책을 읽어요'});
  await worker.evaluate(async()=>{await chrome.storage.local.set({autoLookup:false});await syncAuto();});
  assert.equal((await worker.evaluate(()=>chrome.scripting.getRegisteredContentScripts({ids:['softgloss-auto']}))).length,0);
  await eventually(()=>worker.evaluate(async tabId=>{const [r]=await chrome.scripting.executeScript({target:{tabId},func:()=>Boolean(globalThis.__softgloss?.isAutomatic())});return r.result;},autoTab),false);
@@ -189,6 +210,7 @@ try {
  const inactiveTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'inactive');
  const activations=await popup.evaluate(tabId=>Promise.all([chrome.runtime.sendMessage({type:'enableCurrent',tabId}),chrome.runtime.sendMessage({type:'enableCurrent',tabId})]),inactiveTab);
  assert.ok(activations.every(r=>r.ok));assert.equal(await inactivePage.locator('#softgloss-root').count(),1);
+ await popup.setViewportSize({width:350,height:700});await popup.screenshot({path:'test-results/popup.png',fullPage:true});
  await popup.close();await automaticPage.close();await inactivePage.close();await library.bringToFront();
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'softgloss-anki.tsv');

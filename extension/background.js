@@ -76,7 +76,7 @@ async function autoEnable(message,sender) {
  const {autoLookup}=await chrome.storage.local.get({autoLookup:false});
  const url=new URL(sender.url || sender.tab.url);
  if(!autoLookup || !['http:','https:'].includes(url.protocol) || !await chrome.permissions.contains({origins:[url.origin+'/*']}))return {ok:false};
- if(typeof message.word!=='string'||!/^[가-힣]{1,80}$/.test(message.word)||typeof message.context!=='string'||message.context.length>2000)return {ok:false};
+ if(typeof message.word!=='string'||!SG.selectionWords(message.word).length||typeof message.context!=='string'||message.context.length>2000)return {ok:false};
  const id=sender.tab.id;
  if(!autoLoads.has(id))autoLoads.set(id,enable({id}).finally(()=>autoLoads.delete(id)));
  const result=await autoLoads.get(id);if(!result?.ok)return result;

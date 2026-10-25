@@ -145,3 +145,14 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Record screenshot-derived probes without claiming independent reviewer approval.
 - [x] Verify expanded pack, pilot examples, activation and long-page benchmark in Chromium CI: Actions 40211604984.
 - [ ] Broaden full headword coverage (청원인 is a tracked remaining miss); independently review new analyses.
+
+## 0.8.0 phrase and reading-panel increment
+- [x] Inspect six second-round Naver screenshots: purpose modifier, run-on comment, missing nouns, plural + possessive and negation.
+- [x] Add original short fallback glosses for 명품, 성역 and 끌어모으다.
+- [x] Add bounded plural/particle, -지, -(으)려는 and informal copula analyses; explicitly label possible spacing recovery for 무슨 + noun/copula.
+- [x] Accept up to eight Korean words in manual, keyboard and permission-gated automatic selection.
+- [x] Explain supported adjacent negation, ability and intention constructions; retain component definitions and unresolved tokens.
+- [x] Refresh the panel and toolbar popup with compact navigation, neutral surfaces and coral actions, inspired by the supplied Figma reference.
+- [x] Label grammar/part-of-speech colors, merge duplicate analyses per source entry and collapse secondary meanings/settings.
+- [x] Verify phrase selection, context saving, automatic activation and existing regressions in Chromium CI; inspect desktop/narrow-panel/popup screenshots (Actions 40213872396).
+- [ ] Independently review Korean-language accuracy and usability with learners; expand genuine headword coverage beyond these pilot misses.
