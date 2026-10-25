@@ -5,7 +5,7 @@
  const skip='input,textarea,select,[contenteditable],[role=textbox],script,style';
  let pending=false,timer;
  async function activate(word,context) {
-  if(pending || globalThis.__softgloss || !/^[가-힣]{1,80}$/.test(word))return;
+  if(pending || globalThis.__softgloss || !(word.length<=300 && /^[가-힣\s.,!?…“”"'‘’]+$/u.test(word) && (word.match(/[가-힣]+/gu)||[]).length<=8 && (word.match(/[가-힣]+/gu)||[]).every(w=>w.length<=80)))return;
   pending=true;
   try {await chrome.runtime.sendMessage({type:'autoEnable',word,context:context.slice(0,2000)});} catch {} finally {pending=false;}
  }

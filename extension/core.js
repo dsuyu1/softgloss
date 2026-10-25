@@ -46,7 +46,7 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
  // Imported forms retain their own source entry, so homonyms do not borrow conjugations.
  for (const {entry, tags} of forms.get(word) || []) {
   const labels = tags.map(t => ({past:'past tense', 'non-past':'non-past', polite:'polite speech', informal:'informal style', formal:'formal style', indicative:'declarative table form'}[t] || t));
-  add(entry, ['Listed conjugation: ' + labels.join(' · ')], 'listed conjugation');
+  add(entry, ['Listed conjugation: ' + labels.join(' · ')], 'listed conjugation',{formTags:tags});
  }
  for(const {entry,tags} of sourceForms(word,data)) {
   const labels=tags.filter(t=>!['formal','informal','polite'].includes(t)).map(t=>({'determiner':'noun-modifying form','noun-from-verb':'nominalized form','conditional':'conditional connective','conjunctive':'linking connective','contrastive':'contrast/background connective','causative':'connective (context needed)','interrogative':'question-form table entry','motive-form':'purpose/intention connective'}[t]||t));
@@ -58,6 +58,19 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
  if(options.composed!==false && word.endsWith('는지')) {
   for(const result of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(result.formTags?.includes('determiner')&&result.formTags.includes('present'))add(result,['-는지: possible embedded-question ending'],'possible connective analysis');
  }
+ // Bounded analyses: an ending alone does not establish the meaning of a sentence.
+ if(options.composed!==false && word.endsWith('지')) {
+  for(const entry of lemmas.get(word.slice(0,-1)+'다')||[])if(['verb','adjective'].includes(entry.pos))add(entry,['-지: connective or sentence ending; select the following word for a construction'],'possible ending analysis',{ending:'지'});
+ }
+ if(options.composed!==false && /(?:으려는|려는)$/.test(word)) {
+  for(const result of lookup(word.slice(0,-1)+'고',data,{composed:false,compounds:false}))if(result.formTags?.includes('motive-form'))add(result,['-(으)려는: intention/purpose modifying the following noun'],'possible intention modifier',{ending:'려는'});
+ }
+ for(const suffix of ['이냐','냐'])if(word.endsWith(suffix)) {
+  const stem=word.slice(0,-suffix.length), final=stem ? (stem.charCodeAt(stem.length-1)-0xAC00)%28 : -1;
+  if((suffix==='이냐')!==Boolean(final))continue;
+  for(const entry of lemmas.get(stem)||[])if(['noun','pronoun'].includes(entry.pos))add(entry,[`-${suffix}: informal question with the copula (be)`],'possible copula analysis');
+ }
+ if(word.endsWith('들'))for(const entry of lemmas.get(word.slice(0,-1))||[])if(['noun','pronoun'].includes(entry.pos))add(entry,['-들: plural marker'],'possible plural analysis');
  const form = data.forms?.[word];
  if (form && !forms.has(word)) for (const entry of lemmas.get(form[0]) || []) add(entry, form.slice(1), 'listed form');
  for (const [suffix,note] of particles) {
@@ -69,6 +82,7 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   if (suffix === '으로' && (final === 0 || final === 8)) continue;
   if (suffix === '로' && final !== 0 && final !== 8) continue;
   for(const {entry,tags} of sourceForms(stem,data))if(tags.includes('noun-from-verb'))add(entry,['Source-listed nominalization', `-${suffix}: ${note}`],'possible nominalization + particle');
+  if(stem.endsWith('들'))for(const base of lemmas.get(stem.slice(0,-1))||[])if(['noun','pronoun'].includes(base.pos))add(base,['-들: plural marker',`-${suffix}: ${note}`],'possible plural + particle analysis',{particle:suffix});
   for (const base of lemmas.get(stem) || []) {
    if (['noun','pronoun'].includes(base.pos)) add(base, [`-${suffix}: ${note}`], 'possible particle analysis', {particle:suffix});
   }
@@ -93,12 +107,48 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
    for(const [component,entries] of [left,right].entries())for(const entry of entries)add(entry,[`Possible noun compound: ${parts.join(' + ')}`,`Component ${component+1} of 2; not a whole-word translation`],'possible compound component',{compoundParts:parts});
   }
  }
+ // One explicitly bounded spacing recovery for the pilot comment, not general segmentation.
+ if(!out.length && options.composed!==false && word.startsWith('무슨')) {
+  const rest=lookup(word.slice(2),data,{composed:false,compounds:false}).filter(r=>r.kind==='possible copula analysis');
+  if(rest.length)for(const r of rest)add(r,['Possible spacing: 무슨 '+word.slice(2),'무슨: what / what kind of',...r.parts],'possible spacing + copula analysis');
+ }
  const unique = new Map();
  for (const result of out) {
   const key = (result.id || result.lemma) + '|' + result.parts.join('|');
   if (!unique.has(key)) unique.set(key, result);
  }
  return [...unique.values()];
+}
+function selectionWords(input) {
+ const text=String(input).trim().normalize('NFC');
+ if(!text || text.length>300 || !/^[가-힣\s.,!?…“”"'‘’]+$/u.test(text))return [];
+ const words=text.match(/[가-힣]+/gu)||[];
+ return words.length<=8 && words.every(w=>w.length<=80) ? words : [];
+}
+function phrase(input,data=globalThis.SG_DATA) {
+ const words=selectionWords(input);
+ if(words.length<2)return null;
+ const components=words.map(surface=>({surface,results:lookup(surface,data)})), constructions=[];
+ // Require adjacent words with whitespace only; punctuation ends a construction.
+ const normalized=String(input).normalize('NFC'), offsets=tokens(normalized);
+ const adjacent=(i,n)=>offsets.slice(i+1,i+n).every((t,j)=>/^\s+$/u.test(normalized.slice(offsets[i+j].index+offsets[i+j].word.length,t.index)));
+ for(let i=0;i<words.length;i++) {
+  const a=components[i],b=components[i+1],c=components[i+2];
+  const predicate=a.results.some(r=>['verb','adjective'].includes(r.pos));
+  if(b && adjacent(i,2) && predicate && a.results.some(r=>r.ending==='지') && b.results.some(r=>r.lemma==='않다'||r.lemma==='못하다'))constructions.push({surface:words.slice(i,i+2).join(' '),pattern:'-지 '+(b.results.some(r=>r.lemma==='않다')?'않다':'못하다'),meaning:b.results.some(r=>r.lemma==='않다')?'Negation: not doing or not being something.':'Inability: cannot do something.',indices:[i,i+1]});
+  if(c && adjacent(i,3) && b.surface==='수' && a.results.some(r=>r.formTags?.includes('determiner')&&r.formTags.includes('future')) && c.results.some(r=>['있다','없다'].includes(r.lemma)))constructions.push({surface:words.slice(i,i+3).join(' '),pattern:'-(으)ㄹ 수 '+(c.results.some(r=>r.lemma==='없다')?'없다':'있다'),meaning:c.results.some(r=>r.lemma==='없다')?'Inability / impossibility: cannot do something.':'Ability / possibility: can do something.',indices:[i,i+1,i+2]});
+  if(b && adjacent(i,2) && a.results.some(r=>r.formTags?.includes('motive-form')) && b.results.some(r=>r.lemma==='하다'))constructions.push({surface:words.slice(i,i+2).join(' '),pattern:'-(으)려고 하다',meaning:'Intention: intend or plan to do something.',indices:[i,i+1]});
+ }
+ // Prefer entries compatible with the matched construction; retain other homonyms for disclosure.
+ for(const construction of constructions) {
+  const [i,j,k]=construction.indices;
+  const filters=k!==undefined ? [r=>r.formTags?.includes('determiner')&&r.formTags.includes('future'),r=>r.id==='wikt:en-수-ko-noun-eatSHHnQ',r=>['있다','없다'].includes(r.lemma)&&r.pos==='adjective'] : construction.pattern.startsWith('-지') ? [r=>r.ending==='지',r=>['않다','못하다'].includes(r.lemma)] : [r=>r.formTags?.includes('motive-form'),r=>r.lemma==='하다'];
+  for(const [position,componentIndex] of construction.indices.entries()) {
+   const component=components[componentIndex], matches=component.results.filter(filters[position]);
+   if(matches.length){component.alternatives=component.results.filter(r=>!matches.includes(r));component.results=matches;}
+  }
+ }
+ return {components,constructions};
 }
 function search(input, data = globalThis.SG_DATA) {
  const query = String(input).trim().normalize('NFC').toLowerCase();
@@ -137,5 +187,5 @@ function validateBackup(value) {
  return {version:1,words,cards};
 }
 function grammarFor(result) {return (globalThis.SG_GRAMMAR || []).filter(card => result.kind === 'possible particle analysis' && card.forms.includes(result.particle));}
-globalThis.SG = {lookup,search,tokens,coverage,ankiTSV,validateBackup,grammarFor};
+globalThis.SG = {lookup,search,phrase,selectionWords,tokens,coverage,ankiTSV,validateBackup,grammarFor};
 })();
