@@ -49,3 +49,6 @@ The selected relation snapshot is `data/morphology-source.json.gz`; its checksum
 
 ## 0.8.0 pilot fallback entries
 Added short original glosses for 명품 (luxury goods / outstanding product), 성역 (sacred ground / protected subject) and 끌어모으다 (gather / attract), plus two explicitly listed purpose forms of 끌어모으다. These are deliberately limited editorial fallbacks, labeled as original starter glosses in the panel; they are not attributed to the Wiktionary pack or advertised as exhaustive entries. The import remains byte-identical. [Collins publisher entry](https://www.collinsdictionary.com/ko/dictionary/korean-english/끌어-모으다) and [NIKL language-service usage](https://x.com/urimal365/status/370786640983117824) were consulted for 끌어모으다; gloss text is original. All three remain subject to independent review.
+
+## 0.10.0 official default curriculum
+NIKL vocabulary and grammar grade data is now bundled separately under KOGL Type 1. This supersedes the earlier “No NIKL data” candidate decision for curriculum fields only; no Basic Dictionary API/media/definitions are imported. See CURRICULUM.md, data/curriculum-lock.json, reproducible importer and packaged credits. The source is the official 2017 study appendix revised 2020-11-17, not a third-party TOPIK list.

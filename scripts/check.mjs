@@ -23,3 +23,6 @@ if(JSON.stringify(m.optional_host_permissions)!==JSON.stringify(["http://*/*","h
 const morphology=JSON.parse(fs.readFileSync('data/morphology-manifest.json'));
 for(const file of morphology.files){const p='extension/morphology/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Morphology checksum mismatch');execFileSync(process.execPath,['--check',p]);}
 console.log('Extended morphology integrity and syntax checks passed.');
+
+const study=JSON.parse(fs.readFileSync('extension/study/manifest.json'));for(const file of study.files){const p='extension/study/'+file.path;const bytes=fs.readFileSync(p);if(crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Curriculum checksum mismatch');execFileSync(process.execPath,['--check',p]);}
+console.log('Official curriculum integrity and syntax checks passed.');

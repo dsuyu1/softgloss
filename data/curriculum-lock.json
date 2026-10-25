@@ -1,0 +1,14 @@
+{
+  "publisher": "National Institute of Korean Language (국립국어원)",
+  "title": "2017년 국제 통용 한국어 표준 교육과정 적용 연구(4단계) 어휘, 문법 등급 목록",
+  "revision": "2020-11-17",
+  "retrieved": "2026-10-25",
+  "page": "https://www.korean.go.kr/front/reportData/reportDataView.do?mn_id=45&report_seq=932",
+  "download": "https://www.korean.go.kr/common/download.do?c_file_name=157339df-1904-443a-b1a9-d6d34578ba93.xlsx&file_path=reportData&o_file_name=curriculum.xlsx",
+  "license": "KOGL-Type-1",
+  "xlsxSha256": "2cde28ab90e04728513e65ef5df4baaa400a4055fe2abd1856889cb983c4c3ac",
+  "snapshotSha256": "dbdcdbc9adfb39736772727a5a079e756d0e456c0c39423703ef5c88e41e5ac9",
+  "vocabularyRows": 10635,
+  "grammarRows": 336,
+  "changes": "Retain source row IDs, grades, headwords/POS and grammar forms/category/meaning labels. Omit vocabulary examples; strip homonym digits for lemma matching, retain raw rows in snapshot. Minimum grade on lemma collisions. Curriculum grades are not asserted to be official TOPIK exam assignments."
+}
