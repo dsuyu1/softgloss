@@ -5,8 +5,27 @@
   let pending = Promise.resolve();
   function apply(message) {
    const job = pending.then(async () => {
-    const state = await storage.get({words: {}, cards: [], preferences: {highlights: true}});
+    const state = await storage.get({words: {}, cards: [], preferences: {highlights: true}, reviewCards:{}});
     switch (message.type) {
+     case 'addReview': {
+      const card=SGSRS.create(message.card);
+      if(!state.reviewCards[card.id]){
+       if(Object.keys(state.reviewCards).length>=10000)throw Error('Review deck is full. Export and remove cards first.');
+       state.reviewCards[card.id]=card;await storage.set({reviewCards:state.reviewCards});
+      }
+      break;
+     }
+     case 'rateReview': {
+      const card=Object.hasOwn(state.reviewCards,message.id)?state.reviewCards[message.id]:null;if(!card)throw Error('Review card no longer exists.');
+      state.reviewCards[message.id]=SGSRS.rate(card,message.rating,message.revision);
+      await storage.set({reviewCards:state.reviewCards});break;
+     }
+     case 'suspendReview': {
+      const card=Object.hasOwn(state.reviewCards,message.id)?state.reviewCards[message.id]:null;if(!card||typeof message.suspended!=='boolean')throw Error('Invalid review card.');
+      card.suspended=message.suspended;card.revision++;await storage.set({reviewCards:state.reviewCards});break;
+     }
+     case 'removeReview':
+      delete state.reviewCards[message.id];await storage.set({reviewCards:state.reviewCards});break;
      case 'setWord':
       if (!/^[가-힣]{1,80}$/u.test(message.lemma) || !statuses.includes(message.status)) throw Error('Invalid vocabulary.');
       state.words[message.lemma] = message.status;
@@ -25,7 +44,7 @@
       await storage.set({cards: state.cards}); break;
      case 'restore': {
       const backup = SG.validateBackup(message.backup);
-      await storage.set({words: backup.words, cards: backup.cards}); break;
+      await storage.set({words: backup.words, cards: backup.cards,reviewCards:backup.reviewCards||{}}); break;
      }
      case 'setHighlights':
       if (typeof message.enabled !== 'boolean') throw Error('Invalid preference.');
@@ -39,7 +58,7 @@
       await storage.set({studyLevels,studySource:String(message.name||'Imported list').slice(0,120)});break;
      }
      case 'clearStudyList': await storage.set({studyLevels:{},studySource:''});break;
-     case 'clearLearning': await storage.set({words: {}, cards: []}); break;
+     case 'clearLearning': await storage.set({words: {}, cards: [],reviewCards:{}}); break;
      default: throw Error('Unsupported operation.');
     }
     return {ok: true};

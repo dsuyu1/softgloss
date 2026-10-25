@@ -1,5 +1,5 @@
 (() => {
-const particles = [['에서','location of an action; starting point'],['에게','recipient'],['으로','direction; means'],['부터','starting point'],['까지','endpoint'],['은','topic / contrast'],['는','topic / contrast'],['이','subject'],['가','subject'],['을','object'],['를','object'],['에','location; time; destination'],['도','also'],['만','only'],['의','possession / relation'],['와','and; with'],['과','and; with'],['로','direction; means']];
+const particles = [['처럼','comparison: like; as'],['보다','comparison: than'],['이나','alternative; approximate quantity'],['나','alternative; approximate quantity'],['에서','location of an action; starting point'],['에게','recipient'],['으로','direction; means'],['부터','starting point'],['까지','endpoint'],['은','topic / contrast'],['는','topic / contrast'],['이','subject'],['가','subject'],['을','object'],['를','object'],['에','location; time; destination'],['도','also'],['만','only'],['의','possession / relation'],['와','and; with'],['과','and; with'],['로','direction; means']];
 const indexes = new WeakMap();
 function index(data) {
  if (!indexes.has(data)) {
@@ -58,6 +58,19 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
  if(options.composed!==false && word.endsWith('는지')) {
   for(const result of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(result.formTags?.includes('determiner')&&result.formTags.includes('present'))add(result,['-는지: possible embedded-question ending'],'possible connective analysis');
  }
+ // Source-gated conversational endings from the reading pilot.
+ if(options.composed!==false){
+  if(word.endsWith('네요'))for(const r of lookup(word.slice(0,-2)+'다',data,{composed:false,compounds:false})){
+   const stem=r.lemma.slice(0,-1),final=(stem.charCodeAt(stem.length-1)-0xAC00)%28;
+   if((r.formTags?.includes('past')||(r.kind==='dictionary'&&final!==8))&&['verb','adjective'].includes(r.pos))add(r,[...r.parts,'-네요: noticing or reacting to information; polite ending'],'possible conversational ending',{ending:'네요',formTags:r.formTags});
+  }
+  for(const ending of ['데요','데'])if(word.endsWith(ending)){
+   const prefix=word.slice(0,-ending.length);
+   for(const r of lookup(prefix,data,{composed:false,compounds:false}))if(r.formTags?.includes('determiner')&&r.formTags.includes('present'))add(r,[...r.parts,'-(으)ㄴ/는데: background, contrast or a conversational lead-in; context decides'],'possible background ending',{ending:'데',formTags:r.formTags});
+   if(prefix.endsWith('는'))for(const r of lookup(prefix.slice(0,-1)+'다',data,{composed:false,compounds:false}))if(r.formTags?.includes('past'))add(r,[...r.parts,'-는데: background or contrast after a past form'],'possible background ending',{ending:'는데',formTags:r.formTags});
+  }
+  if(word.endsWith('도'))for(const r of lookup(word.slice(0,-1),data,{composed:false,compounds:false}))if(r.formTags?.includes('indicative')&&r.formTags.includes('informal')&&r.formTags.includes('non-past'))add(r,[...r.parts,'-아/어도: even if; even though'],'possible concessive ending',{ending:'어도',formTags:r.formTags});
+ }
  // Bounded analyses: an ending alone does not establish the meaning of a sentence.
  if(options.composed!==false && word.endsWith('지')) {
   for(const entry of lemmas.get(word.slice(0,-1)+'다')||[])if(['verb','adjective'].includes(entry.pos))add(entry,['-지: connective or sentence ending; select the following word for a construction'],'possible ending analysis',{ending:'지'});
@@ -91,7 +104,7 @@ function lookup(input, data = globalThis.SG_DATA, options = {}) {
   if (!word.endsWith(suffix)) continue;
   const stem = word.slice(0,-suffix.length);
   const final = stem ? (stem.charCodeAt(stem.length-1)-0xAC00)%28 : -1;
-  const pairs = {은:true,는:false,이:true,가:false,을:true,를:false,과:true,와:false};
+  const pairs = {은:true,는:false,이:true,가:false,을:true,를:false,과:true,와:false,이나:true,나:false};
   if (suffix in pairs && Boolean(final) !== pairs[suffix]) continue;
   if (suffix === '으로' && (final === 0 || final === 8)) continue;
   if (suffix === '로' && final !== 0 && final !== 8) continue;
@@ -192,13 +205,13 @@ function ankiTSV(cards) {
  return '#separator:Tab\n#html:true\n'+cards.map(c=>[c.lemma,c.meaning + (c.source ? ' [English Wiktionary contributors · CC BY-SA 4.0 · ' + c.source + ']' : ''),c.sentence,c.url].map(clean).join('\t')).join('\n');
 }
 function validateBackup(value) {
- if(!value || value.version!==1 || !value.words || typeof value.words!=='object' || Array.isArray(value.words) || !Array.isArray(value.cards) || value.cards.length>10000) throw Error('Unsupported backup.');
+ if(!value || ![1,2].includes(value.version) || !value.words || typeof value.words!=='object' || Array.isArray(value.words) || !Array.isArray(value.cards) || value.cards.length>10000) throw Error('Unsupported backup.');
  const words={}; for(const [k,v] of Object.entries(value.words)){if(!/^[가-힣]{1,80}$/u.test(k)||!['unknown','seen','known'].includes(v))throw Error('Invalid vocabulary.');words[k]=v;}
  const cards=value.cards.map(c=>{if(!c||!['lemma','meaning','sentence','url'].every(k=>typeof c[k]==='string'&&c[k].length<=5000))throw Error('Invalid sentence card.');const card = Object.fromEntries(['lemma','meaning','sentence','url'].map(k=>[k,c[k]]));
  for (const k of ['entryId','source','license']) if (c[k] !== undefined) {if (typeof c[k] !== 'string' || c[k].length > 1000) throw Error('Invalid attribution.'); card[k] = c[k];}
  if (card.source && (!/^https:\/\/en\.wiktionary\.org\/wiki\//.test(card.source) || card.license !== 'CC-BY-SA-4.0')) throw Error('Invalid dictionary source.');
  return card;});
- return {version:1,words,cards};
+ return value.version===2?{version:2,words,cards,reviewCards:globalThis.SGSRS.validateDeck(value.reviewCards)}:{version:1,words,cards};
 }
 // User-supplied study levels are list labels, not official exam classifications.
 function parseStudyCSV(input) {

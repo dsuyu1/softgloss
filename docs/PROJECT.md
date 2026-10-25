@@ -1,7 +1,7 @@
 # SoftGloss project scope and delivery checklist
 
 Owner: Damian Villarreal. Scope baseline: October 24, 2026.
-Working name: SoftGloss. Status: offline dictionary alpha, not a public release.
+Product name: Bungeoppang (formerly SoftGloss). Status: offline dictionary alpha, not a public release.
 
 ## Product commitment
 A free, useful Korean immersion companion without AI. Target learners know roughly 500+ words and want to read real content with less lookup friction. Long-term destination: dictionary, morphology, grammar, subtitles, sentence mining, vocabulary tracking, reader, recommendations and mobile. Build our own implementation; do not copy a competitor's code or content.
@@ -57,7 +57,7 @@ Check a box only when its stated deliverable is implemented and supporting evide
 - [x] No AI runtime, no API keys, no telemetry, no lookup service dependency. Static checks and Chromium network observations pass.
 - [ ] Full dictionary license/attribution, privacy notice, install/help and data deletion instructions reviewed.
 - [ ] Supported ordinary web pages work without breaking links, selection or editing.
-- [x] Unsupported surfaces documented: internal/store pages, cross-origin frames, canvas text, PDFs and DRM content.
+- [x] Unsupported surfaces documented: internal/store pages, frames without website permission, canvas text, PDFs and DRM content.
 - [ ] All required checks pass, review complete, versioned release ZIP produced.
 
 ## Later milestones — not promised in the current release
@@ -68,7 +68,7 @@ M3: optional account sync and data deletion; conflict resolution; authenticated 
 M4: licensed, maintainable content catalog and recommendations using vocabulary coverage; iOS integration and shared dictionary/library format. Community features and opt-in leaderboards only after a demonstrated need. Android later.
 
 ## Architecture and costs
-Current: isolated extension content script → local dictionary/rules; writes → service-worker queue → chrome.storage.local. No backend, no network calls, no runtime dependencies. Shadow DOM separates popup styles; CSS Custom Highlights avoids wrapping page text. Core is independent of Chrome APIs for future reuse.
+Current: isolated extension content script → local dictionary/rules; writes → service-worker queue → chrome.storage.local. No backend or lookup network calls; the MIT-licensed FSRS scheduler is bundled locally. Shadow DOM separates popup styles; CSS Custom Highlights avoids wrapping page text. Core is independent of Chrome APIs for future reuse.
 
 Cloudflare later: static documentation/download hosting first if useful, then optional sync. Do not provision accounts/database/object storage for functionality already handled locally. No deployment, DNS, billing changes or paid resources in this increment. Track hosting/storage/egress costs before offering sync without limits.
 
@@ -76,12 +76,11 @@ Cloudflare later: static documentation/download hosting first if useful, then op
 The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multiple senses and source hanja spellings. Its accuracy and learner usefulness have not passed beta gates. No monolingual dictionary, production parser, frequency ranks, subtitles, reader, sync or mobile implementation yet. Grammar analysis is a candidate, not proof of sentence meaning. Vocabulary coverage is not comprehension. Dynamic highlighting rescans in chunks, bounded to 10,000 text nodes and 500,000 characters (10,000 per node). All vocabulary/card mutations are serialized through the service worker. Status names and pressed states supplement page colors. Browser and assistive-technology verification remain separate gates.
 
 ## Next concrete work
-1. Expand graded-list sourcing for the new TOPIK mode with audited redistribution rights; retain local import in the meantime.
-2. Collect and independently review at least 100 real reading tokens; report unknowns and incorrect analyses separately.
-2. Complete manual Chrome permission/hover/accessibility/zoom and actual Anki import checks.
-3. Add reviewed grammar explanations, and profile cold startup, memory and long-page responsiveness.
-4. Pilot with Damian and 3–5 learners; log friction.
-5. Reassess beta scope before adding reader/subtitle features.
+1. Verify iframe article behavior on Naver Café and other learner sites; permitted-frame regression coverage is in 0.13.0.
+2. Independently review real reading tokens (61 new Café probes are prepared; reach at least 100 reviewed tokens). Separate unknowns from incorrect candidates.
+3. Review original grammar explanations and bilingual examples; expand sourced coverage.
+4. Complete manual Chrome permissions, keyboard/zoom/accessibility, learner-hardware memory and actual Anki import checks.
+5. Pilot reading and the new FSRS review flow with Damian and 3–5 learners, then reassess beta readiness before reader/subtitle expansion.
 
 ## GitHub work tracking
 - [Chrome verification #1](https://github.com/dsuyu1/softgloss/issues/1)
@@ -186,3 +185,16 @@ Next implementation: improve supported grammar/inflection coverage against the i
 - [x] Label missing examples; document coverage of 2,814 dictionary entries without claiming full coverage.
 - [x] Show loaded version and six color swatches, reject stale panels with reload guidance.
 - [ ] Expand licensed example coverage and independently review translations and sense alignment.
+
+
+## 0.13.0 — embedded reading and offline spaced repetition
+- [x] Scan accessible Korean child frames, relay hover/selection into the main panel, preserve frame source URLs and disable frame scanners with the parent.
+- [x] Register automatic bootstrap in permitted frames; refresh accessible frames after iframe load events.
+- [x] Bundle pinned MIT-licensed ts-fsrs 5.4.2, default parameters and 90% target retention; no remote runtime dependency or Anki code copied.
+- [x] Add entry-specific review saving, due queue, answer reveal, four ratings/intervals, suspend/resume/removal and serialized stale-answer protection.
+- [x] Include reviews in Anki content export, JSON v2 schedule/history backup, restore and delete-all; retain v1 compatibility.
+- [x] Add seven original clothing/color/price entries and bilingual examples, bounded conversational endings and comparison/alternative particles from the screenshot.
+- [x] Chromium CI verifies frame link/selection/highlights, delayed and denied-origin frames, review UI, backup/restore and restart persistence; desktop/narrow screenshots inspected (Actions 40237573990).
+- [x] Prepare 61 screenshot-derived review probes: 44 supported candidates, 17 unknown, zero independently reviewed. This does not satisfy the 100-token accuracy gate.
+- [ ] Verify actual Naver Café article with the learner; independently review new Korean analyses/examples and remaining unknowns.
+- [ ] Complete manual accessibility/zoom, learner hardware profiling and real Anki import; parameter optimization, deck collections and live Anki sync remain future scope.
