@@ -135,3 +135,13 @@ The 0.4.0 pack has 29,777 imported headwords and listed conjugations, with multi
 - [x] Handle opt-out and permission revocation; retain manual mode.
 - [x] Verify new-page automatic activation, visible Korean result, opt-out and concurrent manual activation in Chromium CI: Actions 40209433993.
 - [ ] Verify Chrome's interactive website-access permission dialog and actual toolbar activeTab grant manually.
+
+## 0.7.0 pilot conjugation increment
+- [x] Inspect Naver screenshots; separate omitted endings from missing headwords/compounds.
+- [x] Import 255,759 additional source entry/form-tag links as 638 whitelisted transformations, including 188,285 previously absent spellings.
+- [x] Preserve source-specific homonym distinctions and per-entry attribution.
+- [x] Add bounded -면서 / -는지 and nominalization + particle candidates.
+- [x] Add labeled two-noun and noun + 하다/되다 component fallbacks.
+- [x] Record screenshot-derived probes without claiming independent reviewer approval.
+- [ ] Verify expanded pack in browser CI and long-page benchmark.
+- [ ] Broaden full headword coverage (청원인 is a tracked remaining miss); independently review new analyses.
