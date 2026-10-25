@@ -1,1 +1,30 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SoftGloss · Your library</title><link rel="stylesheet" href="library.css"><main><small>SOFTGLOSS · OFFLINE ALPHA</small><h1>Your Korean, one sentence at a time.</h1><p>A small starter dictionary. Your vocabulary and saved sentences stay in this browser.</p><p id="stats"></p><button id="backup">Export backup</button><button id="anki">Export Anki TSV</button><label>Restore backup <input id="restore" type="file" accept="application/json"></label><p id="message" role="status"></p><h2>Saved sentences</h2><div id="cards"></div><h2>Try the starter pack</h2><p lang="ko">저는 오늘 학교에서 한국어를 공부해요. 친구는 책을 읽어요. 어제 밥을 먹었어요.</p><p>Open this page in a regular browser tab using the included demo.html to test the extension. Browser extension pages cannot be injected into.</p></main><script src="data.js"></script><script src="core.js"></script><script src="library.js"></script></html>
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoftGloss · Your library</title><link rel="stylesheet" href="library.css">
+<main>
+ <small>SOFTGLOSS · OFFLINE ALPHA</small>
+ <h1>Your Korean, one sentence at a time.</h1>
+ <p>A small starter dictionary. Your vocabulary and saved sentences stay in this browser.</p>
+ <p id="stats"></p>
+ <p id="message" role="status"></p>
+ <h2>Dictionary search</h2>
+ <form id="search-form"><label for="search">Korean word or English meaning</label><input id="search" type="search" maxlength="80" required><button type="submit">Search</button></form>
+ <div id="search-results" aria-live="polite"></div>
+ <h2>Vocabulary</h2>
+ <label for="word-filter">Filter Korean words</label><input id="word-filter" type="search" maxlength="80">
+ <label for="status-filter">Status</label><select id="status-filter"><option value="">All statuses</option><option>unknown</option><option>seen</option><option>known</option></select>
+ <p id="word-count" role="status"></p><div id="words"></div>
+ <h2>Saved sentences</h2><div id="cards"></div>
+ <h2>Your data</h2>
+ <button id="backup">Export backup</button><button id="anki">Export Anki TSV</button>
+ <label>Restore backup <input id="restore" type="file" accept="application/json"></label>
+ <p>Backups contain vocabulary and saved sentences. Restoring replaces them; highlight preferences stay unchanged.</p>
+ <button id="clear">Delete all learning data</button>
+ <h2>Using SoftGloss</h2>
+ <p>Enable on a regular webpage using the toolbar. Hover or select a Korean word, or press Alt+Shift+K to focus dictionary search. You can change the shortcut at chrome://extensions/shortcuts.</p>
+ <p>Close hides the panel; Disable on this page stops lookups and highlighting until you enable again. Highlight vocabulary is a preference shared across tabs. Word status is always available as text here and in lookup results.</p>
+ <p>Dynamic pages refresh automatically. Highlighting is bounded to the first 10,000 text nodes and 500,000 scanned characters (10,000 per node). Internal browser pages, extension/store pages, PDFs, canvas text, and cross-origin frames are unsupported.</p>
+</main>
+<script src="data.js"></script><script src="core.js"></script><script src="api.js"></script><script src="library.js"></script>
+</html>
