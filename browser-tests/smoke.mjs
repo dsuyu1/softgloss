@@ -91,6 +91,8 @@ try {
  assert.equal(await page.locator('#softgloss-root').count(), 1);
 
  // Real mouse coordinates and DOM selections exercise the reading entry points.
+ await worker.evaluate(tabId => enable({id:tabId},true),tabId);
+ await eventually(()=>panel('focus'),'sg-search');
  await panel('click', 'Close');
  assert.equal(await panel('hasFocus'), false);
  const point = await page.evaluate(() => {
