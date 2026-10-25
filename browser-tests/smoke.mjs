@@ -84,6 +84,7 @@ try {
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
  await panel('expandGrammar');
  assert.deepEqual(await panel('grammarOpen'), [true,false]);
+ for(const [word,definition] of [['지도부','leadership'],['전원주택은','countryside'],['하단에는','bottom section'],['성공하려면','intending'],['할까','wondering']])assert.ok((await panel('search',word)).includes(definition),word);
  assert.match(await panel('search','기업들의'),/기업/);
  assert.match(await panel('search','끌어모으려는'),/끌어모으다/);
  assert.match(await panel('search','무슨성역이냐'),/성역/);

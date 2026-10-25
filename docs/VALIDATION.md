@@ -65,3 +65,6 @@ The clicked screenshot example 인기글 is a noun compound; screenshot-derived 
 Construction hints explain a matched substring, not a full translation. This release supports -지 않다/못하다, -(으)ㄹ 수 있다/없다 and -(으)려고 하다 when their components resolve. Full Korean parsing, arbitrary spacing repair, idiom translation and independent linguistic validation are not claimed. Local Chromium remains unavailable because of the workspace socket restriction; browser assertions are run in CI.
 
 In that Chromium 141 / Linux x64 / Node 22.23.3 run, cold injection was 449 ms, the 2,000-paragraph rescan was 307 ms and frame-gap p95 was 16.7 ms (108 sampled frames; no observed long tasks in the measured rescan window). These are synthetic CI results, not real-device or independent language validation.
+
+## 0.8.1 screenshot coverage
+38 Node tests and static/integrity checks pass locally. New probes cover the third-round screenshots, every token of the selected six-word question, stacked particles and invalid ending/base combinations. Earlier screenshot probes remain passing. See PILOT-COVERAGE.md for scope and limitations. Chromium CI adds targeted reading-panel checks; independent Korean review remains open.
