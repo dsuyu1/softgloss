@@ -6,13 +6,18 @@
   function apply(message) {
    const job = pending.then(async () => {
     const state = await storage.get({words: {}, cards: [], preferences: {highlights: true}, reviewCards:{},reviewUndo:null});
-    if(['saveLesson','deleteLesson'].includes(message.type))state.lessonDrafts=(await storage.get({lessonDrafts:{}})).lessonDrafts;
+    if(['saveLesson','deleteLesson','completeLesson'].includes(message.type))state.lessonDrafts=(await storage.get({lessonDrafts:{}})).lessonDrafts;
     switch (message.type) {
+     case 'completeLesson': {
+      const d=Object.hasOwn(state.lessonDrafts,message.id)?state.lessonDrafts[message.id]:null;
+      if(!d||d.revision!==message.expectedRevision)throw Error('Lesson changed or was deleted. Reopen practice for the current version.');
+      state.lessonDrafts[d.id]={...d,completedAt:new Date().toISOString()};await storage.set({lessonDrafts:state.lessonDrafts});break;
+     }
      case 'saveLesson': {
       const draft=SGLessons.validate(message.draft),existing=Object.hasOwn(state.lessonDrafts,draft.id)?state.lessonDrafts[draft.id]:null;
       if(existing?message.expectedRevision!==existing.revision:message.expectedRevision!==null)throw Error('This lesson changed or was deleted. Reopen it before saving.');
       if(!existing&&Object.keys(state.lessonDrafts).length>=50)throw Error('Lesson library is full (50 drafts). Export and remove a draft first.');
-      state.lessonDrafts[draft.id]={...draft,revision:crypto.randomUUID()};await storage.set({lessonDrafts:state.lessonDrafts});return {ok:true,revision:state.lessonDrafts[draft.id].revision};
+      delete draft.completedAt;state.lessonDrafts[draft.id]={...draft,revision:crypto.randomUUID()};await storage.set({lessonDrafts:state.lessonDrafts});return {ok:true,revision:state.lessonDrafts[draft.id].revision};
      }
      case 'deleteLesson': {
       const existing=Object.hasOwn(state.lessonDrafts,message.id)?state.lessonDrafts[message.id]:null;
