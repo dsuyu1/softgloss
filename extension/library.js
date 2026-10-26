@@ -1,11 +1,11 @@
 let state,activeReview=null,answerShown=false,reviewBusy=false,reviewTimer;
 const $ = id => document.getElementById(id);
-const views=['library','review','dictionary','vocabulary','sentences','settings'];
+const views=['library','review','dictionary','vocabulary','sentences','lessons','settings'];
 function routeView(focus=false){
  const requested=location.hash.replace('#view-',''),view=views.includes(requested)?requested:'library';
  for(const panel of document.querySelectorAll('[data-panel]'))panel.hidden=panel.dataset.panel!==view;
  for(const link of document.querySelectorAll('[data-view]')){if(link.dataset.view===view)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
- document.title='Malnaru Read · '+({library:'Library',review:'Review',dictionary:'Dictionary',vocabulary:'Vocabulary',sentences:'Sentences',settings:'Settings & data'}[view]);
+ document.title='Malnaru Read · '+({library:'Library',review:'Review',dictionary:'Dictionary',vocabulary:'Vocabulary',sentences:'Sentences',lessons:'Lessons',settings:'Settings & data'}[view]);
  if(focus){window.scrollTo(0,0);document.querySelector('[data-panel="'+view+'"] h1')?.focus({preventScroll:true});}
 }
 window.addEventListener('hashchange',()=>routeView(true));routeView();
@@ -24,11 +24,11 @@ function download(name, text, type) {
  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 async function write(message, success) {
- try {await SGWrite(message); await render(); $('message').textContent = success;}
+ try {await SGWrite(message); await render(); if(['restore','clearLearning'].includes(message.type))globalThis.resetLessonEditor?.(); $('message').textContent = success;}
  catch (error) {$('message').textContent = 'Could not save: ' + error.message;}
 }
 async function render() {
- state = await chrome.storage.local.get({words: {}, cards: [],reviewCards:{},reviewUndo:null});
+ state = await chrome.storage.local.get({words: {}, cards: [],reviewCards:{},reviewUndo:null,lessonDrafts:{}});
  const counts = {unknown: 0, seen: 0, known: 0};
  Object.values(state.words).forEach(s => counts[s]++);
  $('stats').textContent = `${counts.known} known · ${counts.seen} seen · ${state.cards.length} saved sentences`;
@@ -43,7 +43,7 @@ async function render() {
   b.onclick = () => write({type: 'deleteCard', card: c}, 'Sentence deleted.');
   article.append(b); $('cards').append(article);
  }
- renderWords();renderReviews();
+ renderWords();renderReviews();globalThis.renderLessons?.();
 }
 // Extension pages load audio shards as ordinary scripts.
 function loadAudio(file) {
@@ -101,17 +101,17 @@ $('search-form').onsubmit = event => {
   $('search-results').append(article);
  }
 };
-$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version:2,words:state.words,cards:state.cards,reviewCards:state.reviewCards}, null, 2), 'application/json');};
+$('backup').onclick = async () => {await render(); download('malnaru-read-backup.json', JSON.stringify({version:3,words:state.words,cards:state.cards,reviewCards:state.reviewCards,lessonDrafts:state.lessonDrafts}, null, 2), 'application/json');};
 $('anki').onclick = async () => {await render(); download('malnaru-read-anki.tsv', SG.ankiTSV([...state.cards,...Object.values(state.reviewCards).filter(c=>!state.cards.some(s=>s.entryId===c.entryId&&s.sentence===c.sentence))]), 'text/tab-separated-values');};
 $('clear').onclick = () => {
- if (confirm('Delete all vocabulary, saved sentences and review schedules from this browser? Export a backup first. This cannot be undone.')) write({type: 'clearLearning'}, 'Learning data deleted.');
+ if (confirm('Delete all vocabulary, saved sentences, review schedules and lesson drafts from this browser? Export a backup first. This cannot be undone.')) write({type: 'clearLearning'}, 'Learning data deleted.');
 };
 $('restore').onchange = async event => {
  try {
   const file = event.target.files[0]; if (!file) return;
   if (file.size > 30000000) throw Error('Backup must be under 30 MB.');
   const backup = SG.validateBackup(JSON.parse(await file.text()));
-  if (!confirm('Replace your vocabulary, sentences and review schedules with this backup? Export a backup first if needed.')) return;
+  if (!confirm('Replace your vocabulary, sentences, review schedules and lesson drafts with this backup? Export a backup first if needed.')) return;
   await write({type: 'restore', backup}, 'Backup restored.');
  } catch (error) {$('message').textContent = 'Restore failed: ' + error.message;}
  finally {event.target.value = '';}
@@ -162,7 +162,7 @@ function renderReviews(){
    if(next.source){const a=reviewText('a','Wiktionary contributors · CC BY-SA 4.0',box);a.href=next.source;a.target='_blank';a.rel='noopener noreferrer';}
    const ratings=reviewText('div','',box);ratings.className='review-ratings';const preview=SGSRS.preview(next,new Date(now));
    for(const [i,label] of ['Again','Hard','Good','Easy'].entries()){
-    const button=reviewButton(label+' · '+SGSRS.interval(preview[i+1].card.due,now),()=>rateReview(i+1),ratings);button.id='review-rate-'+(i+1);button.disabled=reviewBusy;button.setAttribute('aria-keyshortcuts',String(i+1));
+    const button=reviewButton(label+' · '+SGSRS.interval(preview[i+1].card.due,now),()=>rateReview(i+1),ratings);button.id='review-rate-'+(i+1);button.dataset.rating=label.toLowerCase();button.disabled=reviewBusy;button.setAttribute('aria-keyshortcuts',String(i+1));
    }
    reviewText('small','Again: forgot · Hard: recalled with effort · Good: recalled · Easy: effortless',box);
   }
@@ -195,4 +195,4 @@ function renderReviewDeck(){
 }
 $('review-filter').oninput=renderReviewDeck;
 $('refresh-reviews').onclick=()=>render();
-chrome.storage.onChanged.addListener((changes,area)=>{if(state&&area==='local'&&(changes.reviewCards||changes.reviewUndo)){if(changes.reviewCards)state.reviewCards=changes.reviewCards.newValue||{};if(changes.reviewUndo)state.reviewUndo=changes.reviewUndo.newValue||null;renderReviews();}});
+chrome.storage.onChanged.addListener((changes,area)=>{if(state&&area==='local'&&(changes.reviewCards||changes.reviewUndo||changes.lessonDrafts)){if(changes.reviewCards)state.reviewCards=changes.reviewCards.newValue||{};if(changes.reviewUndo)state.reviewUndo=changes.reviewUndo.newValue||null;if(changes.lessonDrafts)state.lessonDrafts=changes.lessonDrafts.newValue||{};renderReviews();globalThis.renderLessons?.();}});

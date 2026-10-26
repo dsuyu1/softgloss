@@ -228,13 +228,16 @@ function ankiTSV(cards) {
  return '#separator:Tab\n#html:true\n'+cards.map(c=>[c.lemma,c.meaning + (c.source ? ' [English Wiktionary contributors · CC BY-SA 4.0 · ' + c.source + ']' : ''),c.sentence,c.url].map(clean).join('\t')).join('\n');
 }
 function validateBackup(value) {
- if(!value || ![1,2].includes(value.version) || !value.words || typeof value.words!=='object' || Array.isArray(value.words) || !Array.isArray(value.cards) || value.cards.length>10000) throw Error('Unsupported backup.');
+ if(!value || ![1,2,3].includes(value.version) || !value.words || typeof value.words!=='object' || Array.isArray(value.words) || !Array.isArray(value.cards) || value.cards.length>10000) throw Error('Unsupported backup.');
  const words={}; for(const [k,v] of Object.entries(value.words)){if(!/^[가-힣]{1,80}$/u.test(k)||!['unknown','seen','known'].includes(v))throw Error('Invalid vocabulary.');words[k]=v;}
  const cards=value.cards.map(c=>{if(!c||!['lemma','meaning','sentence','url'].every(k=>typeof c[k]==='string'&&c[k].length<=5000))throw Error('Invalid sentence card.');const card = Object.fromEntries(['lemma','meaning','sentence','url'].map(k=>[k,c[k]]));
  for (const k of ['entryId','source','license']) if (c[k] !== undefined) {if (typeof c[k] !== 'string' || c[k].length > 1000) throw Error('Invalid attribution.'); card[k] = c[k];}
  if (card.source && (!/^https:\/\/en\.wiktionary\.org\/wiki\//.test(card.source) || card.license !== 'CC-BY-SA-4.0')) throw Error('Invalid dictionary source.');
  return card;});
- return value.version===2?{version:2,words,cards,reviewCards:globalThis.SGSRS.validateDeck(value.reviewCards)}:{version:1,words,cards};
+ if(value.version===1)return {version:1,words,cards};
+ const backup={version:value.version,words,cards,reviewCards:globalThis.SGSRS.validateDeck(value.reviewCards)};
+ if(value.version===3)backup.lessonDrafts=globalThis.SGLessons.validateCollection(value.lessonDrafts);
+ return backup;
 }
 // User-supplied study levels are list labels, not official exam classifications.
 function parseStudyCSV(input) {

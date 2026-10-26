@@ -6,7 +6,19 @@
   function apply(message) {
    const job = pending.then(async () => {
     const state = await storage.get({words: {}, cards: [], preferences: {highlights: true}, reviewCards:{},reviewUndo:null});
+    if(['saveLesson','deleteLesson'].includes(message.type))state.lessonDrafts=(await storage.get({lessonDrafts:{}})).lessonDrafts;
     switch (message.type) {
+     case 'saveLesson': {
+      const draft=SGLessons.validate(message.draft),existing=Object.hasOwn(state.lessonDrafts,draft.id)?state.lessonDrafts[draft.id]:null;
+      if(existing?message.expectedRevision!==existing.revision:message.expectedRevision!==null)throw Error('This lesson changed or was deleted. Reopen it before saving.');
+      if(!existing&&Object.keys(state.lessonDrafts).length>=50)throw Error('Lesson library is full (50 drafts). Export and remove a draft first.');
+      state.lessonDrafts[draft.id]={...draft,revision:crypto.randomUUID()};await storage.set({lessonDrafts:state.lessonDrafts});return {ok:true,revision:state.lessonDrafts[draft.id].revision};
+     }
+     case 'deleteLesson': {
+      const existing=Object.hasOwn(state.lessonDrafts,message.id)?state.lessonDrafts[message.id]:null;
+      if(!existing||existing.revision!==message.expectedRevision)throw Error('This lesson changed. Reopen it before deleting.');
+      delete state.lessonDrafts[message.id];await storage.set({lessonDrafts:state.lessonDrafts});break;
+     }
      case 'addReview': {
       const card=SGSRS.create(message.card);
       if(!state.reviewCards[card.id]){
@@ -50,7 +62,7 @@
       await storage.set({cards: state.cards}); break;
      case 'restore': {
       const backup = SG.validateBackup(message.backup);
-      await storage.set({words: backup.words, cards: backup.cards,reviewCards:backup.reviewCards||{},reviewUndo:null}); break;
+      await storage.set({words: backup.words, cards: backup.cards,reviewCards:backup.reviewCards||{},reviewUndo:null,lessonDrafts:Object.fromEntries(Object.entries(backup.lessonDrafts||{}).map(([id,d])=>[id,{...d,revision:crypto.randomUUID()}]))}); break;
      }
      case 'setHighlights':
       if (typeof message.enabled !== 'boolean') throw Error('Invalid preference.');
@@ -67,7 +79,7 @@
       await storage.set({studyLevels,studySource:String(message.name||'Imported list').slice(0,120)});break;
      }
      case 'clearStudyList': await storage.set({studyLevels:{},studySource:''});break;
-     case 'clearLearning': await storage.set({words: {}, cards: [],reviewCards:{},reviewUndo:null}); break;
+     case 'clearLearning': await storage.set({words: {}, cards: [],reviewCards:{},reviewUndo:null,lessonDrafts:{}}); break;
      default: throw Error('Unsupported operation.');
     }
     return {ok: true};

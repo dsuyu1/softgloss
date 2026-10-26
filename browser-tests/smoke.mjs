@@ -93,7 +93,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.17.0/);
+ assert.match(await panel('text'),/v0.18.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -253,6 +253,10 @@ try {
  await library.keyboard.press('1');assert.equal(await library.locator('#review-show-answer').count(),1);
  await library.screenshot({path:'test-results/review-front-desktop.png',fullPage:true});
  await library.keyboard.press('Space');await library.locator('#review-rate-4').waitFor();
+ const ratingColors=await library.locator('.review-ratings button').evaluateAll(buttons=>buttons.map(b=>{const s=getComputedStyle(b);return {label:b.textContent,ink:s.color,bg:s.backgroundColor};}));
+ assert.equal(new Set(ratingColors.map(c=>c.bg)).size,4,'each rating has its own color');
+ for(const color of ratingColors){const luminance=rgb=>rgb.match(/\d+/g).slice(0,3).map(Number).map(n=>n/255).map(n=>n<=0.04045?n/12.92:((n+0.055)/1.055)**2.4).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);const a=luminance(color.ink),b=luminance(color.bg);assert.ok((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'readable rating '+color.label);}
+
  assert.equal(await library.evaluate(()=>document.activeElement.id),'review');
  await library.keyboard.press('p');await eventually(()=>library.locator('#message').textContent(),'Machine-generated voice · Supertonic 3');
  await library.screenshot({path:'test-results/review-desktop.png',fullPage:true});
@@ -277,10 +281,27 @@ try {
  await libraryView(library,'dictionary');
  await library.locator('#search-results article').first().getByRole('button',{name:'Add to reviews',exact:true}).click();
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 1 cards');
- const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{}}));
+ // Local lesson authoring/import/export stays separate from FSRS grading.
+ const schedulesBeforeLessons=await library.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards);
+ await libraryView(library,'lessons');await library.getByRole('checkbox',{name:'Select 학교',exact:true}).check();await library.locator('#lesson-create').click();
+ await library.locator('#lesson-title').fill('School practice');await library.locator('#lesson-goal').fill('Talk about tomorrow');
+ await library.locator('#lesson-korean-0').fill('내일 학교에 가요.');await library.locator('#lesson-english-0').fill('I am going to school tomorrow.');
+ await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-save-state').textContent(),'Saved on this device.');
+ const lessonDownload=library.waitForEvent('download');await library.locator('#lesson-export').click();const lessonFile=JSON.parse(await readFile(await (await lessonDownload).path(),'utf8'));
+ assert.equal(lessonFile.format,'malnaru-lesson');assert.equal(lessonFile.draft.items[0].english,'I am going to school tomorrow.');
+ await library.reload();await library.locator('#lesson-list button').first().click();assert.equal(await library.locator('#lesson-goal').inputValue(),'Talk about tomorrow');
+ await library.locator('#lesson-import').setInputFiles({name:'lesson.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(lessonFile))});
+ await eventually(()=>library.locator('#lesson-save-state').textContent(),'Unsaved changes — save or export to keep them.');
+ await library.locator('#lesson-title').fill('Imported copy');await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-list button').count(),2);
+ const savedLessons=await library.evaluate(async()=> (await chrome.storage.local.get('lessonDrafts')).lessonDrafts);assert.equal(Object.keys(savedLessons).length,2);
+ await library.locator('#lesson-import').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"format":"malnaru-lesson","version":99}')});
+ await eventually(()=>library.locator('#message').textContent(),'Could not import lesson: Unsupported lesson file.');assert.equal(await library.locator('#lesson-list button').count(),2);
+ library.once('dialog',d=>d.accept());await library.locator('#lesson-delete').click();await eventually(()=>library.locator('#lesson-list button').count(),1);
+ assert.deepEqual(await library.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),schedulesBeforeLessons,'lesson editing cannot grade cards');
+ const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{},lessonDrafts:{}}));
  assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,2);
  await libraryView(library,'settings');const backupDownload=library.waitForEvent('download');await library.locator('#backup').click();const exported=JSON.parse(await readFile(await (await backupDownload).path(),'utf8'));
- assert.equal(exported.version,2);assert.equal(Object.hasOwn(exported,'reviewUndo'),false);assert.deepEqual(exported.reviewCards,backup.reviewCards);
+ assert.equal(exported.version,3);assert.equal(Object.hasOwn(exported,'reviewUndo'),false);assert.deepEqual(exported.reviewCards,backup.reviewCards);assert.deepEqual(exported.lessonDrafts,backup.lessonDrafts);
  // Frame fixture: child highlights and selection use the top panel, preserving link behavior.
  const framePage=await context.newPage();await framePage.goto(url+'frames');
  const frameTab=await worker.evaluate(async url=>(await chrome.tabs.query({url}))[0].id,url+'frames');
@@ -353,10 +374,10 @@ try {
  const downloadPromise = library.waitForEvent('download'); await library.locator('#anki').click();
  const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'malnaru-read-anki.tsv');
  library.once('dialog', d => d.accept()); await library.locator('#clear').click();
- await eventually(() => library.locator('#cards article').count(), 0);
+ await eventually(() => library.locator('#cards article').count(), 0);assert.equal(Object.keys(await library.evaluate(async()=> (await chrome.storage.local.get('lessonDrafts')).lessonDrafts)).length,0);
  await eventually(()=>library.locator('#review-stats').textContent(),'0 due · 0 new · 0 cards');
  library.once('dialog', d => d.accept());
- await library.locator('#restore').setInputFiles({name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({version: 2, ...backup}))});
+ await library.locator('#restore').setInputFiles({name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({version: 3, ...backup}))});
  await eventually(() => library.locator('#cards article').count(), 1);
  assert.deepEqual(await library.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),backup.reviewCards);
  await library.locator('#restore').setInputFiles({name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"version":2}')});
@@ -372,7 +393,8 @@ try {
  await libraryView(library,'library');
  await library.setViewportSize({width: 360, height: 740});
  assert.equal(await library.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
- for(const view of ['dictionary','vocabulary','sentences','settings','review']){await libraryView(library,view);assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,view+' mobile reflow');await library.screenshot({path:'test-results/library-'+view+'-mobile.png',fullPage:true});}
+ for(const view of ['dictionary','vocabulary','sentences','lessons','settings','review']){await libraryView(library,view);assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,view+' mobile reflow');await library.screenshot({path:'test-results/library-'+view+'-mobile.png',fullPage:true});}
+ await libraryView(library,'lessons');await library.locator('#lesson-list button').first().click();assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await library.screenshot({path:'test-results/lesson-editor-mobile.png',fullPage:true});
  await libraryView(library,'library');
  await mkdir('test-results', {recursive: true}); await library.screenshot({path: 'test-results/library-mobile.png', fullPage: true});
  assert.deepEqual(errors, []); assert.deepEqual(external, []);
@@ -381,6 +403,7 @@ try {
  const restored = await context.newPage(); await restored.goto(`chrome-extension://${id}/library.html`);
  await eventually(() => restored.locator('#cards article').count(), 1);
  assert.deepEqual(await restored.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),backup.reviewCards);
+ assert.equal(Object.keys(await restored.evaluate(async()=> (await chrome.storage.local.get('lessonDrafts')).lessonDrafts)).length,1);
  await eventually(() => restored.locator('#stats').textContent(), '1 known · 1 seen · 1 saved sentences');
  assert.deepEqual(errors, []); assert.deepEqual(external, []);
  console.log('PASS: unpacked extension, keyboard entry, search, status, dynamic highlights, disable/re-enable, multi-tab saves, export, backup/restore, invalid backup, narrow library and persistence. No external HTTP requests observed.');

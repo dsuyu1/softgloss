@@ -239,3 +239,13 @@ No new runtime dependencies, external assets, copied Decki branding or AI featur
 
 ## Connected suite proposal
 See [SUITE.md](SUITE.md) for the proposed Speak Along, editable AI lessons, opt-in reader sync and bounded premium trial. This is a roadmap proposal; accounts, microphone capture, cloud generation and billing are not shipped by 0.17.0.
+
+
+## 0.18.0 — rating colors and local lesson foundations
+- [x] Give Again/Hard/Good/Easy distinct red/amber/green/blue colors with text and keyboard cues preserved.
+- [x] Inspect supplied CSS/SVG exports; adapt control spacing, 8px corners and restrained surfaces to Malnaru's existing palette with native HTML/CSS. No exported sheet or raster embedded in SVG is bundled.
+- [x] Add lesson schema and local editor from 1–20 selected review cards; retain definition attribution and editable bilingual text without inventing missing translations.
+- [x] Add local persistence, versioned lesson-file export/import as a new copy, revision-safe saves/deletes, and backup v3 including drafts. Preserve v1/v2 restore support and remove drafts on full deletion.
+- [x] Test malformed imports, limits, concurrent edits, retryable storage failure, schedule isolation, backup restore and deletion locally (70 tests plus static/integrity checks).
+- [ ] Verify Chromium lesson authoring/persistence/import/export, rating contrast and mobile reflow, then inspect screenshots.
+Human language/audio, real-device accessibility/zoom and learner-pilot gates remain open. This local lesson increment is explicitly in scope following the connected-app request; it does not ship cloud generation, recording, account sync or payment features.

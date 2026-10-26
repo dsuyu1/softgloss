@@ -56,5 +56,5 @@ test('data deletion preserves display preferences', async () => {
  await f.store.apply({type: 'setHighlights', enabled: false});
  await f.store.apply({type: 'saveCard', card});
  await f.store.apply({type: 'clearLearning'});
- assert.deepEqual(f.read(), {words: {}, cards: [], reviewCards:{},reviewUndo:null,preferences: {highlights: false}});
+ assert.deepEqual(f.read(), {words: {}, cards: [], reviewCards:{},reviewUndo:null,lessonDrafts:{},preferences: {highlights: false}});
 });

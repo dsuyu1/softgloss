@@ -3,7 +3,7 @@ Free, offline Korean reading companion. **Offline dictionary alpha — broader c
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.17.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.18.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin Malnaru Read from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
@@ -59,7 +59,7 @@ Use **Break down sentence** after looking up page text for possible word classes
 Thirty-two headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
-The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.17.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
+The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.18.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
 
 The pinned dictionary now supplies 3,704 bilingual sentence pairs across 3,276 senses, reaching 2,814 of 33,796 dictionary entries (before original learning examples). Examples show their associated sense and source attribution. The corpus does not supply suitable bilingual examples for every entry; missing examples are labeled, not generated.
 
@@ -95,3 +95,11 @@ Undo applies only to the latest rating across tabs. It restores that card’s ea
 My library now opens a collection overview with real ready/new/total review counts, saved sentences and known-word progress. The navigation separates Library, Review, Dictionary, Vocabulary, Sentences and Settings. Views have addressable URL hashes and support browser Back/Forward; hidden views do not capture review shortcuts. Backups, restore, Anki export and deletion are in Settings.
 
 The review screen uses a larger centered Korean prompt and a separate revealed state, retaining FSRS intervals, keyboard/audio controls, undo and source/example information. The coral/neutral palette and on-page six-grade colors are unchanged. This is an original adaptation of the user-provided Decki overview/review screenshots, not a pixel-for-pixel clone; no Decki brand, Japanese content, AI features, imagery, icons or fonts are bundled.
+
+
+### Rating colors and local lessons (0.18.0)
+Review ratings now use distinct red (Again), amber (Hard), green (Good) and blue (Easy) surfaces. Text, shortcuts and intervals remain visible. These colors describe recall effort and are separate from the six curriculum-grade highlights.
+
+Open **My library → Lessons**, choose 1–20 review words, and click **Create draft**. Edit the title, practice goal and Korean/English practice text; then **Save draft**. Drafts assemble existing material locally, without AI generation. Dictionary examples are linked to the selected entry; a saved page sentence starts with a blank translation. Check/edit translations before studying. Definitions keep their dictionary attribution. Up to 50 drafts can be saved. Unsaved edits remain while switching views; reload/closing warns before discarding them.
+
+**Export lesson** creates a versioned JSON file; **Import lesson** opens a new unsaved copy with a fresh identity, preserving existing drafts. Lessons do not grade cards or change FSRS schedules. Backup v3 includes lessons; v1/v2 backups still restore, replacing lessons with an empty collection. The restore confirmation and Settings explain this. Delete all learning data also removes saved lessons. Older extension versions cannot restore v3 backups, so keep an earlier backup when testing downgrades. AI lessons, microphone practice, accounts, sync and billing remain proposed in [docs/SUITE.md](docs/SUITE.md).
