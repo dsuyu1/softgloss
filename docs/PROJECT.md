@@ -234,5 +234,8 @@ Next executable work within the reading-beta scope: make the FSRS review flow pr
 - [x] Collection overview using real due/new/total, sentence and vocabulary counts, plus known-word progress; no invented decks or mastery values.
 - [x] Addressable Library/Review/Dictionary/Vocabulary/Sentences/Settings navigation with one visible view, current-page state and browser history support.
 - [x] Large centered review prompt, revealed meaning/context and the existing four FSRS ratings, keyboard/audio/undo behavior.
-- [ ] Verify navigation, narrow/reflow layouts and all existing study/export/persistence behavior in Chromium; inspect screenshots against the uploaded references.
+- [x] Verify navigation, narrow/reflow layouts and all existing study/export/persistence behavior in Chromium; inspect screenshots against the uploaded references.
 No new runtime dependencies, external assets, copied Decki branding or AI features. The reading overlay and TOPIK palette remain unchanged. Existing language/accessibility/manual beta gates stay open.
+
+## Connected suite proposal
+See [SUITE.md](SUITE.md) for the proposed Speak Along, editable AI lessons, opt-in reader sync and bounded premium trial. This is a roadmap proposal; accounts, microphone capture, cloud generation and billing are not shipped by 0.17.0.
