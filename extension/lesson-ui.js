@@ -33,7 +33,7 @@
   if(cards.length>100)node('p','Showing 100 words. Filter to find others.',picker);
   selectionNote();const list=$('lesson-list');list.replaceChildren();
   const drafts=Object.values(state.lessonDrafts);if(!drafts.length)node('p','No saved lesson drafts yet.',list);
-  for(const d of drafts){const row=node('div','',list);row.className='lesson-draft-row';const open=node('button',d.title,row);open.type='button';open.onclick=()=>{if(!busy&&canReplace())edit(d,d.revision);};node('p',d.items.length+(d.items.length===1?' practice word':' practice words'),row);}
+  for(const d of drafts){const row=node('div','',list);row.className='lesson-draft-row';const open=node('button',d.title,row);open.type='button';open.className='lesson-open';open.onclick=()=>{if(!busy&&canReplace())edit(d,d.revision);};node('p',d.items.length+(d.items.length===1?' practice word':' practice words')+(d.completedAt?' · Completed':''),row);const practice=node('button','Practise '+d.title,row);practice.type='button';practice.onclick=()=>globalThis.startLessonPractice(d);}
  }
  function selectionNote(){$('lesson-selection').textContent=selected.size+' / 20 words selected';$('lesson-create').disabled=!selected.size||busy;}
  $('lesson-filter').oninput=renderLessons;
@@ -77,6 +77,6 @@
  };
  // Preserve visible edits across navigation/storage updates; warn before page loss.
  window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
- globalThis.resetLessonEditor=()=>{draft=null;expectedRevision=null;dirty=false;selected.clear();$('lesson-form').hidden=true;$('lesson-empty').hidden=false;renderLessons();};
+ globalThis.resetLessonEditor=()=>{globalThis.closeLessonPractice?.();draft=null;expectedRevision=null;dirty=false;selected.clear();$('lesson-form').hidden=true;$('lesson-empty').hidden=false;renderLessons();};
  globalThis.renderLessons=renderLessons;if(state)renderLessons();
 })();

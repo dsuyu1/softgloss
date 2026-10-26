@@ -23,7 +23,7 @@ const url = `http://127.0.0.1:${server.address().port}/`;
 const errors = [], external = [];
 let context;
 async function launch() {
- context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]});
+ context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: ['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream',`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]});
  context.on('page', page => page.on('pageerror', e => errors.push(e.message)));
  context.on('request', req => {if (/^https?:/.test(req.url()) && !req.url().startsWith(url) && !req.url().startsWith(url.replace('127.0.0.1','localhost'))) external.push(req.url());});
  let worker = context.serviceWorkers()[0];
@@ -93,7 +93,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.18.0/);
+ assert.match(await panel('text'),/v0.19.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -288,16 +288,27 @@ try {
  await library.locator('#lesson-korean-0').fill('내일 학교에 가요.');await library.locator('#lesson-english-0').fill('I am going to school tomorrow.');
  await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-save-state').textContent(),'Saved on this device.');
  await library.screenshot({path:'test-results/lesson-editor-desktop.png',fullPage:true});
+ await library.getByRole('button',{name:'Practise School practice',exact:true}).click();
+ assert.equal(await library.locator('#practice-next').isDisabled(),true);
+ await library.locator('#practice-record').click();await eventually(()=>library.locator('#practice-record-status').textContent(),'Recording… stops after 60 seconds.');
+ await new Promise(r=>setTimeout(r,600));await library.locator('#practice-stop').click();await library.locator('#practice-replay').waitFor();
+ assert.match(await library.locator('#practice-replay').getAttribute('src'),/^blob:/);
+ await library.locator('#practice-replay').evaluate(a=>a.play());await eventually(()=>library.locator('#practice-replay').evaluate(a=>a.paused),false);
+ await library.screenshot({path:'test-results/practice-desktop.png',fullPage:true});
+ await library.locator('#practice-reveal').click();assert.equal(await library.locator('#practice-translation').textContent(),'I am going to school tomorrow.');
+ await library.locator('#practice-next').click();await library.locator('#practice-done').waitFor();
+ assert.equal(await library.locator('#practice-replay').getAttribute('src'),null);
+ await library.locator('#practice-close').click();assert.match(await library.locator('#lesson-list').textContent(),/Completed/);
  const lessonDownload=library.waitForEvent('download');await library.locator('#lesson-export').click();const lessonFile=JSON.parse(await readFile(await (await lessonDownload).path(),'utf8'));
  assert.equal(lessonFile.format,'malnaru-lesson');assert.equal(lessonFile.draft.items[0].english,'I am going to school tomorrow.');
- await library.reload();await library.locator('#lesson-list button').first().click();assert.equal(await library.locator('#lesson-goal').inputValue(),'Talk about tomorrow');
+ await library.reload();await library.locator('#lesson-list .lesson-open').first().click();assert.equal(await library.locator('#lesson-goal').inputValue(),'Talk about tomorrow');
  await library.locator('#lesson-import').setInputFiles({name:'lesson.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(lessonFile))});
  await eventually(()=>library.locator('#lesson-save-state').textContent(),'Unsaved changes — save or export to keep them.');
- await library.locator('#lesson-title').fill('Imported copy');await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-list button').count(),2);
+ await library.locator('#lesson-title').fill('Imported copy');await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-list .lesson-open').count(),2);
  const savedLessons=await library.evaluate(async()=> (await chrome.storage.local.get('lessonDrafts')).lessonDrafts);assert.equal(Object.keys(savedLessons).length,2);
  await library.locator('#lesson-import').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"format":"malnaru-lesson","version":99}')});
- await eventually(()=>library.locator('#message').textContent(),'Could not import lesson: Unsupported lesson file.');assert.equal(await library.locator('#lesson-list button').count(),2);
- library.once('dialog',d=>d.accept());await library.locator('#lesson-delete').click();await eventually(()=>library.locator('#lesson-list button').count(),1);
+ await eventually(()=>library.locator('#message').textContent(),'Could not import lesson: Unsupported lesson file.');assert.equal(await library.locator('#lesson-list .lesson-open').count(),2);
+ library.once('dialog',d=>d.accept());await library.locator('#lesson-delete').click();await eventually(()=>library.locator('#lesson-list .lesson-open').count(),1);
  assert.deepEqual(await library.evaluate(async()=> (await chrome.storage.local.get('reviewCards')).reviewCards),schedulesBeforeLessons,'lesson editing cannot grade cards');
  const backup = await library.evaluate(() => chrome.storage.local.get({words: {}, cards: [],reviewCards:{},lessonDrafts:{}}));
  assert.equal(Object.values(backup.reviewCards)[0].schedule.reps,2);
@@ -395,7 +406,7 @@ try {
  await library.setViewportSize({width: 360, height: 740});
  assert.equal(await library.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
  for(const view of ['dictionary','vocabulary','sentences','lessons','settings','review']){await libraryView(library,view);assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,view+' mobile reflow');await library.screenshot({path:'test-results/library-'+view+'-mobile.png',fullPage:true});}
- await libraryView(library,'lessons');await library.locator('#lesson-list button').first().click();assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await library.screenshot({path:'test-results/lesson-editor-mobile.png',fullPage:true});
+ await libraryView(library,'lessons');await library.locator('#lesson-list .lesson-open').first().click();assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await library.screenshot({path:'test-results/lesson-editor-mobile.png',fullPage:true});await library.getByRole('button',{name:'Practise School practice',exact:true}).click();assert.equal(await library.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await library.screenshot({path:'test-results/practice-mobile.png',fullPage:true});await library.locator('#practice-close').click();
  await libraryView(library,'library');
  await mkdir('test-results', {recursive: true}); await library.screenshot({path: 'test-results/library-mobile.png', fullPage: true});
  assert.deepEqual(errors, []); assert.deepEqual(external, []);

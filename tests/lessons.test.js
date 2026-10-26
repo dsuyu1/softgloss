@@ -47,3 +47,12 @@ test('lesson collection limits reject new drafts atomically while allowing exist
  await assert.rejects(f.store.apply({type:'saveLesson',draft:SGLessons.fromCards([card]),expectedRevision:null}),/full/);
  const d=Object.values(f.read().lessonDrafts)[0];await f.store.apply({type:'saveLesson',draft:{...d,title:'Updated'},expectedRevision:d.revision});assert.equal(Object.keys(f.read().lessonDrafts).length,50);
 });
+test('completion is revision checked, preserved by backup, excluded from interchange and reset by editing',async()=>{
+ const f=fixture(),d=SGLessons.fromCards([card]);const saved=await f.store.apply({type:'saveLesson',draft:d,expectedRevision:null});
+ await assert.rejects(f.store.apply({type:'completeLesson',id:d.id,expectedRevision:d.revision}));
+ await f.store.apply({type:'completeLesson',id:d.id,expectedRevision:saved.revision});const completed=f.read().lessonDrafts[d.id];assert.ok(completed.completedAt);
+ assert.equal(JSON.parse(SGLessons.exportFile(completed)).draft.completedAt,undefined);
+ assert.equal(SGLessons.importFile({format:'malnaru-lesson',version:1,draft:completed}).completedAt,undefined);
+ const backup=SG.validateBackup({version:3,words:{},cards:[],reviewCards:{},lessonDrafts:f.read().lessonDrafts});assert.equal(backup.lessonDrafts[d.id].completedAt,completed.completedAt);
+ await f.store.apply({type:'saveLesson',draft:completed,expectedRevision:saved.revision});assert.equal(f.read().lessonDrafts[d.id].completedAt,undefined);assert.equal(f.read().reviewCards,undefined);
+});
