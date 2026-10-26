@@ -257,3 +257,10 @@ Human language/audio, real-device accessibility/zoom and learner-pilot gates rem
 - [x] 75 local tests and static/integrity checks pass, including recording cleanup/cancellation and schedule isolation.
 - [x] Chromium fake-device recording/replay, lesson completion, desktop/mobile screenshots and existing regression checks pass (Actions 40262973595); screenshots inspected.
 Real microphone permission prompts, hardware quality, accessibility/zoom, native language/audio review and learner pilots remain open. No speech scoring, transcription, network service or account/billing feature is included.
+
+## 0.20.0 — sentence-first practice and cloud speech pilot
+- [x] Attempt full sentence playback on each prompt; local Korean voice first, optional configured gateway fallback. Done skips recording and does not require translation reveal.
+- [x] Opt-in recording submission for Azure Korean pronunciation assessment; display provider aggregate feedback without changing FSRS or claiming TOPIK/prosody scoring.
+- [x] Private Node gateway with server-side credentials, origin/token checks, bounded PCM validation, escaped SSML, no-store responses and per-process pilot ceiling; session-only extension connection settings.
+- [x] 80 Node tests/static checks; browser fixtures cover sentence playback, explicit upload consent, feedback display and unrecorded completion.
+- [ ] CI/screenshots; live Azure configuration and native evaluation, real microphone prompts/hardware and production account/billing/quota infrastructure remain open.

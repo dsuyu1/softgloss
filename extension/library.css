@@ -15,3 +15,5 @@
 #lesson-practice{max-width:850px;margin:20px auto}#practice-word{font-size:40px}#practice-sentence{font-size:22px;line-height:1.8}#practice-answer{padding:16px;background:var(--accent-soft);border-radius:8px;margin:20px 0}.practice-recording{margin:28px 0;padding-top:20px;border-top:1px solid var(--line)}#practice-replay{max-width:100%;width:100%}#lesson-practice p{overflow-wrap:anywhere}.lesson-draft-row button{margin:4px 6px 4px 0}
 
 #practice-listen{margin:16px 0}
+
+#speech-settings input{max-width:100%;width:100%;padding:10px;font:inherit}#practice-grade-result{padding:12px 0}
