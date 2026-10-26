@@ -2,6 +2,7 @@
 (() => {
  const selected=new Set();let draft=null,expectedRevision=null,dirty=false,busy=false;
  const node=(tag,text,parent)=>{const n=document.createElement(tag);n.textContent=text;parent.append(n);return n;};
+ function setBusy(value){busy=value;for(const control of $('lesson-form').querySelectorAll('button,input,textarea'))control.disabled=value;$('lesson-import').disabled=value;selectionNote();}
  function canReplace(){return !dirty||confirm('Discard unsaved lesson edits? Save or export the draft to keep them.');}
  function note(){ $('lesson-save-state').textContent=dirty?'Unsaved changes — save or export to keep them.':'Saved on this device.'; }
  function edit(d,revision){
@@ -32,7 +33,7 @@
   if(cards.length>100)node('p','Showing 100 words. Filter to find others.',picker);
   selectionNote();const list=$('lesson-list');list.replaceChildren();
   const drafts=Object.values(state.lessonDrafts);if(!drafts.length)node('p','No saved lesson drafts yet.',list);
-  for(const d of drafts){const row=node('div','',list);row.className='lesson-draft-row';const open=node('button',d.title,row);open.type='button';open.onclick=()=>{if(!busy&&canReplace())edit(d,d.revision);};node('p',d.items.length+' practice words',row);}
+  for(const d of drafts){const row=node('div','',list);row.className='lesson-draft-row';const open=node('button',d.title,row);open.type='button';open.onclick=()=>{if(!busy&&canReplace())edit(d,d.revision);};node('p',d.items.length+(d.items.length===1?' practice word':' practice words'),row);}
  }
  function selectionNote(){$('lesson-selection').textContent=selected.size+' / 20 words selected';$('lesson-create').disabled=!selected.size||busy;}
  $('lesson-filter').oninput=renderLessons;
@@ -52,27 +53,27 @@
  };
  $('lesson-form').addEventListener('input',()=>{dirty=true;note();});
  $('lesson-form').onsubmit=async event=>{
-  event.preventDefault();if(busy)return;busy=true;selectionNote();
+  event.preventDefault();if(busy)return;setBusy(true);
   try{
    const next=readDraft();const result=await SGWrite({type:'saveLesson',draft:next,expectedRevision});
    draft=next;expectedRevision=result.revision;draft.revision=result.revision;dirty=false;note();$('lesson-delete').hidden=false;
    await render();$('message').textContent='Lesson saved on this device.';
   }catch(e){$('message').textContent='Could not save lesson: '+e.message;}
-  finally{busy=false;selectionNote();}
+  finally{setBusy(false);}
  };
  $('lesson-export').onclick=()=>{try{download('malnaru-lesson.json',SGLessons.exportFile(readDraft()),'application/json');$('message').textContent='Lesson exported. Local edits still need saving on this device.';}catch(e){$('message').textContent=e.message;}};
  $('lesson-import').onchange=async event=>{
   try{
-   const file=event.target.files[0];if(!file)return;if(file.size>500000)throw Error('Lesson files must be under 500 KB.');
-   const imported=SGLessons.importFile(JSON.parse(await file.text()));if(canReplace()){edit(imported,null);$('message').textContent='Imported as a new draft. Check the text and save to keep it.';}
+   const file=event.target.files[0];if(!file||busy)return;if(file.size>500000)throw Error('Lesson files must be under 500 KB.');
+   const imported=SGLessons.importFile(JSON.parse(await file.text()));if(busy)return;if(canReplace()){edit(imported,null);$('message').textContent='Imported as a new draft. Check the text and save to keep it.';}
   }catch(e){$('message').textContent='Could not import lesson: '+e.message;}
   finally{event.target.value='';}
  };
  $('lesson-delete').onclick=async()=>{
   if(busy||!draft||expectedRevision===null||!confirm('Delete this saved lesson and its unsaved edits? Review cards stay in your deck.'))return;
-  busy=true;
+  setBusy(true);
   try{await SGWrite({type:'deleteLesson',id:draft.id,expectedRevision});draft=null;dirty=false;expectedRevision=null;$('lesson-form').hidden=true;$('lesson-empty').hidden=false;await render();$('message').textContent='Lesson deleted.';}
-  catch(e){$('message').textContent=e.message;}finally{busy=false;}
+  catch(e){$('message').textContent=e.message;}finally{setBusy(false);}
  };
  // Preserve visible edits across navigation/storage updates; warn before page loss.
  window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});

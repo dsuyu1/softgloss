@@ -287,6 +287,7 @@ try {
  await library.locator('#lesson-title').fill('School practice');await library.locator('#lesson-goal').fill('Talk about tomorrow');
  await library.locator('#lesson-korean-0').fill('내일 학교에 가요.');await library.locator('#lesson-english-0').fill('I am going to school tomorrow.');
  await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-save-state').textContent(),'Saved on this device.');
+ await library.screenshot({path:'test-results/lesson-editor-desktop.png',fullPage:true});
  const lessonDownload=library.waitForEvent('download');await library.locator('#lesson-export').click();const lessonFile=JSON.parse(await readFile(await (await lessonDownload).path(),'utf8'));
  assert.equal(lessonFile.format,'malnaru-lesson');assert.equal(lessonFile.draft.items[0].english,'I am going to school tomorrow.');
  await library.reload();await library.locator('#lesson-list button').first().click();assert.equal(await library.locator('#lesson-goal').inputValue(),'Talk about tomorrow');

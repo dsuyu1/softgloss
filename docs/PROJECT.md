@@ -247,5 +247,5 @@ See [SUITE.md](SUITE.md) for the proposed Speak Along, editable AI lessons, opt-
 - [x] Add lesson schema and local editor from 1–20 selected review cards; retain definition attribution and editable bilingual text without inventing missing translations.
 - [x] Add local persistence, versioned lesson-file export/import as a new copy, revision-safe saves/deletes, and backup v3 including drafts. Preserve v1/v2 restore support and remove drafts on full deletion.
 - [x] Test malformed imports, limits, concurrent edits, retryable storage failure, schedule isolation, backup restore and deletion locally (70 tests plus static/integrity checks).
-- [ ] Verify Chromium lesson authoring/persistence/import/export, rating contrast and mobile reflow, then inspect screenshots.
+- [x] Verify Chromium lesson authoring/persistence/import/export, rating contrast and mobile reflow (Actions 40260932204), then inspect review and lesson-editor screenshots.
 Human language/audio, real-device accessibility/zoom and learner-pilot gates remain open. This local lesson increment is explicitly in scope following the connected-app request; it does not ship cloud generation, recording, account sync or payment features.
