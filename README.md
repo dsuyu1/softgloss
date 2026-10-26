@@ -1,9 +1,9 @@
 # Malnaru Read · 말나루
-Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** No runtime AI, server, login or API key. The FSRS scheduler is bundled locally.
+Free, offline Korean reading companion. **Offline dictionary alpha — broader coverage; Korean-language validation and learner testing still pending.** Core reading needs no server, login or API key. Optional connected speech uses a private gateway. The FSRS scheduler is bundled locally.
 
 ## Try it on websites
 1. Download/extract the latest source, or update your checkout. Existing unpacked installs do not update themselves from GitHub.
-2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.19.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
+2. Open `chrome://extensions`, click **Reload** on Malnaru Read, and check that it shows version **0.20.0**. If starting fresh, enable Developer mode and Load unpacked → select `extension/`.
 
 3. **Refresh the webpage** after reloading/updating the extension. A browser restart is not required.
 4. Open a normal webpage containing Korean text. Pin Malnaru Read from Chrome's Extensions menu, click its toolbar icon, then **Enable on this page**. The dictionary panel should appear.
@@ -59,7 +59,7 @@ Use **Break down sentence** after looking up page text for possible word classes
 Thirty-two headwords have original bilingual learning examples, labeled separately from dictionary quotations. Example coverage is limited and a sample may illustrate just one homonym sense.
 
 ### Version and expanded examples (0.12.0)
-The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.19.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
+The panel header now shows its loaded version, and Reading settings shows all six grade-color swatches. If the screenshot still says SoftGloss or “Strong blue”, it is an older page/build. Update the unpacked extension files, reload it at chrome://extensions, check version 0.20.0, then reload the webpage. Activation detects already-running older panels and asks for a page reload.
 
 The pinned dictionary now supplies 3,704 bilingual sentence pairs across 3,276 senses, reaching 2,814 of 33,796 dictionary entries (before original learning examples). Examples show their associated sense and source attribution. The corpus does not supply suitable bilingual examples for every entry; missing examples are labeled, not generated.
 
@@ -108,3 +108,9 @@ Open **My library → Lessons**, choose 1–20 review words, and click **Create 
 In **Lessons**, click **Practise** beside a saved draft. Recall the word from its Korean sentence, reveal the meaning/translation, then move to the next word. Completing the last item records completion for that saved lesson version; editing the draft resets completion. Completion is included in backups, excluded from portable lesson files, and never changes FSRS ratings.
 
 **Start recording** asks Chrome for microphone access. Read the displayed sentence, stop, and replay your voice. Clips are temporary: they are discarded on the next word, leaving practice, switching tabs, or closing the page. Recording stops automatically after 60 seconds. Audio is not uploaded, saved to storage or included in backups. Recording is optional; permission denial does not block studying. Listen plays the existing synthetic **word** audio, not a full sentence model. This release has no transcription or pronunciation scoring. Real microphone/device and Chrome permission-prompt checks remain learner tests.
+
+
+### Sentence-first practice and optional cloud grading (0.20.0)
+Practice automatically reads the full Korean sentence first, using an installed local Korean voice or the configured speech gateway. Then choose **Record yourself**, or **Done without recording**. Translation reveal is optional. Replay is available; if audio is unavailable, the error explains setup and lets you continue.
+
+After recording, select the upload checkbox and click **Grade recording** to send that clip and the reference sentence for Azure Korean pronunciation assessment. Scores are provider feedback, not TOPIK grades; they never change FSRS schedules. Nothing is uploaded for grading when you simply click Done. Previous local-only recording descriptions refer to 0.19.0; 0.20.0 adds this explicitly opt-in cloud path. Grading is a private pilot requiring gateway/provider setup; there is no built-in funded service or subscription yet. See [speech gateway setup](services/speech/README.md). Live Azure quality and real microphone checks remain open.

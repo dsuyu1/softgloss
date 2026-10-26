@@ -13,7 +13,11 @@ await cp(path.resolve('extension'), extension, {recursive: true});
 const manifest = JSON.parse(await readFile(path.join(extension, 'manifest.json'), 'utf8'));
 manifest.host_permissions = ['http://127.0.0.1/*'];
 await writeFile(path.join(extension, 'manifest.json'), JSON.stringify(manifest));
+let speechAssessments=0,speechPlaybacks=0;
 const server = createServer((req,res)=>{
+ if(req.url==='/synthesize'){speechPlaybacks++;const b=Buffer.alloc(16044);b.write('RIFF');b.writeUInt32LE(b.length-8,4);b.write('WAVEfmt ',8);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(16000,24);b.writeUInt32LE(32000,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(b.length-44,40);for(let i=0;i<8000;i++)b.writeInt16LE(Math.round(1000*Math.sin(i/16)),44+i*2);res.writeHead(200,{'Content-Type':'audio/wav'});res.end(b);return;}
+ if(req.url==='/assess'){speechAssessments++;res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({provider:'Azure Speech',pronunciation:81,accuracy:82,fluency:80,completeness:100,words:[]}));return;}
+
  res.setHeader('Content-Type','text/html; charset=utf-8');
  const body=req.url?.startsWith('/frames')?'<p>학교에서 읽어요.</p><iframe title="Cafe article" src="/article"></iframe>':req.url?.startsWith('/article')?'<p id="frame-text"><a href="#next"><span>책을</span></a> 읽어요. 가격대나 보온성은 상당하네요.</p><p id="next">학교에서 공부해요.</p>':'<p id="text">책을 읽어요. 학교에서 공부해요.</p><input id="private" value="책"><div contenteditable>먹었어요</div>';
  res.end('<!doctype html><html><head><title>Reading fixture</title></head><body>'+body+'</body></html>');
@@ -93,7 +97,7 @@ try {
  assert.match(await panel('search', '배'), /pear/);
  assert.match(await panel('search', '배'), /boat/);
  assert.match(await panel('search', '병원'), /Wiktionary contributors/);
- assert.match(await panel('text'),/v0.19.0/);
+ assert.match(await panel('text'),/v0.20.0/);
  assert.match(await panel('search', '책을'), /Grammar hint/);
  assert.match(await panel('search', '책을'), /Explain and show an example/);
  assert.deepEqual(await panel('grammarOpen'), [false,false]);
@@ -288,17 +292,23 @@ try {
  await library.locator('#lesson-korean-0').fill('내일 학교에 가요.');await library.locator('#lesson-english-0').fill('I am going to school tomorrow.');
  await library.locator('#lesson-form button[type=submit]').click();await eventually(()=>library.locator('#lesson-save-state').textContent(),'Saved on this device.');
  await library.screenshot({path:'test-results/lesson-editor-desktop.png',fullPage:true});
+ await library.evaluate(url=>chrome.storage.session.set({speechService:{url,token:'test-pilot-token-'.repeat(3)}}),url.slice(0,-1));
  await library.getByRole('button',{name:'Practise School practice',exact:true}).click();
- assert.equal(await library.locator('#practice-next').isDisabled(),true);
+ await eventually(()=>library.locator('#practice-play-status').textContent(),'Your turn. Record yourself or choose Done.');assert.ok(speechPlaybacks>0);
  await library.locator('#practice-record').click();await eventually(()=>library.locator('#practice-record-status').textContent(),'Recording… stops after 60 seconds.');
  await new Promise(r=>setTimeout(r,600));await library.locator('#practice-stop').click();await library.locator('#practice-replay').waitFor();
  assert.match(await library.locator('#practice-replay').getAttribute('src'),/^blob:/);
  await library.locator('#practice-replay').evaluate(a=>a.play());await eventually(()=>library.locator('#practice-replay').evaluate(a=>a.paused),false);
+ await library.locator('#practice-grade').click();assert.equal(speechAssessments,0,'no upload without consent');
+ await library.locator('#practice-cloud-consent').check();await library.locator('#practice-grade').click();
+ await eventually(()=>library.locator('#practice-grade-result').textContent().then(t=>t.includes('pronunciation 81')),true);assert.equal(speechAssessments,1);
  await library.screenshot({path:'test-results/practice-desktop.png',fullPage:true});
  await library.locator('#practice-reveal').click();assert.equal(await library.locator('#practice-translation').textContent(),'I am going to school tomorrow.');
  await library.locator('#practice-next').click();await library.locator('#practice-done').waitFor();
  assert.equal(await library.locator('#practice-replay').getAttribute('src'),null);
  await library.locator('#practice-close').click();assert.match(await library.locator('#lesson-list').textContent(),/Completed/);
+ await library.getByRole('button',{name:'Practise School practice',exact:true}).click();await eventually(()=>library.locator('#practice-play-status').textContent(),'Your turn. Record yourself or choose Done.');
+ await library.locator('#practice-next').click();await library.locator('#practice-done').waitFor();assert.equal(speechAssessments,1,'Done without recording never submits grading');await library.locator('#practice-close').click();
  const lessonDownload=library.waitForEvent('download');await library.locator('#lesson-export').click();const lessonFile=JSON.parse(await readFile(await (await lessonDownload).path(),'utf8'));
  assert.equal(lessonFile.format,'malnaru-lesson');assert.equal(lessonFile.draft.items[0].english,'I am going to school tomorrow.');
  await library.reload();await library.locator('#lesson-list .lesson-open').first().click();assert.equal(await library.locator('#lesson-goal').inputValue(),'Talk about tomorrow');
