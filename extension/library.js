@@ -1,5 +1,23 @@
 let state,activeReview=null,answerShown=false,reviewBusy=false,reviewTimer;
 const $ = id => document.getElementById(id);
+const views=['library','review','dictionary','vocabulary','sentences','settings'];
+function routeView(focus=false){
+ const requested=location.hash.replace('#view-',''),view=views.includes(requested)?requested:'library';
+ for(const panel of document.querySelectorAll('[data-panel]'))panel.hidden=panel.dataset.panel!==view;
+ for(const link of document.querySelectorAll('[data-view]')){if(link.dataset.view===view)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+ document.title='Malnaru Read · '+({library:'Library',review:'Review',dictionary:'Dictionary',vocabulary:'Vocabulary',sentences:'Sentences',settings:'Settings & data'}[view]);
+ if(focus){window.scrollTo(0,0);document.querySelector('[data-panel="'+view+'"] h1')?.focus({preventScroll:true});}
+}
+window.addEventListener('hashchange',()=>routeView(true));routeView();
+$('library-version').textContent='v'+chrome.runtime.getManifest().version;
+function renderOverview(){
+ if(!state)return;const cards=Object.values(state.reviewCards),due=SGSRS.due(state.reviewCards).length,fresh=cards.filter(c=>c.schedule.state===0&&!c.suspended).length;
+ const words=Object.values(state.words),known=words.filter(v=>v==='known').length;
+ $('overview-due').textContent=String(due);$('overview-new').textContent=String(fresh);$('overview-total').textContent=String(cards.length);
+ $('collection-reviews').textContent=cards.length+(cards.length===1?' card':' cards');$('collection-due').textContent=due+' ready';$('collection-sentences').textContent=state.cards.length+(state.cards.length===1?' sentence':' sentences');$('collection-known').textContent=known+' known';$('collection-tracked').textContent=words.length+' tracked';
+ $('known-progress').max=Math.max(1,words.length);$('known-progress').value=known;$('known-progress').setAttribute('aria-valuetext',known+' known of '+words.length+' tracked words');
+ const summary=$('review-summary');summary.replaceChildren();for(const [label,count] of [['Ready',due],['New',fresh],['Total',cards.length]]){const item=document.createElement('span');item.textContent=label+' ';const value=document.createElement('strong');value.textContent=String(count);item.append(value);summary.append(item);}
+}
 function download(name, text, type) {
  const url = URL.createObjectURL(new Blob([text], {type}));
  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
@@ -59,7 +77,7 @@ $('word-filter').oninput = renderWords; $('status-filter').onchange = renderWord
 $('search-form').onsubmit = event => {
  event.preventDefault(); $('search-results').replaceChildren();
  const results = SG.search($('search').value);
- if (!results.length) $('search-results').textContent = 'No supported entry in the starter dictionary.';
+ if (!results.length) $('search-results').textContent = 'No supported entry yet. Try a dictionary form or another meaning.';
  for (const r of results) {
   const article = document.createElement('article');
   const title = document.createElement('h3'); title.textContent = r.lemma; title.lang = 'ko'; article.append(title, listenButton(r.lemma));
@@ -126,12 +144,13 @@ function renderReviews(){
  if(!next||next.id!==activeReview?.id||next.revision!==activeReview?.revision){activeReview=next||null;answerShown=false;}
  $('start-review').disabled=!next||reviewBusy;
  const undo=$('undo-review');undo.hidden=!state.reviewUndo;undo.disabled=reviewBusy;undo.textContent='Undo last rating'+(state.reviewUndo?' · '+state.reviewUndo.before.lemma:'');
- box.replaceChildren();box.setAttribute('aria-busy',String(reviewBusy));
+ box.replaceChildren();box.setAttribute('aria-busy',String(reviewBusy));box.className=next?(answerShown?'is-revealed':'is-front'):'is-front is-empty';
  if(!next){
   const future=all.filter(c=>!c.suspended).sort((a,b)=>Date.parse(a.schedule.due)-Date.parse(b.schedule.due))[0];
   reviewText('p',future?'You’re done for now. Next review: '+new Date(future.schedule.due).toLocaleString()+'.':all.length?'All your review cards are suspended. Resume one in Manage review deck.':'Your review deck is empty. Add a word from a dictionary result to begin.',box);
  }else{
-  reviewText('h3',next.lemma,box).lang='ko';
+  reviewText('small',answerShown?'MEANING & CONTEXT':'KOREAN WORD',box).className='eyebrow';
+  reviewText('h2',next.lemma,box).lang='ko';
   if(!answerShown){const show=reviewButton('Show answer',revealReview,box);show.id='review-show-answer';show.disabled=reviewBusy;}
   else{
    reviewText('p',next.meaning,box);
@@ -148,7 +167,7 @@ function renderReviews(){
    reviewText('small','Again: forgot · Hard: recalled with effort · Good: recalled · Easy: effortless',box);
   }
  }
- renderReviewDeck();scheduleReviewRefresh();
+ renderReviewDeck();renderOverview();scheduleReviewRefresh();
  if(hadFocus){const restored=focusId&&$(focusId);(restored&&box.contains(restored)?restored:box).focus({preventScroll:true});}
 }
 $('start-review').onclick=()=>{focusReview();$('review-session').scrollIntoView({block:'start',behavior:'auto'});};
