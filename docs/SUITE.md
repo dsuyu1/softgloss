@@ -30,7 +30,7 @@ Proposed trial: seven days with a clearly stated included lesson allowance and s
 
 ## Delivery order
 - Resolve existing Reader beta gates (independent Korean coverage, native content/audio review and learner pilots).
-- Build a local lesson draft/schema and export/import bridge using selected cards; no billing or microphone required.
+- Shipped in Reader 0.18.0: local lesson draft/schema and export/import bridge using selected review cards; no billing or microphone. AI generation and a connected-app consumer are still future work.
 - Prototype the account/sync contract and turn-based speaking flow, then test Korean feedback quality.
 - Add backend generation, server-enforced quotas, reservation/refund accounting and an auditable usage ledger.
 - Pilot the paid connected app with bounded trial allowances; test payment/webhook failure handling before launch.

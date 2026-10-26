@@ -1,4 +1,4 @@
-importScripts('vendor/ts-fsrs-5.4.2.js', 'srs.js', 'core.js', 'mutations.js', 'dictionary-files.js');
+importScripts('vendor/ts-fsrs-5.4.2.js', 'srs.js', 'lessons.js', 'core.js', 'mutations.js', 'dictionary-files.js');
 const store = SGStore.createStore(chrome.storage.local);
 // Probe only permitted frames. The main frame owns the panel; child frames relay lookups.
 async function loadFrame(tabId, frameId, quiet=false) {
@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if(sender.tab?.id){chrome.action.setBadgeText({tabId:sender.tab.id,text:''});if(sender.frameId===0)chrome.scripting.executeScript({target:{tabId:sender.tab.id,allFrames:true},func:()=>{if(window!==top)globalThis.__softgloss?.disable();}}).catch(()=>{});}
   return;
  }
- const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'setUngradedHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','undoReview','suspendReview','removeReview'];
+ const operations = ['setWord', 'saveCard', 'deleteCard', 'restore', 'setHighlights', 'setUngradedHighlights', 'clearLearning','setStudyLevel','importStudyList','clearStudyList','addReview','rateReview','undoReview','suspendReview','removeReview','saveLesson','deleteLesson'];
  if (!operations.includes(message?.type)) return;
  store.apply(message).then(respond, e => respond({ok: false, error: e.message}));
  return true;
