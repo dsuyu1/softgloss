@@ -255,5 +255,5 @@ Human language/audio, real-device accessibility/zoom and learner-pilot gates rem
 - [x] Revision-checked completion; reset on content edits, preserve in backups, omit from portable lesson files.
 - [x] Optional permission-on-click microphone recording, local replay and discard; bounded duration/size, cleanup on word/navigation/visibility changes, cancellation and permission-denial handling.
 - [x] 75 local tests and static/integrity checks pass, including recording cleanup/cancellation and schedule isolation.
-- [ ] Chromium fake-device recording/replay, lesson completion, desktop/mobile screenshots and existing regression checks.
+- [x] Chromium fake-device recording/replay, lesson completion, desktop/mobile screenshots and existing regression checks pass (Actions 40262973595); screenshots inspected.
 Real microphone permission prompts, hardware quality, accessibility/zoom, native language/audio review and learner pilots remain open. No speech scoring, transcription, network service or account/billing feature is included.

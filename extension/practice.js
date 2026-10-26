@@ -18,7 +18,7 @@
   $('practice-word').textContent=item.card.lemma;$('practice-sentence').textContent=item.korean.trim()||'No practice sentence yet. You can add one in the lesson editor.';
   $('practice-answer').hidden=true;$('practice-meaning').textContent=item.card.meaning;$('practice-translation').textContent=item.english.trim()||'No English translation saved.';
   $('practice-source').replaceChildren();if(item.card.source){const a=document.createElement('a');a.textContent='Dictionary source · Wiktionary contributors · CC BY-SA 4.0';a.href=item.card.source;a.target='_blank';a.rel='noopener noreferrer';$('practice-source').append(a);}
-  const listen=$('practice-listen');listen.replaceChildren(listenButton(item.card.lemma));
+  const listen=$('practice-listen'),wordAudio=listenButton(item.card.lemma);wordAudio.textContent='Listen to word · synthetic';listen.replaceChildren(wordAudio);
   $('practice-reveal').hidden=false;$('practice-next').disabled=true;$('practice-next').textContent=index===lesson.items.length-1?'Complete lesson':'Next word';
   $('practice-done').hidden=true;$('practice-study').hidden=false;$('practice-word').focus();
  }
