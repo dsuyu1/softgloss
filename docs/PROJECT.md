@@ -263,4 +263,5 @@ Real microphone permission prompts, hardware quality, accessibility/zoom, native
 - [x] Opt-in recording submission for Azure Korean pronunciation assessment; display provider aggregate feedback without changing FSRS or claiming TOPIK/prosody scoring.
 - [x] Private Node gateway with server-side credentials, origin/token checks, bounded PCM validation, escaped SSML, no-store responses and per-process pilot ceiling; session-only extension connection settings.
 - [x] 80 Node tests/static checks; browser fixtures cover sentence playback, explicit upload consent, feedback display and unrecorded completion.
-- [ ] CI/screenshots; live Azure configuration and native evaluation, real microphone prompts/hardware and production account/billing/quota infrastructure remain open.
+- [x] CI and desktop/mobile screenshot inspection pass (Actions 40264246898).
+- [ ] Live Azure configuration and native evaluation, real microphone prompts/hardware and production account/billing/quota infrastructure remain open.

@@ -23,7 +23,7 @@ export function createGateway(env=process.env,send=fetch){
    if(req.url==='/assess'){
     if(typeof body.audio!=='string'||!/^[A-Za-z0-9+/]*={0,2}$/.test(body.audio))throw Error('Invalid recording.');
     wav=Buffer.from(body.audio,'base64');
-    if(wav.length<3244||wav.length>1920044||wav.toString('ascii',0,4)!=='RIFF'||wav.toString('ascii',8,16)!=='WAVEfmt '||wav.readUInt32LE(16)!==16||wav.readUInt16LE(20)!==1||wav.readUInt16LE(22)!==1||wav.readUInt32LE(24)!==16000||wav.readUInt16LE(34)!==16||wav.toString('ascii',36,40)!=='data'||wav.readUInt32LE(40)!==wav.length-44||wav.readUInt32LE(4)!==wav.length-8)throw Error('Use 0.1–60 seconds of mono 16 kHz PCM WAV.');
+    if(wav.length<3244||wav.length>1920044||wav.toString('ascii',0,4)!=='RIFF'||wav.toString('ascii',8,16)!=='WAVEfmt '||wav.readUInt32LE(16)!==16||wav.readUInt16LE(20)!==1||wav.readUInt16LE(22)!==1||wav.readUInt32LE(24)!==16000||wav.readUInt32LE(28)!==32000||wav.readUInt16LE(32)!==2||wav.readUInt16LE(34)!==16||wav.toString('ascii',36,40)!=='data'||wav.readUInt32LE(40)!==wav.length-44||wav.readUInt32LE(4)!==wav.length-8)throw Error('Use 0.1–60 seconds of mono 16 kHz PCM WAV.');
    }
    // Per-process pilot ceiling, deliberately not a production billing ledger.
    const day=new Date().toISOString().slice(0,10),count=counts.get(day)||0;
